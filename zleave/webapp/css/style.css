@@ -1,0 +1,104 @@
+html,
+body,
+#container,
+.leaveToolPage,
+.leavePage {
+	height: 100%;
+}
+
+body {
+	background:
+		radial-gradient(circle at top left, rgba(11, 99, 166, 0.14), transparent 32%),
+		radial-gradient(circle at top right, rgba(26, 176, 137, 0.12), transparent 30%),
+		#f5f7fb;
+}
+
+.leaveToolPage .sapTntToolPageMain,
+.leaveToolPage .sapTntToolPageSideContent {
+	background: transparent;
+}
+
+.leavePage .sapMPageHeader,
+.leavePage .sapMPageContent {
+	background: transparent;
+}
+
+.leaveToolbar {
+	padding-inline: 1rem;
+}
+
+.leaveContent {
+	gap: 1rem;
+	padding: 1rem;
+}
+
+.leaveCard {
+	border-radius: 1.25rem;
+	box-shadow: 0 10px 32px rgba(13, 38, 76, 0.08);
+	overflow: hidden;
+}
+
+.heroPanel {
+	padding: 0.5rem;
+}
+
+.heroHeader {
+	min-height: 5.25rem;
+	height: auto;
+	padding-block: 1rem;
+	align-items: flex-start;
+	flex-wrap: wrap;
+	row-gap: 0.5rem;
+}
+
+.heroHeader .sapMBarChild {
+	min-height: 2.25rem;
+}
+
+.heroHeader .sapMTitle,
+.heroHeader .sapMText {
+	line-height: 1.4;
+}
+
+.heroHeader .sapMObjStatus {
+	margin-top: 0.125rem;
+	margin-bottom: 0.125rem;
+}
+
+.kpiStrip {
+	gap: 1rem;
+}
+
+.kpiStrip .sapMGT {
+	border-radius: 1rem;
+	min-width: 14rem;
+	box-shadow: 0 10px 24px rgba(13, 38, 76, 0.08);
+}
+
+.sectionCard {
+	margin-top: 0.25rem;
+}
+
+.statusChipRow {
+	gap: 0.75rem;
+	padding: 0.25rem 0.25rem 0.75rem;
+}
+
+.leaveTable .sapMListTblCell {
+	padding-top: 0.875rem;
+	padding-bottom: 0.875rem;
+}
+
+.tableFilter {
+	margin-bottom: 0.75rem;
+}
+
+.leaveTable .sapMObjectStatus {
+	font-weight: 600;
+}
+
+.sapTntSideNavigation,
+.sapTntSideNavigationList,
+.sapTntSideNavigationFixedList {
+	border-radius: 1rem;
+}

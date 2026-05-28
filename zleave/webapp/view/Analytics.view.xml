@@ -1,0 +1,12 @@
+<mvc:View controllerName="zleave.zleave.controller.Analytics"
+    xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m">
+    <Page id="analyticsPage" title="{i18n>analytics}">
+        <content>
+            <Panel class="leaveCard" backgroundDesign="Translucent">
+                <content>
+                    <Text text="{i18n>analyticsPlaceholder}"/>
+                </content>
+            </Panel>
+        </content>
+    </Page>
+</mvc:View>

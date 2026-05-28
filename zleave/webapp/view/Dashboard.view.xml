@@ -1,0 +1,78 @@
+<mvc:View controllerName="zleave.zleave.controller.Dashboard"
+    xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m">
+    <Page id="dashboardPage" title="{i18n>dashboard}">
+        <content>
+            <VBox class="leaveContent" width="100%">
+                <Panel class="heroPanel leaveCard" backgroundDesign="Translucent">
+                    <headerToolbar>
+                        <Toolbar class="heroHeader">
+                            <VBox>
+                                <Title text="{i18n>welcomeTitle}" level="H3"/>
+                                <Text text="{i18n>welcomeSubtitle}"/>
+                            </VBox>
+                            <ToolbarSpacer/>
+                            <ObjectStatus text="{i18n>statusApproved}" state="Success"/>
+                            <ObjectStatus text="{i18n>statusPending}" state="Warning"/>
+                            <ObjectStatus text="{i18n>statusRejected}" state="Error"/>
+                        </Toolbar>
+                    </headerToolbar>
+                    <content>
+                        <FlexBox wrap="Wrap" justifyContent="SpaceBetween" class="kpiStrip" renderType="Bare">
+                            <GenericTile header="{i18n>totalRequests}" subheader="{i18n>dashboard}">
+                                <tileContent>
+                                    <TileContent>
+                                        <content>
+                                            <NumericContent value="{ui>/stats/totalRequests}" valueColor="Neutral" indicator="None"/>
+                                        </content>
+                                    </TileContent>
+                                </tileContent>
+                            </GenericTile>
+                            <GenericTile header="{i18n>pendingRequests}" subheader="{i18n>statusPending}">
+                                <tileContent>
+                                    <TileContent>
+                                        <content>
+                                            <NumericContent value="{ui>/stats/pendingRequests}" valueColor="Critical" indicator="Up"/>
+                                        </content>
+                                    </TileContent>
+                                </tileContent>
+                            </GenericTile>
+                            <GenericTile header="{i18n>approvedRequests}" subheader="{i18n>statusApproved}">
+                                <tileContent>
+                                    <TileContent>
+                                        <content>
+                                            <NumericContent value="{ui>/stats/approvedRequests}" valueColor="Good" indicator="Up"/>
+                                        </content>
+                                    </TileContent>
+                                </tileContent>
+                            </GenericTile>
+                            <GenericTile header="{i18n>rejectedRequests}" subheader="{i18n>statusRejected}">
+                                <tileContent>
+                                    <TileContent>
+                                        <content>
+                                            <NumericContent value="{ui>/stats/rejectedRequests}" valueColor="Error" indicator="Down"/>
+                                        </content>
+                                    </TileContent>
+                                </tileContent>
+                            </GenericTile>
+                        </FlexBox>
+                    </content>
+                </Panel>
+
+                <Panel class="leaveCard sectionCard" backgroundDesign="Translucent">
+                    <headerToolbar>
+                        <Toolbar>
+                            <Title text="{i18n>dashboard}" level="H3"/>
+                        </Toolbar>
+                    </headerToolbar>
+                    <content>
+                        <HBox class="statusChipRow" wrap="Wrap">
+                            <ObjectStatus text="{i18n>statusApproved}" state="Success"/>
+                            <ObjectStatus text="{i18n>statusPending}" state="Warning"/>
+                            <ObjectStatus text="{i18n>statusRejected}" state="Error"/>
+                        </HBox>
+                    </content>
+                </Panel>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

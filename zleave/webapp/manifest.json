@@ -1,0 +1,85 @@
+{
+  "_version": "1.48.0",
+  "sap.app": {
+    "id": "zleave.zleave",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": { "version": "0.0.1" },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": { "id": "@sap/generator-fiori:basic", "version": "1.24.0", "toolsId": "92e84b1a-5cfb-4f19-83a7-64ebb598f276" },
+    "dataSources": {
+      "ZUI_LEAVE_MGMT_O2_VAN": {
+        "uri": "/sap/opu/odata/IWFND/CATALOGSERVICE;v=2/Annotations(TechnicalName='ZUI_LEAVE_MGMT_O2_VAN',Version='0001')/$value/",
+        "type": "ODataAnnotation",
+        "settings": { "localUri": "localService/mainService/ZUI_LEAVE_MGMT_O2_VAN.xml" }
+      },
+      "mainService": {
+        "uri": "/sap/opu/odata/sap/ZUI_LEAVE_MGMT_O2/",
+        "type": "OData",
+        "settings": { "annotations": ["ZUI_LEAVE_MGMT_O2_VAN"], "localUri": "localService/mainService/metadata.xml", "odataVersion": "2.0" }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "ZLeaveRequest-display_create": {
+          "semanticObject": "ZLeaveRequest",
+          "action": "display_create",
+          "title": "{{ZLeaveRequest-display_create.flpTitle}}",
+          "subTitle": "{{ZLeaveRequest-display_create.flpSubtitle}}",
+          "signature": { "parameters": {}, "additionalParameters": "allowed" }
+        },
+        "app-preview": {
+          "semanticObject": "app",
+          "action": "preview",
+          "title": "{{appTitle}}",
+          "subTitle": "{{appDescription}}",
+          "signature": { "parameters": {}, "additionalParameters": "allowed" },
+          "resolutionResult": {
+            "applicationType": "URL",
+            "additionalInformation": "SAPUI5.Component=zleave.zleave",
+            "url": "./"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": { "icon": "", "favIcon": "", "phone": "", "phone@2": "", "tablet": "", "tablet@2": "" },
+    "deviceTypes": { "desktop": true, "tablet": true, "phone": true }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "dependencies": { "minUI5Version": "1.108.33", "libs": { "sap.m": {}, "sap.tnt": {}, "sap.ui.core": {} } },
+    "contentDensities": { "compact": true, "cozy": true },
+    "models": {
+      "i18n": { "type": "sap.ui.model.resource.ResourceModel", "settings": { "bundleName": "zleave.zleave.i18n.i18n" } },
+      "": { "dataSource": "mainService", "preload": true, "settings": {} }
+    },
+    "resources": { "css": [ { "uri": "css/style.css" } ] },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "zleave.zleave.view",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "clearControlAggregation": false
+      },
+      "routes": [
+        { "name": "dashboard", "pattern": "", "target": "dashboard" },
+        { "name": "requests", "pattern": "requests", "target": "requests" },
+        { "name": "analytics", "pattern": "analytics", "target": "analytics" }
+      ],
+      "targets": {
+        "dashboard": { "viewName": "Dashboard", "viewId": "Dashboard", "viewType": "XML", "transition": "slide" },
+        "requests": { "viewName": "Requests", "viewId": "Requests", "viewType": "XML", "transition": "slide" },
+        "analytics": { "viewName": "Analytics", "viewId": "Analytics", "viewType": "XML", "transition": "slide" }
+      }
+    },
+    "rootView": { "viewName": "zleave.zleave.view.App", "type": "XML", "async": true, "id": "App" }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "generationParameters": {
+    "generationDate": "Mon May 25 2026 15:15:31 GMT+0700 (Indochina Time)",
+    "generatorPlatform": "Visual Studio Code",
+    "serviceType": "OData URL",
+    "metadataFilename": "",
+    "serviceUrl": "https://s40lp1.ucc.cit.tum.de/sap/opu/odata/sap/ZUI_LEAVE_MGMT_O2/",
+    "appName": "zleave",
+    "appTitle": "Leave Request App",
+    "appDescription": "An SAP Fiori application.",
+    "appNamespace": "zleave",
+    "ui5Theme": "sap_horizon",
+    "ui5Version": "1.108.33",
+    "enableEslint": true,
+    "enableTypeScript": true,
+    "showMockDataInfo": true,
+    "generatorVersion": "1.24.0",
+    "template": "Basic V2",
+    "generatorName": "SAP Fiori Application Generator",
+    "entityRelatedConfig": [],
+    "launchText": "To launch the generated application, run the following from the generated application root folder:\n\n```\n    npm start\n```"
+  }
+}

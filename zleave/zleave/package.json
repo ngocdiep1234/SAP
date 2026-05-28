@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "@types/qunit": "^2.19.14"
+  }
+}
