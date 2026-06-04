@@ -7,21 +7,55 @@ import JSONModel from "sap/ui/model/json/JSONModel";
 export default class App extends Controller {
 
     public onInit(): void {
-        const oView = (this as any).getView();
-        // app-level UI model used by multiple views
-        oView.setModel(new JSONModel({ selectedSection: "dashboard", stats: { totalRequests: 0, pendingRequests: 0, approvedRequests: 0, rejectedRequests: 0, totalDays: 0 } }), "ui");
+        const oView = this.getView();
+
+        oView.setModel(
+            new JSONModel({
+                selectedSection: "dashboard",
+                stats: {
+                    totalRequests: 0,
+                    pendingRequests: 0,
+                    approvedRequests: 0,
+                    rejectedRequests: 0,
+                    totalDays: 0
+                }
+            }),
+            "ui"
+        );
     }
 
     public onNavSelect(oEvent: any): void {
-        const oItem = oEvent.getParameter && oEvent.getParameter("item");
-        const sKey = oItem && oItem.getKey && oItem.getKey();
-        if (!sKey) { return; }
-        // update UI model
-        (this as any).getView().getModel("ui").setProperty("/selectedSection", sKey);
-        // navigate using router so URL updates
+
+        const oItem = oEvent.getParameter("item") as {
+            getKey: () => string;
+        } | undefined;
+
+        if (!oItem) {
+            return;
+        }
+
+        const sKey = oItem.getKey();
+
+        const oUiModel = this.getView().getModel("ui");
+
+        oUiModel.setProperty("/selectedSection", sKey);
+
         try {
-            const oRouter = (this as any).getOwnerComponent().getRouter();
-            if (oRouter && oRouter.navTo) { oRouter.navTo(sKey); }
-        } catch (e) { /* ignore */ }
+            const oOwnerComponent = this.getOwnerComponent();
+
+            if (!oOwnerComponent) {
+                return;
+            }
+
+            const oRouter = (oOwnerComponent as {
+                getRouter(): {
+                    navTo(route: string): void;
+                };
+            }).getRouter();
+
+            oRouter.navTo(sKey);
+        } catch {
+            // ignore
+        }
     }
 }

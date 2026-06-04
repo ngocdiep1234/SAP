@@ -1,4 +1,4 @@
-import Opa5 from "sap/ui/test/Opa5";
+﻿import Opa5 from "sap/ui/test/Opa5";
 
 const sViewName = "App";
 

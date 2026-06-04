@@ -16,7 +16,7 @@ builder:
       afterTask: generateCachebusterInfo
       configuration:
         target:
-          url: https://s40lp1.ucc.cit.tum.de/sap/opu/odata/sap/ZUI_LEAVE_MGMT_O2/?sap-client=324
+          url: https://s40lp1.ucc.cit.tum.de
           client: '324'
         app:
           name: ZLEAVE_APP

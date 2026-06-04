@@ -23,11 +23,11 @@
     },
     "crossNavigation": {
       "inbounds": {
-        "ZLeaveRequest-display_create": {
+        "ZLeaveRequest-manage": {
           "semanticObject": "ZLeaveRequest",
-          "action": "display_create",
-          "title": "{{ZLeaveRequest-display_create.flpTitle}}",
-          "subTitle": "{{ZLeaveRequest-display_create.flpSubtitle}}",
+          "action": "manage",
+          "title": "{{ZLeaveRequest-manage.flpTitle}}",
+          "subTitle": "{{ZLeaveRequest-manage.flpSubtitle}}",
           "signature": { "parameters": {}, "additionalParameters": "allowed" }
         },
         "app-preview": {

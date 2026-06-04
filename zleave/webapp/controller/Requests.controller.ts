@@ -1,3 +1,4 @@
+
 import Controller from "sap/ui/core/mvc/Controller";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
@@ -31,7 +32,7 @@ export default class Requests extends Controller {
                 and: false
             }));
         }
-        const oTable = (this as any).byId("table") as any;
+        const oTable = (this as any).byId("table");
         const oBinding = oTable.getBinding("items");
         oBinding.filter(aFilters.length ? aFilters : []);
     }
@@ -42,14 +43,14 @@ export default class Requests extends Controller {
         if (sValue) {
             aFilters.push(new Filter("EmployeeName", FilterOperator.Contains, sValue));
         }
-        const oTable = (this as any).byId("table") as any;
+        const oTable = (this as any).byId("table");
         oTable.getBinding("items").filter(aFilters);
     }
 
     public onRefresh(): void {
         const oModel = (this as any).getView().getModel();
-        if (oModel && (oModel as any).refresh) {
-            (oModel as any).refresh(true);
+        if (oModel && oModel.refresh) {
+            oModel.refresh(true);
             MessageToast.show((this as any).getView().getModel("i18n").getProperty("refreshed"));
         }
     }
@@ -57,14 +58,13 @@ export default class Requests extends Controller {
     private _updateStatus(sPath: string, sStatus: string): void {
         const oModel = (this as any).getView().getModel();
         const oPayload = { Status: sStatus } as any;
-        (oModel as any).update(sPath, oPayload, {
+        oModel.update(sPath, oPayload, {
             success: () => {
                 MessageToast.show((this as any).getView().getModel("i18n").getProperty("updateSuccess"));
                 // refresh app-level stats
-                const oDashboard = (this as any).getOwnerComponent().getController && (this as any).getOwnerComponent().getController();
-                try { (this as any).getView().getModel().refresh(true); } catch (e) { }
+                try { (this as any).getView().getModel().refresh(true); } catch { }
             },
-            error: (oErr: any) => { MessageToast.show((this as any).getView().getModel("i18n").getProperty("updateError")); }
+            error: () => { MessageToast.show((this as any).getView().getModel("i18n").getProperty("updateError")); }
         });
     }
 
@@ -93,7 +93,7 @@ export default class Requests extends Controller {
         const oSource = oEvent.getSource();
         const oContext = oSource.getParent().getBindingContext();
         if (!oContext) { return; }
-        const sPath = oContext.getPath();
+        const sPath: string = String(oContext.getPath());
         const oDlg = new Dialog({
             title: (this as any).getView().getModel("i18n").getProperty("confirmRejectTitle"),
             type: "Message",
@@ -114,9 +114,15 @@ export default class Requests extends Controller {
         const oSource = oEvent.getSource();
         const oContext = oSource.getParent().getBindingContext();
         if (!oContext) { return; }
-        const sAttachment = oContext.getProperty("AttachmentURL");
-        if (sAttachment) { window.open(sAttachment, "_blank"); }
-        else { MessageToast.show((this as any).getView().getModel("i18n").getProperty("noAttachment")); }
+        const sAttachment = oContext.getProperty("AttachmentURL") as string;
+
+        if (sAttachment) {
+            window.open(sAttachment, "_blank");
+        } else {
+            MessageToast.show(
+                (this as any).getView().getModel("i18n").getProperty("noAttachment")
+            );
+        }    
     }
 
     public onCreate(): void {
@@ -153,10 +159,10 @@ export default class Requests extends Controller {
                         Status: "Pending"
                     };
                     const oModel = (this as any).getView().getModel();
-                    (oModel as any).create("/LeaveRequest", oEntry, {
+                    oModel.create("/LeaveRequest", oEntry, {
                         success: () => {
                             MessageToast.show((this as any).getView().getModel("i18n").getProperty("createSuccess"));
-                            try { (this as any).getView().getModel().refresh(true); } catch (e) { }
+                            try { (this as any).getView().getModel().refresh(true); } catch { }
                         },
                         error: () => { MessageToast.show((this as any).getView().getModel("i18n").getProperty("createError")); }
                     });
