@@ -1,78 +1,130 @@
 <mvc:View controllerName="zleave.zleave.controller.Dashboard"
-    xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m">
-    <Page id="dashboardPage" title="{i18n>dashboard}">
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core">
+    <Page id="dashboardPage" title="Leave Management Dashboard" showHeader="true">
         <content>
-            <VBox class="leaveContent" width="100%">
-                <Panel class="heroPanel leaveCard" backgroundDesign="Translucent">
-                    <headerToolbar>
-                        <Toolbar class="heroHeader">
-                            <VBox>
-                                <Title text="{i18n>welcomeTitle}" level="H3"/>
-                                <Text text="{i18n>welcomeSubtitle}"/>
-                            </VBox>
-                            <ToolbarSpacer/>
-                            <ObjectStatus text="{i18n>statusApproved}" state="Success"/>
-                            <ObjectStatus text="{i18n>statusPending}" state="Warning"/>
-                            <ObjectStatus text="{i18n>statusRejected}" state="Error"/>
-                        </Toolbar>
-                    </headerToolbar>
-                    <content>
-                        <FlexBox wrap="Wrap" justifyContent="SpaceBetween" class="kpiStrip" renderType="Bare">
-                            <GenericTile header="{i18n>totalRequests}" subheader="{i18n>dashboard}">
+            <l:Grid id="dashboardGrid" defaultSpan="XL12 L12 M12 S12" hSpacing="1" vSpacing="1" class="sapUiSmallMargin">
+                
+                <!-- Left Column (70%) -->
+                <VBox id="leftContainer">
+                    <layoutData>
+                        <l:GridData span="XL8 L8 M12 S12"/>
+                    </layoutData>
+
+                    <!-- Leave Balance Section -->
+                    <Panel headerText="Leave Balance" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
+                        <FlexBox wrap="Wrap" justify="SpaceBetween" class="sapUiTinyMarginTop">
+                            <GenericTile header="Annual Leave" subheader="Remaining" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" press=".onTilePress">
                                 <tileContent>
                                     <TileContent>
                                         <content>
-                                            <NumericContent value="{ui>/stats/totalRequests}" valueColor="Neutral" indicator="None"/>
+                                            <NumericContent value="{ui>/dashboard/annualLeaveRemaining}" valueColor="{= ${ui>/dashboard/annualLeaveRemaining} > 5 ? 'Good' : ${ui>/dashboard/annualLeaveRemaining} > 2 ? 'Critical' : 'Error' }" indicator="None"/>
                                         </content>
                                     </TileContent>
                                 </tileContent>
                             </GenericTile>
-                            <GenericTile header="{i18n>pendingRequests}" subheader="{i18n>statusPending}">
+
+                            <GenericTile header="Sick Leave" subheader="Remaining" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" press=".onTilePress">
                                 <tileContent>
                                     <TileContent>
                                         <content>
-                                            <NumericContent value="{ui>/stats/pendingRequests}" valueColor="Critical" indicator="Up"/>
+                                            <NumericContent value="{ui>/dashboard/sickLeaveRemaining}" valueColor="{= ${ui>/dashboard/sickLeaveRemaining} > 2 ? 'Good' : 'Error' }" indicator="None"/>
                                         </content>
                                     </TileContent>
                                 </tileContent>
                             </GenericTile>
-                            <GenericTile header="{i18n>approvedRequests}" subheader="{i18n>statusApproved}">
+
+                            <GenericTile header="Unpaid Leave" subheader="Used" class="sapUiTinyMarginBottom" press=".onTilePress">
                                 <tileContent>
                                     <TileContent>
                                         <content>
-                                            <NumericContent value="{ui>/stats/approvedRequests}" valueColor="Good" indicator="Up"/>
-                                        </content>
-                                    </TileContent>
-                                </tileContent>
-                            </GenericTile>
-                            <GenericTile header="{i18n>rejectedRequests}" subheader="{i18n>statusRejected}">
-                                <tileContent>
-                                    <TileContent>
-                                        <content>
-                                            <NumericContent value="{ui>/stats/rejectedRequests}" valueColor="Error" indicator="Down"/>
+                                            <NumericContent value="{ui>/dashboard/unpaidLeaveUsed}" valueColor="Neutral" indicator="None"/>
                                         </content>
                                     </TileContent>
                                 </tileContent>
                             </GenericTile>
                         </FlexBox>
-                    </content>
-                </Panel>
+                    </Panel>
 
-                <Panel class="leaveCard sectionCard" backgroundDesign="Translucent">
-                    <headerToolbar>
-                        <Toolbar>
-                            <Title text="{i18n>dashboard}" level="H3"/>
-                        </Toolbar>
-                    </headerToolbar>
-                    <content>
-                        <HBox class="statusChipRow" wrap="Wrap">
-                            <ObjectStatus text="{i18n>statusApproved}" state="Success"/>
-                            <ObjectStatus text="{i18n>statusPending}" state="Warning"/>
-                            <ObjectStatus text="{i18n>statusRejected}" state="Error"/>
+                    <!-- Quick Actions Section -->
+                    <Panel headerText="Quick Actions" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
+                        <HBox wrap="Wrap" class="sapUiTinyMarginTop">
+                            <Button text="Create Leave Request" type="Emphasized" icon="sap-icon://create" press=".onNavToCreate" class="sapUiSmallMarginEnd sapUiTinyMarginBottom"/>
+                            <Button text="My Requests" icon="sap-icon://employee" press=".onNavToRequests" class="sapUiSmallMarginEnd sapUiTinyMarginBottom"/>
+                            <Button text="Leave Calendar" icon="sap-icon://appointment-2" press=".onNavToCalendar" class="sapUiTinyMarginBottom"/>
                         </HBox>
-                    </content>
-                </Panel>
-            </VBox>
+                    </Panel>
+
+                    <!-- My Leave Requests Section -->
+                    <Panel headerText="My Recent Leave Requests" backgroundDesign="Translucent">
+                        <Table id="tableRecentRequests" inset="false" items="{ui>/dashboard/myRequests}">
+                            <columns>
+                                <Column width="5rem"><Text text="ID" design="Bold"/></Column>
+                                <Column><Text text="Type" design="Bold"/></Column>
+                                <Column minScreenWidth="Tablet" demandPopin="true"><Text text="Date Range" design="Bold"/></Column>
+                                <Column width="5rem" hAlign="End"><Text text="Days" design="Bold"/></Column>
+                                <Column width="8rem" hAlign="Center"><Text text="Status" design="Bold"/></Column>
+                                <Column width="10rem" hAlign="End"><Text text="Actions" design="Bold"/></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <Text text="{ui>RequestID}"/>
+                                        <Text text="{ui>LeaveType}"/>
+                                        <Text text="{path: 'ui>StartDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}} → {path: 'ui>EndDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"/>
+                                        <Text text="{ui>TotalDays}"/>
+                                        <ObjectStatus text="{ui>Status}" state="{= ${ui>Status} === 'Approved' ? 'Success' : ${ui>Status} === 'Rejected' ? 'Error' : ${ui>Status} === 'Draft' ? 'None' : 'Warning' }"/>
+                                        <HBox justify="End" alignWidth="true">
+                                            <Button icon="sap-icon://hint" type="Transparent" press=".onViewRequest" tooltip="View Details"/>
+                                            <Button icon="sap-icon://edit" type="Transparent" press=".onEditRequest" visible="{= ${ui>Status} === 'Draft' }" tooltip="Edit Draft"/>
+                                            <Button icon="sap-icon://decline" type="Reject" press=".onCancelRequest" visible="{= ${ui>Status} === 'Pending' }" tooltip="Cancel Request"/>
+                                        </HBox>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </Panel>
+                </VBox>
+                
+                <!-- Right Column (30%) -->
+                <VBox id="rightContainer">
+                    <layoutData>
+                        <l:GridData span="XL4 L4 M12 S12"/>
+                    </layoutData>
+
+                    <!-- Upcoming Leaves Section -->
+                    <Panel headerText="Upcoming Leaves" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
+                        <List id="listUpcomingLeaves" 
+                            noDataText="No upcoming leaves approved"
+                            items="{ui>/dashboard/upcomingLeaves}">
+                            <StandardListItem 
+                                title="{ui>LeaveType} Leave"
+                                description="{path: 'ui>StartDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}} ({ui>TotalDays} Days)"
+                                icon="sap-icon://calendar"
+                                info="{ui>Status}"
+                                infoState="Success"/>
+                        </List>
+                    </Panel>
+
+                    <!-- System Notifications Section -->
+                    <Panel headerText="Notifications" backgroundDesign="Translucent">
+                        <List id="listNotifications" 
+                            items="{ui>/dashboard/notifications}">
+                            <CustomListItem>
+                                <HBox class="sapUiSmallMargin" alignItems="Center">
+                                    <core:Icon src="{ui>icon}" color="{= ${ui>state} === 'Success' ? '#2b7c2b' : ${ui>state} === 'Error' ? '#bb0000' : '#0066cc' }" class="sapUiSmallMarginEnd"/>
+                                    <VBox>
+                                        <Text text="{ui>message}" design="Bold"/>
+                                        <Text text="{ui>time}" class="sapUiTinyMarginTop" style="font-size: 0.8rem; color: #666;"/>
+                                    </VBox>
+                                </HBox>
+                            </CustomListItem>
+                        </List>
+                    </Panel>
+                </VBox>
+            </l:Grid>
         </content>
     </Page>
 </mvc:View>
