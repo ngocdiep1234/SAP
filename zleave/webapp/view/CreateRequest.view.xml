@@ -1,0 +1,153 @@
+<mvc:View controllerName="zleave.zleave.controller.CreateRequest"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    xmlns:upload="sap.m.upload">
+    <Page id="createRequestPage"
+        title="{i18n>createLeaveRequestTitle}"
+        showNavButton="true"
+        navButtonPress=".onNavBack"
+        showFooter="true">
+        <content>
+            <l:Grid id="mainGrid" defaultSpan="XL12 L12 M12 S12" hSpacing="1" vSpacing="1" class="sapUiSmallMargin">
+                <!-- Left Column: Input Forms -->
+                <VBox id="formsContainer">
+                    <layoutData>
+                        <l:GridData span="XL8 L8 M12 S12"/>
+                    </layoutData>
+
+                    <!-- Employee Information -->
+                    <Panel headerText="{i18n>employeeInfoSection}" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
+                        <f:SimpleForm editable="false" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
+                            <f:content>
+                                <Label text="{i18n>employeeId}"/>
+                                <Text text="{createForm>/employee/EmployeeID}"/>
+                                <Label text="{i18n>employeeName}"/>
+                                <Text text="{createForm>/employee/EmployeeName}"/>
+                                <Label text="Department"/>
+                                <Text text="{createForm>/employee/DepartmentID}"/>
+                                <Label text="Manager"/>
+                                <Text text="{createForm>/employee/ManagerID}"/>
+                            </f:content>
+                        </f:SimpleForm>
+                    </Panel>
+
+                    <!-- Leave Details -->
+                    <Panel headerText="{i18n>leaveDetailsSection}" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
+                        <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
+                            <f:content>
+                                <Label text="{i18n>leaveType}" required="true"/>
+                                <ComboBox id="cmbLeaveType" 
+                                    required="true"
+                                    placeholder="Select Leave Type"
+                                    selectedKey="{createForm>/leaveRequest/LeaveType}"
+                                    selectionChange=".onLeaveTypeChange">
+                                    <core:Item key="Annual" text="Annual Leave"/>
+                                    <core:Item key="Sick" text="Sick Leave"/>
+                                    <core:Item key="Unpaid" text="Unpaid Leave"/>
+                                    <core:Item key="Maternity" text="Maternity Leave"/>
+                                    <core:Item key="Emergency" text="Emergency Leave"/>
+                                </ComboBox>
+
+                                <Label text="{i18n>startDate}" required="true"/>
+                                <DatePicker id="dpStartDate" 
+                                    required="true" 
+                                    valueFormat="yyyy-MM-dd"
+                                    displayFormat="yyyy-MM-dd"
+                                    value="{createForm>/leaveRequest/StartDate}"
+                                    change=".onDatesChange"/>
+
+                                <Label text="{i18n>endDate}" required="true"/>
+                                <DatePicker id="dpEndDate" 
+                                    required="true" 
+                                    valueFormat="yyyy-MM-dd"
+                                    displayFormat="yyyy-MM-dd"
+                                    value="{createForm>/leaveRequest/EndDate}"
+                                    change=".onDatesChange"/>
+
+                                <Label text="{i18n>duration}"/>
+                                <Input value="{createForm>/leaveRequest/TotalDays}" editable="false" description="Days"/>
+
+                                <Label text="{i18n>halfDayLeave}"/>
+                                <CheckBox selected="{createForm>/leaveRequest/HalfDay}" select=".onHalfDaySelect"/>
+
+                                <Label text="{i18n>halfDayPeriod}" visible="{createForm>/leaveRequest/HalfDay}"/>
+                                <RadioButtonGroup id="rbHalfDayPeriod" 
+                                    visible="{createForm>/leaveRequest/HalfDay}" 
+                                    select=".onHalfDayPeriodSelect"
+                                    columns="2">
+                                    <RadioButton text="{i18n>morning}" key="Morning"/>
+                                    <RadioButton text="{i18n>afternoon}" key="Afternoon"/>
+                                </RadioButtonGroup>
+                            </f:content>
+                        </f:SimpleForm>
+                    </Panel>
+
+                    <!-- Reason -->
+                    <Panel headerText="{i18n>reasonSection}" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
+                        <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
+                            <f:content>
+                                <Label text="{i18n>reason}"/>
+                                <TextArea value="{createForm>/leaveRequest/Reason}" 
+                                    rows="4" 
+                                    maxLength="500" 
+                                    placeholder="Enter reason (optional, min 5 chars)..."
+                                    liveChange=".onDatesChange"/>
+                            </f:content>
+                        </f:SimpleForm>
+                    </Panel>
+
+                    <!-- Attachments -->
+                    <Panel headerText="{i18n>attachmentsSection}" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
+                        <upload:UploadSet id="uploadSet" 
+                            instantUpload="false" 
+                            uploadEnabled="true"
+                            maxFileSize="10"
+                            fileTypes="pdf,doc,docx,jpg,jpeg,png"
+                            class="sapUiSmallMarginTop">
+                        </upload:UploadSet>
+                    </Panel>
+                </VBox>
+
+                <!-- Right Column: Request Summary -->
+                <Panel id="summaryPanel" headerText="{i18n>requestSummarySection}" backgroundDesign="Translucent">
+                    <layoutData>
+                        <l:GridData span="XL4 L4 M12 S12"/>
+                    </layoutData>
+                    <VBox class="sapUiContentPadding">
+                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom">
+                            <Label text="Leave Type:" design="Bold"/>
+                            <Text text="{createForm>/summary/LeaveType}"/>
+                        </HBox>
+                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom">
+                            <Label text="Duration:" design="Bold"/>
+                            <Text text="{createForm>/summary/Duration}"/>
+                        </HBox>
+                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom">
+                            <Label text="Remaining Balance:" design="Bold"/>
+                            <Text text="{createForm>/summary/RemainingBalance}"/>
+                        </HBox>
+                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom">
+                            <Label text="Approver:" design="Bold"/>
+                            <Text text="{createForm>/summary/Approver}"/>
+                        </HBox>
+                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom">
+                            <Label text="Status:" design="Bold"/>
+                            <ObjectStatus text="{createForm>/summary/Status}" state="Warning"/>
+                        </HBox>
+                    </VBox>
+                </Panel>
+            </l:Grid>
+        </content>
+        <footer>
+            <OverflowToolbar>
+                <ToolbarSpacer/>
+                <Button text="{i18n>submit}" type="Emphasized" press=".onSubmit"/>
+                <Button text="{i18n>saveDraft}" press=".onSaveDraft"/>
+                <Button text="{i18n>cancel}" type="Transparent" press=".onCancel"/>
+            </OverflowToolbar>
+        </footer>
+    </Page>
+</mvc:View>

@@ -20,6 +20,15 @@ interface DashboardStats {
 export default class Dashboard extends Controller {
 
     public onInit(): void {
+        const oRouter = (this as any).getOwnerComponent().getRouter();
+        oRouter.getRoute("dashboard").attachPatternMatched(this._onPatternMatched, this);
+    }
+
+    private _onPatternMatched(): void {
+        const oUiModel = this.getView().getModel("ui") as any;
+        if (oUiModel) {
+            oUiModel.setProperty("/selectedSection", "dashboard");
+        }
         this._loadDashboardStats();
     }
 

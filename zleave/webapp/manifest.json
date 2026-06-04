@@ -72,12 +72,14 @@
       "routes": [
         { "name": "dashboard", "pattern": "", "target": "dashboard" },
         { "name": "requests", "pattern": "requests", "target": "requests" },
-        { "name": "analytics", "pattern": "analytics", "target": "analytics" }
+        { "name": "analytics", "pattern": "analytics", "target": "analytics" },
+        { "name": "createRequest", "pattern": "requests/create", "target": "createRequest" }
       ],
       "targets": {
         "dashboard": { "viewName": "Dashboard", "viewId": "Dashboard", "viewType": "XML", "transition": "slide" },
         "requests": { "viewName": "Requests", "viewId": "Requests", "viewType": "XML", "transition": "slide" },
-        "analytics": { "viewName": "Analytics", "viewId": "Analytics", "viewType": "XML", "transition": "slide" }
+        "analytics": { "viewName": "Analytics", "viewId": "Analytics", "viewType": "XML", "transition": "slide" },
+        "createRequest": { "viewName": "CreateRequest", "viewId": "CreateRequest", "viewType": "XML", "transition": "slide" }
       }
     },
     "rootView": { "viewName": "zleave.zleave.view.App", "type": "XML", "async": true, "id": "App" }

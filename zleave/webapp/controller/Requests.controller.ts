@@ -14,7 +14,20 @@ import VBox from "sap/m/VBox";
 export default class Requests extends Controller {
 
     public onInit(): void {
-        // nothing special here; view benefits from app-level ui model
+        const oRouter = (this as any).getOwnerComponent().getRouter();
+        oRouter.getRoute("requests").attachPatternMatched(this._onPatternMatched, this);
+    }
+
+    private _onPatternMatched(): void {
+        const oUiModel = this.getView().getModel("ui") as any;
+        if (oUiModel) {
+            oUiModel.setProperty("/selectedSection", "requests");
+        }
+    }
+
+    public onNavToCreate(): void {
+        const oRouter = (this as any).getOwnerComponent().getRouter();
+        oRouter.navTo("createRequest");
     }
 
     public onSearch(oEvent: any): void {

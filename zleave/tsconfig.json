@@ -2,11 +2,11 @@
   "compilerOptions": {
     "target": "es2022",
     "module": "es2022",
+    "moduleResolution": "node",
     "skipLibCheck": true,
     "allowJs": true,
     "strict": true,
     "strictPropertyInitialization": false,
-    "moduleResolution": "node",
     "ignoreDeprecations": "6.0",
     "rootDir": "./webapp",
     "outDir": "./dist",
@@ -25,9 +25,10 @@
     "typeRoots": [
       "./node_modules/@types",
       "./node_modules/@sapui5/ts-types-esm"
+    ],
+    "types": [
+      "qunit"
     ]
-    ,
-    "types": ["qunit"]
   },
   "include": [
     "./webapp/**/*"

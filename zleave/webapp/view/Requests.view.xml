@@ -1,6 +1,9 @@
 <mvc:View controllerName="zleave.zleave.controller.Requests"
     xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m">
     <Page id="requestsPage" title="{i18n>leaveRequests}">
+        <headerContent>
+            <Button text="{i18n>create}" icon="sap-icon://add" press=".onNavToCreate" type="Emphasized"/>
+        </headerContent>
         <content>
             <VBox>
                 <SearchField id="filterEmployeeRequests" placeholder="{i18n>employee}" search=".onFilter" width="18rem" class="tableFilter"/>
