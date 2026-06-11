@@ -14,10 +14,10 @@
     "@sap/ux-ui5-tooling": "1",
     "@sapui5/ts-types": "^1.148.0",
     "@sapui5/ts-types-esm": "~1.108.0",
-    "@ui5/cli": "^4.0.33",
+    "@ui5/cli": "^4.0.55",
     "eslint": "^10",
     "rimraf": "^5.0.5",
-    "typescript": "^6.0.0",
+    "typescript": "^5.9.3",
     "ui5-tooling-transpile": "^3.10.0"
   },
   "scripts": {

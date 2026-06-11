@@ -7,17 +7,18 @@ export default class ZI_LEAVE_REQUESTPage extends Opa5 {
 
 
 	// Assertions
-	iShouldSeeThePageView() {
-		return this.waitFor({
-				id: "dashboardPage",
-				viewName: sViewName,
-			success: function () {
-				Opa5.assert.ok(true, "The " + sViewName + " view is displayed");
-			},
-			errorMessage: "Did not find the " + sViewName + " view"
-		});
-	}
+	public iShouldSeeThePageView(): this {
+    this.waitFor({
+        id: "dashboardPage",
+        viewName: sViewName,
+        success: () => {
+            Opa5.assert.ok(true, `The ${sViewName} view is displayed`);
+        },
+        errorMessage: `Did not find the ${sViewName} view`
+    });
 
+    return this;
+	}
 }
 
 

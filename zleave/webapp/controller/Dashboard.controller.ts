@@ -36,6 +36,7 @@ export default class Dashboard extends Controller {
             oUiModel.setProperty("/selectedSection", "dashboard");
         }
         this._loadDashboardData();
+        void this._loadCurrentUser();
     }
 
     private _loadDashboardData(): void {
@@ -212,5 +213,71 @@ export default class Dashboard extends Controller {
 
     public onTilePress(): void {
         // Handled generic tile click details
+    }
+
+    /**
+     * Fetch the currently logged-in SAP user from the start_up endpoint
+     * and store the result in the "ui" model at /currentUser.
+     */
+    private async _loadCurrentUser(): Promise<void> {
+        const oUiModel = this.getView()?.getModel("ui") as any;
+        if (!oUiModel) {
+            return;
+        }
+
+        // Initialise with a fallback while loading
+        oUiModel.setProperty("/currentUser", { id: "", displayName: "Unknown User" });
+
+        try {
+            const oResponse = await fetch("/sap/bc/ui2/start_up", {
+                credentials: "same-origin"
+            });
+
+            if (!oResponse.ok) {
+                return; // keep fallback
+            }
+
+            const oData: Record<string, unknown> = await oResponse.json() as Record<string, unknown>;
+
+            // The start_up response may expose the user under different keys
+            // depending on the ABAP system version.
+            const sId: string =
+                (oData["id"] as string) ??
+                (oData["userId"] as string) ??
+                (oData["name"] as string) ??
+                "";
+
+            const sFullName: string =
+                (oData["fullName"] as string) ??
+                (oData["displayName"] as string) ??
+                sId;
+
+            const sDisplayName = sFullName || sId || "Unknown User";
+
+            oUiModel.setProperty("/currentUser", {
+                id: sId,
+                displayName: sDisplayName
+            });
+        } catch {
+            // Network error or JSON parse error – keep the fallback
+        }
+    }
+
+    /**
+     * Ask for confirmation and redirect to the SAP ICF logoff URL.
+     */
+    public onLogout(): void {
+        MessageBox.confirm(
+            "Are you sure you want to logout?",
+            {
+                actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+                emphasizedAction: MessageBox.Action.YES,
+                onClose: (sAction: string): void => {
+                    if (sAction === MessageBox.Action.YES) {
+                        window.location.href = "/sap/public/bc/icf/logoff";
+                    }
+                }
+            }
+        );
     }
 }

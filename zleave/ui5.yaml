@@ -46,8 +46,7 @@ server:
 
 builder:
   resources:
-    excludes:
-      - "**/*.ts"
+      excludes:     
       - "/test/**"
       - "/localService/**"
 
@@ -58,3 +57,4 @@ builder:
         debug: true
         transformModulesToUI5:
           overridesToOverride: true
+        omitTSFromBuildResult: true

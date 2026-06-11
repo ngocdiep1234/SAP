@@ -12,6 +12,7 @@ builder:
         debug: true
         transformModulesToUI5:
           overridesToOverride: true
+        omitTSFromBuildResult: true
     - name: deploy-to-abap
       afterTask: generateCachebusterInfo
       configuration:
@@ -27,5 +28,7 @@ builder:
           - /test/
   resources:
     excludes:
+      - "**/*.ts"
+      - "**/*.ts.map"
       - /test/**
       - /localService/**

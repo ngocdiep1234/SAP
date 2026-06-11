@@ -7,16 +7,18 @@ export default class AppPage extends Opa5 {
 
 
 	// Assertions
-	iShouldSeeTheApp() {
-		return this.waitFor({
-			id: "app",
-			viewName: sViewName,
-			success: function () {
-				Opa5.assert.ok(true, "The " + sViewName + " view is displayed");
-			},
-			errorMessage: "Did not find the " + sViewName + " view"
-		});
-	}
+	public iShouldSeeTheApp(): this {
+    this.waitFor({
+        id: "app",
+        viewName: sViewName,
+        success: () => {
+            Opa5.assert.ok(true, `The ${sViewName} view is displayed`);
+        },
+        errorMessage: `Did not find the ${sViewName} view`
+    });
+
+    return this;
+}
 
 }
 
