@@ -43,12 +43,9 @@
                                     required="true"
                                     placeholder="Select Leave Type"
                                     selectedKey="{createForm>/leaveRequest/LeaveType}"
-                                    selectionChange=".onLeaveTypeChange">
-                                    <core:Item key="Annual" text="Annual Leave"/>
-                                    <core:Item key="Sick" text="Sick Leave"/>
-                                    <core:Item key="Unpaid" text="Unpaid Leave"/>
-                                    <core:Item key="Maternity" text="Maternity Leave"/>
-                                    <core:Item key="Emergency" text="Emergency Leave"/>
+                                    selectionChange=".onLeaveTypeChange"
+                                    items="{createForm>/leaveTypes}">
+                                    <core:Item key="{createForm>LeaveType}" text="{createForm>LeaveName}"/>
                                 </ComboBox>
 
                                 <Label text="{i18n>startDate}" required="true"/>
@@ -101,13 +98,12 @@
 
                     <!-- Attachments -->
                     <Panel headerText="{i18n>attachmentsSection}" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
-                        <upload:UploadSet id="uploadSet" 
-                            instantUpload="false" 
-                            uploadEnabled="true"
-                            maxFileSize="10"
-                            fileTypes="pdf,doc,docx,jpg,jpeg,png"
-                            class="sapUiSmallMarginTop">
-                        </upload:UploadSet>
+                        <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
+                            <f:content>
+                                <Label text="Attachment URL"/>
+                                <Input id="inpAttachmentUrl" value="{createForm>/leaveRequest/AttachmentUrl}" placeholder="Enter attachment URL link..."/>
+                            </f:content>
+                        </f:SimpleForm>
                     </Panel>
                 </VBox>
 
