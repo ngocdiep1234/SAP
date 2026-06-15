@@ -1,5 +1,6 @@
 <mvc:View controllerName="zleave.zleave.controller.Requests"
-    xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m">
+    xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m"
+    xmlns:core="sap.ui.core">
     <Page id="requestsPage" title="{i18n>leaveRequests}">
         <headerContent>
             <Button text="{i18n>create}" icon="sap-icon://add" press=".onNavToCreate" type="Emphasized"/>
@@ -7,34 +8,41 @@
         <content>
             <VBox>
                 <SearchField id="filterEmployeeRequests" placeholder="{i18n>employee}" search=".onFilter" width="18rem" class="tableFilter"/>
-                <Table id="tableRequests" inset="false" items="{/LeaveRequest}" growing="true" growingScrollToLoad="true" class="leaveTable">
+                <Select id="filterStatus" change=".onStatusFilterChange" selectedKey="SUBMITTED" class="sapUiSmallMarginBottom" width="18rem">
+                    <items>
+                        <core:Item key="ALL" text="All Requests"/>
+                        <core:Item key="SUBMITTED" text="Pending Approval"/>
+                    </items>
+                </Select>
+                <Table id="tableRequests" mode="MultiSelect" selectionChange=".onSelectionChange" inset="false" items="{/LeaveRequest}" growing="true" growingScrollToLoad="true" class="leaveTable">
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <Title text="{i18n>leaveRequests}" level="H2"/>
+                            <ToolbarSpacer/>
+                            <Button id="btnApproveSelected" text="{i18n>approveSelected}" icon="sap-icon://accept" type="Accept" press=".onApproveSelected" enabled="false"/>
+                            <Button id="btnRejectSelected" text="{i18n>rejectSelected}" icon="sap-icon://decline" type="Reject" press=".onRejectSelected" enabled="false"/>
+                            <Button id="btnDeleteSelected" text="Delete Selected" icon="sap-icon://delete" type="Negative" press=".onDeleteSelected" enabled="false" visible="false"/>
+                        </OverflowToolbar>
+                    </headerToolbar>
                     <columns>
                         <Column><Text text="{i18n>requestId}"/></Column>
                         <Column><Text text="{i18n>employeeId}"/></Column>
-                        <Column><Text text="{i18n>departmentId}"/></Column>
                         <Column><Text text="{i18n>leaveType}"/></Column>
                         <Column><Text text="{i18n>startDate}"/></Column>
                         <Column><Text text="{i18n>endDate}"/></Column>
                         <Column><Text text="{i18n>totalDays}"/></Column>
                         <Column><Text text="{i18n>status}"/></Column>
-                        <Column><Text text="{i18n>actions}"/></Column>
                     </columns>
                     <items>
                         <ColumnListItem type="Active">
                             <cells>
-                                <Text text="{RequestID}"/>
-                                <Text text="{EmployeeID}"/>
-                                <Text text="{DepartmentID}"/>
+                                <Text text="{RequestId}"/>
+                                <Text text="{EmployeeId}"/>
                                 <Text text="{LeaveType}"/>
                                 <Text text="{path: 'StartDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"/>
                                 <Text text="{path: 'EndDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"/>
-                                <Text text="{TotalDays}"/>
+                                <Text text="{path: 'TotalDays', type: 'sap.ui.model.type.Float', formatOptions: {minFractionDigits: 0, maxFractionDigits: 1}}"/>
                                 <ObjectStatus text="{Status}" state="{= ${Status} === 'Approved' ? 'Success' : ${Status} === 'Rejected' ? 'Error' : 'Warning' }"/>
-                                <HBox>
-                                    <Button text="{i18n>approve}" type="Accept" press=".onApprove" visible="{= ${Status} === 'Pending' }"/>
-                                    <Button text="{i18n>reject}" type="Reject" press=".onReject" visible="{= ${Status} === 'Pending' }"/>
-                                    <Button icon="sap-icon://attachment" press=".onOpenAttachment" tooltip="{i18n>attachment}"/>
-                                </HBox>
                             </cells>
                         </ColumnListItem>
                     </items>

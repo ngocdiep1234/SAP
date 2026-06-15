@@ -2,6 +2,9 @@ import Controller from "sap/ui/core/mvc/Controller";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import MessageToast from "sap/m/MessageToast";
 import MessageBox from "sap/m/MessageBox";
+import Event from "sap/ui/base/Event";
+import ODataModel from "sap/ui/model/odata/v2/ODataModel";
+import ManagedObject from "sap/ui/base/ManagedObject";
 
 interface LeaveRequest {
     UUID: string;
@@ -207,6 +210,55 @@ export default class Dashboard extends Controller {
             error: (): void => {
                 this.getView().setBusy(false);
                 MessageBox.error("Failed to cancel the request");
+            }
+        });
+    }
+
+    public onDeleteRequest(oEvent: InstanceType<typeof Event>): void {
+        const oSource = oEvent.getSource() as InstanceType<typeof ManagedObject>;
+        const oParent = oSource.getParent();
+        if (!oParent) {
+            return;
+        }
+        const oBindingContext = oParent.getBindingContext("ui");
+        if (!oBindingContext) {
+            return;
+        }
+        const oRequest = oBindingContext.getObject() as LeaveRequest;
+
+        MessageBox.confirm(
+            `Are you sure you want to delete leave request ${oRequest.RequestID}?`,
+            {
+                title: "Delete Leave Request",
+                actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+                onClose: (sAction?: string) => {
+                    if (sAction === MessageBox.Action.YES) {
+                        this._deleteODataRequest(oRequest);
+                    }
+                }
+            }
+        );
+    }
+
+    private _deleteODataRequest(oRequest: LeaveRequest): void {
+        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+        if (!oModel) {
+            return;
+        }
+
+        this.getView().setBusy(true);
+
+        const sPath = `/LeaveRequest(guid'${oRequest.UUID}')`;
+
+        oModel.remove(sPath, {
+            success: (): void => {
+                this.getView().setBusy(false);
+                MessageToast.show(`Request ${oRequest.RequestID} deleted successfully`);
+                this._loadDashboardData();
+            },
+            error: (): void => {
+                this.getView().setBusy(false);
+                MessageBox.error("Failed to delete the request");
             }
         });
     }

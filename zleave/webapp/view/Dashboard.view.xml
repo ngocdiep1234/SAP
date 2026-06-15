@@ -69,29 +69,29 @@
                         </HBox>
                     </Panel>
 
-                    <!-- My Leave Requests Section -->
-                    <Panel headerText="My Recent Leave Requests" backgroundDesign="Translucent">
+                    <!-- Leave Requests Section -->
+                    <Panel headerText="Leave Requests" backgroundDesign="Translucent">
                         <Table id="tableRecentRequests" inset="false" items="{ui>/dashboard/myRequests}">
                             <columns>
-                                <Column width="5rem"><Text text="ID" design="Bold"/></Column>
-                                <Column><Text text="Type" design="Bold"/></Column>
+                                <Column width="7rem"><Text text="Request ID" design="Bold"/></Column>
+                                <Column><Text text="Leave Type" design="Bold"/></Column>
                                 <Column minScreenWidth="Tablet" demandPopin="true"><Text text="Date Range" design="Bold"/></Column>
-                                <Column width="5rem" hAlign="End"><Text text="Days" design="Bold"/></Column>
+                                <Column width="6rem" hAlign="End"><Text text="Total Days" design="Bold"/></Column>
                                 <Column width="8rem" hAlign="Center"><Text text="Status" design="Bold"/></Column>
                                 <Column width="10rem" hAlign="End"><Text text="Actions" design="Bold"/></Column>
                             </columns>
                             <items>
                                 <ColumnListItem>
                                     <cells>
-                                        <Text text="{ui>RequestID}"/>
+                                        <Text text="{ui>RequestId}"/>
                                         <Text text="{ui>LeaveType}"/>
                                         <Text text="{path: 'ui>StartDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}} → {path: 'ui>EndDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"/>
-                                        <Text text="{ui>TotalDays}"/>
-                                        <ObjectStatus text="{ui>Status}" state="{= ${ui>Status} === 'Approved' ? 'Success' : ${ui>Status} === 'Rejected' ? 'Error' : ${ui>Status} === 'Draft' ? 'None' : 'Warning' }"/>
+                                        <Text text="{path: 'ui>TotalDays', type: 'sap.ui.model.type.Float', formatOptions: {minFractionDigits: 0, maxFractionDigits: 1}}"/>
+                                        <ObjectStatus text="{ui>Status}" state="{= ${ui>Status} === 'Approved' ? 'Success' : ${ui>Status} === 'Rejected' ? 'Error' : (${ui>Status} === 'Submitted' || ${ui>Status} === 'SUBMITTED' || ${ui>Status} === 'Pending') ? 'Warning' : 'None' }"/>
                                         <HBox justify="End" alignWidth="true">
                                             <Button icon="sap-icon://hint" type="Transparent" press=".onViewRequest" tooltip="View Details"/>
                                             <Button icon="sap-icon://edit" type="Transparent" press=".onEditRequest" visible="{= ${ui>Status} === 'Draft' }" tooltip="Edit Draft"/>
-                                            <Button icon="sap-icon://decline" type="Reject" press=".onCancelRequest" visible="{= ${ui>Status} === 'Pending' }" tooltip="Cancel Request"/>
+                                            <Button icon="sap-icon://delete" type="Transparent" press=".onDeleteRequest" visible="{= ${ui>Delete_mc} !== undefined ? ${ui>Delete_mc} === true : (${ui>Status} === 'Draft' || ${ui>Status} === 'Submitted' || ${ui>Status} === 'SUBMITTED' || ${ui>Status} === 'Pending') }" tooltip="Delete Request"/>
                                         </HBox>
                                     </cells>
                                 </ColumnListItem>
