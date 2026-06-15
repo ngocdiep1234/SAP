@@ -43,6 +43,8 @@ interface CreateFormModel {
     summary: Summary;
     busy: boolean;
     leaveTypes: LeaveTypeEntry[];
+    /** true = user found in Employee master; false/undefined = blocked */
+    employeeRegistered: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -54,7 +56,12 @@ interface CreateFormModel {
  *
  * CreateRequest controller
  * ========================
- * Handles the original Create Leave Request view UI and OData mappings.
+ * Handles the Create Leave Request view UI and OData mappings.
+ *
+ * On every route match the controller verifies that the currently logged-in
+ * SAP user exists in the Employee master data before allowing any submission.
+ * Unregistered users are blocked immediately with a MessageBox and the
+ * Submit / Save Draft buttons are disabled.
  */
 export default class CreateRequest extends Controller {
 
@@ -76,20 +83,21 @@ export default class CreateRequest extends Controller {
                 AttachmentUrl: ""
             },
             employee: {
-                EmployeeID: "MOCK001",
-                EmployeeName: "Offline Employee Profile",
-                DepartmentID: "Offline Dept",
-                ManagerID: "MOCK_MGR"
+                EmployeeID: "",
+                EmployeeName: "",
+                DepartmentID: "",
+                ManagerID: ""
             },
             summary: {
                 LeaveType: "-",
                 Duration: "0 Days",
                 RemainingBalance: "12 Days",
-                Approver: "MOCK_MGR",
+                Approver: "",
                 Status: "Pending"
             },
             busy: false,
-            leaveTypes: []
+            leaveTypes: [],
+            employeeRegistered: false   // <-- blocked by default until check passes
         } satisfies CreateFormModel);
 
         this.getView().setModel(oFormModel, "createForm");
@@ -110,12 +118,150 @@ export default class CreateRequest extends Controller {
             oUiModel.setProperty("/selectedSection", "createRequest");
         }
 
-        this._loadEmployeeInfo();
+        // Block submission until employee check is done
+        this._getFormModel().setProperty("/employeeRegistered", false);
+
+        void this._checkAndLoadEmployee();
         void this._loadLeaveTypes();
     }
 
     // -----------------------------------------------------------------------
-    // Employee Data Loading
+    // Employee Registration Check  (core new feature)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Fetches the current SAP user's Employee record from the backend.
+     *
+     * Success (record found)  → populate employee fields, set employeeRegistered = true.
+     * Failure (no record / OData error) → MessageBox.error, employeeRegistered stays false,
+     *                                      Submit & SaveDraft buttons remain disabled.
+     */
+    private async _checkAndLoadEmployee(): Promise<void> {
+        const oModel = this.getView().getModel();
+        const oFormModel = this._getFormModel();
+
+        if (!oModel) {
+            console.error("[CreateRequest] OData model is not available.");
+            MessageBox.error(
+                "Không thể kết nối với hệ thống. Vui lòng tải lại trang.",
+                { title: "Lỗi kết nối" }
+            );
+            return;
+        }
+
+        // Step 1: resolve current SAP user id
+        let sUserId: string;
+        try {
+            sUserId = await this._getCurrentUserId();
+        } catch (oErr) {
+            console.error("[CreateRequest] Failed to resolve current user id:", oErr);
+            this._blockWithError("Không thể xác định người dùng hiện tại. Vui lòng tải lại trang.");
+            return;
+        }
+
+        if (!sUserId) {
+            console.warn("[CreateRequest] Current user id is empty.");
+            this._blockWithError("Không thể xác định người dùng hiện tại. Vui lòng tải lại trang.");
+            return;
+        }
+
+        console.info(`[CreateRequest] Checking employee registration for user: ${sUserId}`);
+
+        // Step 2: query Employee entity by SapUserName
+        (oModel as InstanceType<typeof ODataModel>).read("/Employee", {
+            filters: [
+                new Filter("SapUserName", FilterOperator.EQ, sUserId)
+            ],
+            success: (oData: unknown): void => {
+                const oResult = oData as { results?: Record<string, unknown>[] };
+
+                if (oResult?.results && oResult.results.length > 0) {
+                    // --------------------------------------------------------
+                    // User IS registered → populate form & unlock buttons
+                    // --------------------------------------------------------
+                    const oODataEmp = oResult.results[0];
+                    const oEmp: Employee = {
+                        EmployeeID:   String(oODataEmp["EmployeeId"]   ?? ""),
+                        EmployeeName: String(oODataEmp["FullName"]      ?? ""),
+                        DepartmentID: String(oODataEmp["Department"]    ?? ""),
+                        ManagerID:    String(oODataEmp["ManagerSapUser"] ?? "")
+                    };
+
+                    oFormModel.setProperty("/employee", oEmp);
+                    oFormModel.setProperty("/summary/Approver", oEmp.ManagerID);
+                    oFormModel.setProperty("/employeeRegistered", true);
+
+                    console.info(
+                        `[CreateRequest] Employee found – ID: ${oEmp.EmployeeID}, Name: ${oEmp.EmployeeName}`
+                    );
+                } else {
+                    // --------------------------------------------------------
+                    // User NOT registered → block and show error
+                    // --------------------------------------------------------
+                    console.warn(
+                        `[CreateRequest] No Employee record found for SapUserName="${sUserId}".`
+                    );
+                    this._blockWithError(
+                        "Bạn chưa được đăng ký trong hệ thống. " +
+                        "Vui lòng liên hệ quản trị viên."
+                    );
+                }
+            },
+            error: (oError: unknown): void => {
+                // --------------------------------------------------------
+                // OData error → block and show error
+                // --------------------------------------------------------
+                const sDetail = this._extractODataErrorMessage(oError);
+                console.error(
+                    `[CreateRequest] OData error when reading /Employee (user="${sUserId}"):`,
+                    sDetail,
+                    oError
+                );
+                this._blockWithError(
+                    "Đã xảy ra lỗi khi kiểm tra thông tin nhân viên. " +
+                    "Vui lòng thử lại hoặc liên hệ quản trị viên.\n\n" +
+                    `Chi tiết: ${sDetail}`
+                );
+            }
+        });
+    }
+
+    /**
+     * Displays a blocking MessageBox.error and keeps employeeRegistered = false
+     * so that Submit / SaveDraft buttons stay disabled.
+     */
+    private _blockWithError(sMessage: string): void {
+        this._getFormModel().setProperty("/employeeRegistered", false);
+        MessageBox.error(sMessage, {
+            title: "Không thể tạo yêu cầu nghỉ phép"
+        });
+    }
+
+    /**
+     * Tries to extract a human-readable message from an OData V2 error response.
+     */
+    private _extractODataErrorMessage(oError: unknown): string {
+        try {
+            if (oError && typeof oError === "object") {
+                const oErr = oError as { responseText?: string; message?: string };
+                if (oErr.responseText) {
+                    const oParsed = JSON.parse(oErr.responseText) as {
+                        error?: { message?: { value?: string } }
+                    };
+                    return oParsed?.error?.message?.value ?? oErr.responseText;
+                }
+                if (oErr.message) {
+                    return oErr.message;
+                }
+            }
+        } catch {
+            // ignore JSON parse errors
+        }
+        return "Unknown error";
+    }
+
+    // -----------------------------------------------------------------------
+    // Current User Resolution
     // -----------------------------------------------------------------------
 
     private async _getCurrentUserId(): Promise<string> {
@@ -146,55 +292,15 @@ export default class CreateRequest extends Controller {
                 }
                 return sId;
             }
-        } catch {
-            // Keep the fallback
+        } catch (oErr) {
+            console.error("[CreateRequest] fetch /sap/bc/ui2/start_up failed:", oErr);
         }
         return "";
     }
 
-    private async _loadEmployeeInfo(): Promise<void> {
-        const oModel = this.getView().getModel();
-        if (!oModel) {
-            return;
-        }
-
-        const oFormModel = this._getFormModel();
-
-        try {
-            const sUserId = await this._getCurrentUserId();
-            if (!sUserId) {
-                MessageToast.show("Running with offline fallback employee profile");
-                return;
-            }
-
-            (oModel as InstanceType<typeof ODataModel>).read("/Employee", {
-                filters: [
-                    new Filter("SapUserName", FilterOperator.EQ, sUserId)
-                ],
-                success: (oData: unknown): void => {
-                    const oResult = oData as { results?: any[] };
-                    if (oResult && oResult.results && oResult.results.length > 0) {
-                        const oODataEmp = oResult.results[0];
-                        const oEmp: Employee = {
-                            EmployeeID: oODataEmp.EmployeeId,
-                            EmployeeName: oODataEmp.FullName,
-                            DepartmentID: oODataEmp.Department,
-                            ManagerID: oODataEmp.ManagerSapUser
-                        };
-                        oFormModel.setProperty("/employee", oEmp);
-                        oFormModel.setProperty("/summary/Approver", oEmp.ManagerID);
-                    } else {
-                        MessageToast.show("Running with offline fallback employee profile");
-                    }
-                },
-                error: (): void => {
-                    MessageToast.show("Running with offline fallback employee profile");
-                }
-            });
-        } catch {
-            MessageToast.show("Running with offline fallback employee profile");
-        }
-    }
+    // -----------------------------------------------------------------------
+    // Leave Types Loading
+    // -----------------------------------------------------------------------
 
     private async _loadLeaveTypes(): Promise<void> {
         const oService = this._getService();
@@ -313,6 +419,17 @@ export default class CreateRequest extends Controller {
         const oFormModel = this._getFormModel();
         const oResourceBundle = (this.getOwnerComponent() as any)?.getModel("i18n")?.getResourceBundle();
 
+        // Guard: employee must be registered
+        const bRegistered = oFormModel.getProperty("/employeeRegistered") as boolean;
+        if (!bRegistered) {
+            MessageBox.error(
+                "Bạn chưa được đăng ký trong hệ thống. " +
+                "Vui lòng liên hệ quản trị viên.",
+                { title: "Không thể tạo yêu cầu nghỉ phép" }
+            );
+            return false;
+        }
+
         const sLeaveType = oFormModel.getProperty("/leaveRequest/LeaveType") as string;
         const sStart = oFormModel.getProperty("/leaveRequest/StartDate") as string | null;
         const sEnd = oFormModel.getProperty("/leaveRequest/EndDate") as string | null;
@@ -367,7 +484,6 @@ export default class CreateRequest extends Controller {
         }
 
         const oFormModel = this._getFormModel();
-        const oEmployee = oFormModel.getProperty("/employee") as Employee;
         const oRequest = oFormModel.getProperty("/leaveRequest") as LeaveRequest;
         const oResourceBundle = (this.getOwnerComponent() as any)?.getModel("i18n")?.getResourceBundle();
 
@@ -461,6 +577,13 @@ export default class CreateRequest extends Controller {
             RemainingBalance: "12 Days",
             Approver: oFormModel.getProperty("/employee/ManagerID") || "",
             Status: "Pending"
+        });
+        // Also clear employee data to avoid stale display before check completes
+        oFormModel.setProperty("/employee", {
+            EmployeeID: "",
+            EmployeeName: "",
+            DepartmentID: "",
+            ManagerID: ""
         });
     }
 

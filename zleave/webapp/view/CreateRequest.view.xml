@@ -140,9 +140,16 @@
         <footer>
             <OverflowToolbar>
                 <ToolbarSpacer/>
-                <Button text="{i18n>submit}" type="Emphasized" press=".onSubmit"/>
-                <Button text="{i18n>saveDraft}" press=".onSaveDraft"/>
-                <Button text="{i18n>cancel}" type="Transparent" press=".onCancel"/>
+                <Button id="btnSubmit"
+                    text="{i18n>submit}"
+                    type="Emphasized"
+                    press=".onSubmit"
+                    enabled="{createForm>/employeeRegistered}"/>
+                <Button id="btnSaveDraft"
+                    text="{i18n>saveDraft}"
+                    press=".onSaveDraft"
+                    enabled="{createForm>/employeeRegistered}"/>
+                <Button id="btnCancel" text="{i18n>cancel}" type="Transparent" press=".onCancel"/>
             </OverflowToolbar>
         </footer>
     </Page>
