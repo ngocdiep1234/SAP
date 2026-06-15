@@ -132,13 +132,13 @@ export default class CreateRequest extends Controller {
             if (oResponse.ok) {
                 const oData = await oResponse.json() as Record<string, unknown>;
                 const sId = (oData["id"] as string) ??
-                            (oData["userId"] as string) ??
-                            (oData["name"] as string) ??
-                            "";
+                    (oData["userId"] as string) ??
+                    (oData["name"] as string) ??
+                    "";
                 if (oUiModel && sId) {
                     const sFullName = (oData["fullName"] as string) ??
-                                      (oData["displayName"] as string) ??
-                                      sId;
+                        (oData["displayName"] as string) ??
+                        sId;
                     oUiModel.setProperty("/currentUser", {
                         id: sId,
                         displayName: sFullName

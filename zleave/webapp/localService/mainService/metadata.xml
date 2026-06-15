@@ -53,7 +53,7 @@
                 <Property Name="Delete_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="Update_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
                 <Property Name="UUID" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:quickinfo="16 byte UUID in 16 bytes (raw format)" sap:creatable="false" sap:updatable="false"/>
-                <Property Name="RequestID" Type="Edm.String" MaxLength="20"/>
+                <Property Name="RequestId" Type="Edm.String" MaxLength="20"/>
                 <Property Name="EmployeeID" Type="Edm.String" MaxLength="10" sap:display-format="NonNegative" sap:value-list="standard"/>
                 <Property Name="EmployeeName" Type="Edm.String" MaxLength="50" sap:creatable="false" sap:updatable="false"/>
                 <Property Name="DepartmentID" Type="Edm.String" MaxLength="10" sap:creatable="false" sap:updatable="false"/>

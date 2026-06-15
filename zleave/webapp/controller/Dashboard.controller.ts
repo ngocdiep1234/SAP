@@ -8,7 +8,7 @@ import ManagedObject from "sap/ui/base/ManagedObject";
 
 interface LeaveRequest {
     UUID: string;
-    RequestID: string;
+    RequestId: string;
     LeaveType: string;
     StartDate: Date | string | null;
     EndDate: Date | string | null;
@@ -148,7 +148,7 @@ export default class Dashboard extends Controller {
         const oRequest = oBindingContext.getObject() as LeaveRequest;
         
         MessageBox.information(
-            `Request ID: ${oRequest.RequestID}\n` +
+            `Request ID: ${oRequest.RequestId}\n` +
             `Type: ${oRequest.LeaveType}\n` +
             `Duration: ${oRequest.TotalDays} Days\n` +
             `Status: ${oRequest.Status}\n` +
@@ -162,7 +162,7 @@ export default class Dashboard extends Controller {
             return;
         }
         const oRequest = oBindingContext.getObject() as LeaveRequest;
-        MessageToast.show(`Opening Draft request ${oRequest.RequestID} for editing...`);
+        MessageToast.show(`Opening Draft request ${oRequest.RequestId} for editing...`);
         
         // Programmatic navigation to Create page
         this.onNavToCreate();
@@ -176,7 +176,7 @@ export default class Dashboard extends Controller {
         const oRequest = oBindingContext.getObject() as LeaveRequest;
         
         MessageBox.confirm(
-            `Are you sure you want to cancel pending request ${oRequest.RequestID}?`,
+            `Are you sure you want to cancel pending request ${oRequest.RequestId}?`,
             {
                 actions: [MessageBox.Action.YES, MessageBox.Action.NO],
                 onClose: (sAction: string) => {
@@ -204,7 +204,7 @@ export default class Dashboard extends Controller {
         oModel.update(sPath, oPayload, {
             success: (): void => {
                 this.getView().setBusy(false);
-                MessageToast.show(`Request ${oRequest.RequestID} cancelled successfully`);
+                MessageToast.show(`Request ${oRequest.RequestId} cancelled successfully`);
                 this._loadDashboardData();
             },
             error: (): void => {
@@ -227,7 +227,7 @@ export default class Dashboard extends Controller {
         const oRequest = oBindingContext.getObject() as LeaveRequest;
 
         MessageBox.confirm(
-            `Are you sure you want to delete leave request ${oRequest.RequestID}?`,
+            `Are you sure you want to delete leave request ${oRequest.RequestId}?`,
             {
                 title: "Delete Leave Request",
                 actions: [MessageBox.Action.YES, MessageBox.Action.NO],
@@ -253,7 +253,7 @@ export default class Dashboard extends Controller {
         oModel.remove(sPath, {
             success: (): void => {
                 this.getView().setBusy(false);
-                MessageToast.show(`Request ${oRequest.RequestID} deleted successfully`);
+                MessageToast.show(`Request ${oRequest.RequestId} deleted successfully`);
                 this._loadDashboardData();
             },
             error: (): void => {

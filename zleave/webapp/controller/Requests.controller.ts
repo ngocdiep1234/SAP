@@ -16,6 +16,7 @@ import Table from "sap/m/Table";
 import ListItemBase from "sap/m/ListItemBase";
 import ODataModel from "sap/ui/model/odata/v2/ODataModel";
 import Event from "sap/ui/base/Event";
+import JSONModel from "sap/ui/model/json/JSONModel";
 
 export default class Requests extends Controller {
 
@@ -36,6 +37,7 @@ export default class Requests extends Controller {
         }
         this.applyStatusFilter("SUBMITTED");
         this.updateToolbarVisibility("SUBMITTED");
+        this._loadEmployees();
     }
 
     public onSelectionChange(): void {
@@ -58,6 +60,80 @@ export default class Requests extends Controller {
         if (oBtnDelete) {
             oBtnDelete.setEnabled(aSelectedItems.length > 0);
         }
+    }
+
+    private _loadEmployees(): void {
+        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+        const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
+        if (!oModel || !oUiModel) {
+            return;
+        }
+
+        oModel.read("/Employee", {
+            success: (oData: any): void => {
+                const aEmployees = oData.results || [];
+                const oMap: Record<string, string> = {};
+                aEmployees.forEach((emp: any) => {
+                    oMap[emp.EmployeeId] = emp.FullName || emp.SapUserName;
+                });
+                oUiModel.setProperty("/employeesMap", oMap);
+            },
+            error: (): void => {
+                // Ignore or log
+            }
+        });
+    }
+
+    public formatEmployeeName(
+        sEmployeeId: string,
+        oMap: Record<string, string>
+    ): string {
+
+        if (!sEmployeeId || !oMap) {
+            return "";
+        }
+
+        const sNormalizedId = sEmployeeId.padStart(8, "0");
+
+        return oMap[sNormalizedId] || sEmployeeId;
+    }
+
+    public onItemPress(oEvent: InstanceType<typeof Event>): void {
+        const oItem = oEvent.getSource() as InstanceType<typeof ListItemBase>;
+        const oContext = oItem.getBindingContext();
+        if (!oContext) {
+            return;
+        }
+
+        const sRequestId = String(oContext.getProperty("RequestId") || "Unknown");
+        const sEmployeeId = String(oContext.getProperty("EmployeeId") || "");
+
+        const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
+        const oMap = oUiModel?.getProperty("/employeesMap") as Record<string, string> | undefined;
+        const sEmployeeName = oMap && sEmployeeId && oMap[sEmployeeId] ? oMap[sEmployeeId] : sEmployeeId || "Unknown";
+
+        const sLeaveType = String(oContext.getProperty("LeaveType") || "");
+        const oStartDate = oContext.getProperty("StartDate");
+        const oEndDate = oContext.getProperty("EndDate");
+        const sStartDate = oStartDate instanceof Date ? oStartDate.toLocaleDateString() : String(oStartDate || "");
+        const sEndDate = oEndDate instanceof Date ? oEndDate.toLocaleDateString() : String(oEndDate || "");
+        const sTotalDays = String(oContext.getProperty("TotalDays") || "0");
+        const sStatus = String(oContext.getProperty("Status") || "");
+        const sReason = String(oContext.getProperty("Reason") || "No reason provided");
+
+        MessageBox.information(
+            `Request ID: ${sRequestId}\n` +
+            `Employee ID: ${sEmployeeId}\n` +
+            `Type: ${sLeaveType}\n` +
+            `Start Date: ${sStartDate}\n` +
+            `End Date: ${sEndDate}\n` +
+            `Duration: ${sTotalDays} Day(s)\n` +
+            `Status: ${sStatus}\n` +
+            `Reason: ${sReason}`,
+            {
+                title: "Leave Request Details"
+            }
+        );
     }
 
     public onStatusFilterChange(oEvent: InstanceType<typeof Event>): void {
@@ -391,35 +467,91 @@ export default class Requests extends Controller {
     }
 
     public onSearch(oEvent: any): void {
-        const sQuery = oEvent.getParameter && (oEvent.getParameter("query") || oEvent.getParameter("newValue")) || "";
-        const aFilters: any[] = [];
+        const sQuery: string = (oEvent.getParameter && (oEvent.getParameter("query") || oEvent.getParameter("newValue"))) || "";
+        const aTopFilters: any[] = [];
+
         if (sQuery) {
-            aFilters.push(new Filter({
-                filters: [
-                    new Filter("RequestId", FilterOperator.Contains, sQuery),
-                    new Filter("EmployeeId", FilterOperator.Contains, sQuery),
-                    new Filter("DepartmentID", FilterOperator.Contains, sQuery),
-                    new Filter("EmployeeName", FilterOperator.Contains, sQuery),
-                    new Filter("LeaveType", FilterOperator.Contains, sQuery)
-                ],
-                and: false
-            }));
+            // --- 1. Direct OData field filters (RequestId, LeaveType) ---
+            const aOrFilters: any[] = [
+                new Filter("RequestId", FilterOperator.Contains, sQuery),
+                new Filter("LeaveType", FilterOperator.Contains, sQuery)
+            ];
+
+            // --- 2. Client-side name lookup: find EmployeeIds whose name matches the query ---
+            const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
+            const oMap: Record<string, string> | undefined = oUiModel?.getProperty("/employeesMap");
+            if (oMap) {
+                const sQueryLower = sQuery.toLowerCase();
+                Object.entries(oMap).forEach(([sId, sName]: [string, string]) => {
+                    if (sName && sName.toLowerCase().includes(sQueryLower)) {
+                        // Match by exact EmployeeId (padded or raw)
+                        aOrFilters.push(new Filter("EmployeeId", FilterOperator.EQ, sId));
+                    }
+                });
+            }
+
+            aTopFilters.push(new Filter({ filters: aOrFilters, and: false }));
         }
+
         const oTable = (this as any).byId("tableRequests");
         const oBinding = oTable.getBinding("items");
-        oBinding.filter(aFilters.length ? aFilters : []);
+        oBinding.filter(aTopFilters.length ? aTopFilters : []);
     }
 
     public onFilter(oEvent: any): void {
-        const sValue = oEvent.getParameter && (oEvent.getParameter("query") || oEvent.getParameter("newValue")) || "";
-        const aFilters: any[] = [];
-        if (sValue) {
-            aFilters.push(new Filter("EmployeeName", FilterOperator.Contains, sValue));
-        }
-        const oTable = (this as any).byId("tableRequests");
-        oTable.getBinding("items").filter(aFilters);
-    }
 
+        const sValue =
+            oEvent.getParameter("query") ||
+            oEvent.getParameter("newValue") ||
+            "";
+
+        const oTable = this.byId("tableRequests") as InstanceType<typeof Table>;
+        const oBinding = oTable.getBinding("items");
+
+        if (!oBinding) {
+            return;
+        }
+
+        const aFilters: InstanceType<typeof Filter>[] = [];
+
+        if (sValue) {
+
+            const aOrFilters: InstanceType<typeof Filter>[] = [
+                new Filter("RequestId", FilterOperator.Contains, sValue),
+                new Filter("LeaveType", FilterOperator.Contains, sValue)
+            ];
+
+            const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel>;
+            const oMap =
+                oUiModel.getProperty("/employeesMap") as Record<string, string>;
+
+            const sQueryLower = sValue.toLowerCase();
+
+            Object.entries(oMap || {}).forEach(([sId, sName]) => {
+
+                if (
+                    sName &&
+                    sName.toLowerCase().includes(sQueryLower)
+                ) {
+
+                    const sRawId = String(parseInt(sId, 10));
+
+                    aOrFilters.push(
+                        new Filter("EmployeeId", FilterOperator.EQ, sRawId)
+                    );
+                }
+            });
+
+            aFilters.push(
+                new Filter({
+                    filters: aOrFilters,
+                    and: false
+                })
+            );
+        }
+
+        oBinding.filter(aFilters);
+    }
     public onRefresh(): void {
         const oModel = (this as any).getView().getModel();
         if (oModel && oModel.refresh) {
