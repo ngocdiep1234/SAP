@@ -72,16 +72,18 @@
                 <Property Name="LastChangedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:heading="" sap:creatable="false" sap:updatable="false"/>
                 <Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:heading="" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
             </EntityType>
-            <EntityType Name="ZI_EMPLOYEEType" sap:value-list="true" sap:content-version="1">
+            <EntityType Name="EmployeeType" sap:value-list="true" sap:content-version="1">
                 <Key>
-                    <PropertyRef Name="EmployeeID"/>
+                    <PropertyRef Name="EmployeeId"/>
                 </Key>
-                <Property Name="EmployeeID" Type="Edm.String" Nullable="false" MaxLength="10"/>
-                <Property Name="EmployeeName" Type="Edm.String" MaxLength="50"/>
+                <Property Name="EmployeeId" Type="Edm.String" Nullable="false" MaxLength="10"/>
+                <Property Name="SapUserName" Type="Edm.String" MaxLength="12"/>
+                <Property Name="FullName" Type="Edm.String" MaxLength="50"/>
                 <Property Name="Email" Type="Edm.String" MaxLength="100"/>
-                <Property Name="DepartmentID" Type="Edm.String" MaxLength="10"/>
-                <Property Name="PositionC" Type="Edm.String" MaxLength="30"/>
-                <Property Name="ManagerID" Type="Edm.String" MaxLength="10"/>
+                <Property Name="Department" Type="Edm.String" MaxLength="10"/>
+                <Property Name="PositionTitle" Type="Edm.String" MaxLength="30"/>
+                <Property Name="ManagerSapUser" Type="Edm.String" MaxLength="12"/>
+                <Property Name="IsActive" Type="Edm.Boolean"/>
             </EntityType>
             <EntityType Name="ZI_LEAVE_TYPEType" sap:value-list="true" sap:content-version="1">
                 <Key>
@@ -258,7 +260,7 @@
                 <EntitySet Name="SAP__SignatureSet" EntityType="cds_zui_leave_mgmt.SAP__Signature" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
                 <EntitySet Name="SAP__ValueHelpSet" EntityType="cds_zui_leave_mgmt.SAP__ValueHelp" sap:content-version="1"/>
                 <EntitySet Name="LeaveRequest" EntityType="cds_zui_leave_mgmt.LeaveRequestType" sap:content-version="1" sap:deletable-path="Delete_mc" sap:updatable-path="Update_mc"/>
-                <EntitySet Name="ZI_EMPLOYEE" EntityType="cds_zui_leave_mgmt.ZI_EMPLOYEEType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
+                <EntitySet Name="Employee" EntityType="cds_zui_leave_mgmt.EmployeeType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
                 <EntitySet Name="ZI_LEAVE_TYPE" EntityType="cds_zui_leave_mgmt.ZI_LEAVE_TYPEType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
                 <EntitySet Name="SAP__Currencies" EntityType="cds_zui_leave_mgmt.SAP__Currency" sap:content-version="1"/>
                 <EntitySet Name="SAP__UnitsOfMeasure" EntityType="cds_zui_leave_mgmt.SAP__UnitOfMeasure" sap:content-version="1"/>
@@ -301,28 +303,28 @@
                 <Annotation Term="Common.ValueList">
                     <Record>
                         <PropertyValue Property="Label" String=""/>
-                        <PropertyValue Property="CollectionPath" String="ZI_EMPLOYEE"/>
+                        <PropertyValue Property="CollectionPath" String="Employee"/>
                         <PropertyValue Property="SearchSupported" Bool="false"/>
                         <PropertyValue Property="Parameters">
                             <Collection>
                                 <Record Type="Common.ValueListParameterInOut">
                                     <PropertyValue Property="LocalDataProperty" PropertyPath="EmployeeID"/>
-                                    <PropertyValue Property="ValueListProperty" String="EmployeeID"/>
+                                    <PropertyValue Property="ValueListProperty" String="EmployeeId"/>
                                 </Record>
                                 <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="EmployeeName"/>
+                                    <PropertyValue Property="ValueListProperty" String="FullName"/>
                                 </Record>
                                 <Record Type="Common.ValueListParameterDisplayOnly">
                                     <PropertyValue Property="ValueListProperty" String="Email"/>
                                 </Record>
                                 <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="DepartmentID"/>
+                                    <PropertyValue Property="ValueListProperty" String="Department"/>
                                 </Record>
                                 <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="PositionC"/>
+                                    <PropertyValue Property="ValueListProperty" String="PositionTitle"/>
                                 </Record>
                                 <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="ManagerID"/>
+                                    <PropertyValue Property="ValueListProperty" String="ManagerSapUser"/>
                                 </Record>
                             </Collection>
                         </PropertyValue>
@@ -361,28 +363,28 @@
                 <Annotation Term="Common.ValueList">
                     <Record>
                         <PropertyValue Property="Label" String=""/>
-                        <PropertyValue Property="CollectionPath" String="ZI_EMPLOYEE"/>
+                        <PropertyValue Property="CollectionPath" String="Employee"/>
                         <PropertyValue Property="SearchSupported" Bool="false"/>
                         <PropertyValue Property="Parameters">
                             <Collection>
                                 <Record Type="Common.ValueListParameterInOut">
                                     <PropertyValue Property="LocalDataProperty" PropertyPath="EmployeeID"/>
-                                    <PropertyValue Property="ValueListProperty" String="EmployeeID"/>
+                                    <PropertyValue Property="ValueListProperty" String="EmployeeId"/>
                                 </Record>
                                 <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="EmployeeName"/>
+                                    <PropertyValue Property="ValueListProperty" String="FullName"/>
                                 </Record>
                                 <Record Type="Common.ValueListParameterDisplayOnly">
                                     <PropertyValue Property="ValueListProperty" String="Email"/>
                                 </Record>
                                 <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="DepartmentID"/>
+                                    <PropertyValue Property="ValueListProperty" String="Department"/>
                                 </Record>
                                 <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="PositionC"/>
+                                    <PropertyValue Property="ValueListProperty" String="PositionTitle"/>
                                 </Record>
                                 <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="ManagerID"/>
+                                    <PropertyValue Property="ValueListProperty" String="ManagerSapUser"/>
                                 </Record>
                             </Collection>
                         </PropertyValue>

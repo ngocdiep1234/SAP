@@ -4,6 +4,8 @@ import Router from "sap/ui/core/routing/Router";
 import MessageToast from "sap/m/MessageToast";
 import MessageBox from "sap/m/MessageBox";
 import ODataModel from "sap/ui/model/odata/v2/ODataModel";
+import Filter from "sap/ui/model/Filter";
+import FilterOperator from "sap/ui/model/FilterOperator";
 import LeaveRequestService, { LeaveRequestPayload, LeaveTypeEntry } from "../service/LeaveRequestService";
 
 // ---------------------------------------------------------------------------
@@ -116,29 +118,82 @@ export default class CreateRequest extends Controller {
     // Employee Data Loading
     // -----------------------------------------------------------------------
 
-    private _loadEmployeeInfo(): void {
+    private async _getCurrentUserId(): Promise<string> {
+        const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
+        const sStoredId = oUiModel?.getProperty("/currentUser/id") as string | undefined;
+        if (sStoredId) {
+            return sStoredId;
+        }
+
+        try {
+            const oResponse = await fetch("/sap/bc/ui2/start_up", {
+                credentials: "same-origin"
+            });
+            if (oResponse.ok) {
+                const oData = await oResponse.json() as Record<string, unknown>;
+                const sId = (oData["id"] as string) ??
+                            (oData["userId"] as string) ??
+                            (oData["name"] as string) ??
+                            "";
+                if (oUiModel && sId) {
+                    const sFullName = (oData["fullName"] as string) ??
+                                      (oData["displayName"] as string) ??
+                                      sId;
+                    oUiModel.setProperty("/currentUser", {
+                        id: sId,
+                        displayName: sFullName
+                    });
+                }
+                return sId;
+            }
+        } catch {
+            // Keep the fallback
+        }
+        return "";
+    }
+
+    private async _loadEmployeeInfo(): Promise<void> {
         const oModel = this.getView().getModel();
         if (!oModel) {
             return;
         }
 
         const oFormModel = this._getFormModel();
-        (oModel as InstanceType<typeof ODataModel>).read("/ZI_EMPLOYEE", {
-            urlParameters: {
-                "$top": "1"
-            },
-            success: (oData: unknown): void => {
-                const oResult = oData as { results?: Employee[] };
-                if (oResult && oResult.results && oResult.results.length > 0) {
-                    const oEmp = oResult.results[0];
-                    oFormModel.setProperty("/employee", oEmp);
-                    oFormModel.setProperty("/summary/Approver", oEmp.ManagerID);
-                }
-            },
-            error: (): void => {
+
+        try {
+            const sUserId = await this._getCurrentUserId();
+            if (!sUserId) {
                 MessageToast.show("Running with offline fallback employee profile");
+                return;
             }
-        });
+
+            (oModel as InstanceType<typeof ODataModel>).read("/Employee", {
+                filters: [
+                    new Filter("SapUserName", FilterOperator.EQ, sUserId)
+                ],
+                success: (oData: unknown): void => {
+                    const oResult = oData as { results?: any[] };
+                    if (oResult && oResult.results && oResult.results.length > 0) {
+                        const oODataEmp = oResult.results[0];
+                        const oEmp: Employee = {
+                            EmployeeID: oODataEmp.EmployeeId,
+                            EmployeeName: oODataEmp.FullName,
+                            DepartmentID: oODataEmp.Department,
+                            ManagerID: oODataEmp.ManagerSapUser
+                        };
+                        oFormModel.setProperty("/employee", oEmp);
+                        oFormModel.setProperty("/summary/Approver", oEmp.ManagerID);
+                    } else {
+                        MessageToast.show("Running with offline fallback employee profile");
+                    }
+                },
+                error: (): void => {
+                    MessageToast.show("Running with offline fallback employee profile");
+                }
+            });
+        } catch {
+            MessageToast.show("Running with offline fallback employee profile");
+        }
     }
 
     private async _loadLeaveTypes(): Promise<void> {
