@@ -1,0 +1,84 @@
+<mvc:View
+    controllerName="zleave.zleave.controller.Unauthorized"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    displayBlock="true">
+
+    <!--
+        Unauthorized.view.xml
+        =====================
+        Displayed whenever the ErrorHandler detects a 403 response.
+        This page is intentionally self-contained (no side navigation, no toolbar)
+        so the user cannot accidentally navigate to protected areas.
+    -->
+    <Page
+        id="unauthorizedPage"
+        showHeader="false"
+        backgroundDesign="Solid">
+
+        <content>
+            <VBox
+                id="unauthorizedContainer"
+                alignItems="Center"
+                justifyContent="Center"
+                height="100%"
+                class="sapUiMediumMarginTop sapUiLargeMarginBottom">
+
+                <!-- Lock / access-denied icon -->
+                <core:Icon
+                    id="unauthorizedIcon"
+                    src="sap-icon://locked"
+                    size="5rem"
+                    color="var(--sapNegativeColor)"
+                    class="sapUiLargeMarginBottom" />
+
+                <!-- Primary heading -->
+                <Title
+                    id="unauthorizedTitle"
+                    text="Access Denied"
+                    level="H1"
+                    titleStyle="H1"
+                    class="sapUiSmallMarginBottom" />
+
+                <!-- Descriptive sub-text -->
+                <Text
+                    id="unauthorizedDescription"
+                    text="You are not authorized to access this application."
+                    textAlign="Center"
+                    wrapping="true"
+                    width="24rem"
+                    class="sapUiMediumMarginBottom" />
+
+                <!-- Optional: additional guidance -->
+                <Text
+                    id="unauthorizedContact"
+                    text="If you believe this is a mistake, please contact your system administrator."
+                    textAlign="Center"
+                    wrapping="true"
+                    width="24rem"
+                    class="sapUiSmallMarginBottom" />
+
+                <!-- Button row -->
+                <HBox
+                    id="unauthorizedActions"
+                    alignItems="Center"
+                    justifyContent="Center"
+                    class="sapUiLargeMarginTop">
+
+                    <!-- Logout -->
+                    <Button
+                        id="btnLogout"
+                        text="Logout"
+                        type="Negative"
+                        icon="sap-icon://log"
+                        press=".onLogout" />
+
+                </HBox>
+
+            </VBox>
+        </content>
+
+    </Page>
+
+</mvc:View>

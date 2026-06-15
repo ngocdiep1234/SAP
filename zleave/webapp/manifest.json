@@ -145,6 +145,11 @@
           "name": "createRequest",
           "pattern": "requests/create",
           "target": "createRequest"
+        },
+        {
+          "name": "Unauthorized",
+          "pattern": "unauthorized",
+          "target": "Unauthorized"
         }
       ],
       "targets": {
@@ -171,6 +176,12 @@
           "viewId": "CreateRequest",
           "viewType": "XML",
           "transition": "slide"
+        },
+        "Unauthorized": {
+          "viewName": "Unauthorized",
+          "viewId": "Unauthorized",
+          "viewType": "XML",
+          "transition": "show"
         }
       }
     },
