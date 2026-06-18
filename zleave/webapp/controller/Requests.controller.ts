@@ -12,6 +12,7 @@ import TextArea from "sap/m/TextArea";
 import VBox from "sap/m/VBox";
 import MessageBox from "sap/m/MessageBox";
 import Select from "sap/m/Select";
+import SegmentedButton from "sap/m/SegmentedButton";
 import Table from "sap/m/Table";
 import ListItemBase from "sap/m/ListItemBase";
 import ODataModel from "sap/ui/model/odata/v2/ODataModel";
@@ -30,14 +31,23 @@ export default class Requests extends Controller {
         if (oUiModel) {
             oUiModel.setProperty("/selectedSection", "requests");
         }
-
-        const oSelect = this.getView().byId("filterStatus") as InstanceType<typeof Select> | undefined;
-        if (oSelect) {
-            oSelect.setSelectedKey("SUBMITTED");
+        const oSegmentedButton =
+            this.getView().byId("filterStatusButton");
+        if (oSegmentedButton) {
+            oSegmentedButton.setSelectedKey("all");
         }
-        this.applyStatusFilter("SUBMITTED");
-        this.updateToolbarVisibility("SUBMITTED");
+        const oTable = this.getView().byId("tableRequests") as InstanceType<typeof Table> | undefined;
+        if (oTable) {
+            oTable.setBusy(true);
+        }
         this._loadEmployees();
+        void this._applyFilters("all").then(() => {
+            this.updateToolbarVisibility("all");
+            if (oTable) {
+                oTable.setBusy(false);
+            }
+        });
+        this._autoDetectAdminView();
     }
 
     public onSelectionChange(): void {
@@ -52,7 +62,7 @@ export default class Requests extends Controller {
             const oContext = oItem.getBindingContext();
             if (!oContext) { return false; }
             const sStatus = String(oContext.getProperty("Status") || "").toUpperCase();
-            return sStatus === "SUBMITTED" || sStatus === "PENDING";
+            return sStatus === "SUMMITED" || sStatus === "SUBMITTED" || sStatus === "PENDING";
         });
 
         if (oBtnApprove) { oBtnApprove.setEnabled(bEnabled); }
@@ -136,33 +146,155 @@ export default class Requests extends Controller {
         );
     }
 
-    public onStatusFilterChange(oEvent: InstanceType<typeof Event>): void {
-        const oSelect = oEvent.getSource() as InstanceType<typeof Select>;
-        const sKey = oSelect.getSelectedKey();
-        this.applyStatusFilter(sKey);
-        this.updateToolbarVisibility(sKey);
+    public onFilterTabChange(oEvent: InstanceType<typeof Event>): void {
+        const oSegmentedButton = oEvent.getSource() as InstanceType<typeof SegmentedButton>;
+        const key = oSegmentedButton.getSelectedKey();
+        switch (key) {
+            case "pending":
+                void this._applyFilters("pending");
+                this.updateToolbarVisibility("pending");
+                break;
+            case "my":
+                void this._applyFilters("my");
+                this.updateToolbarVisibility("my");
+                break;
+            case "all":
+                void this._applyFilters("all");
+                this.updateToolbarVisibility("all");
+                break;
+            default:
+                break;
+        }
     }
 
-    private applyStatusFilter(sKey: string): void {
+    private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string }> {
+        const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
+        if (!oUiModel) {
+            return { registered: true, employeeId: "1001", employeeName: "Nguyen Van A", role: "Employee" };
+        }
+
+        const oCachedUser = oUiModel.getProperty("/currentUser") as any;
+        if (oCachedUser && oCachedUser.employeeId && oCachedUser.role) {
+            return oCachedUser as { registered: boolean; employeeId: string; employeeName: string; role: string };
+        }
+
+        let sSapUser = oCachedUser?.id as string | undefined;
+
+        // Try to fetch current SAP user id if not cached
+        if (!sSapUser) {
+            try {
+                const oResponse = await fetch("/sap/bc/ui2/start_up", {
+                    credentials: "same-origin"
+                });
+                if (oResponse.ok) {
+                    const oData = await oResponse.json() as Record<string, unknown>;
+                    sSapUser = (oData["id"] as string) ??
+                        (oData["userId"] as string) ??
+                        (oData["name"] as string) ??
+                        "";
+                }
+            } catch (oErr) {
+                console.error("[Requests] fetch /sap/bc/ui2/start_up failed:", oErr);
+            }
+        }
+
+        if (sSapUser) {
+            const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+            if (oModel) {
+                try {
+                    const oResult = await new Promise<any>((resolve, reject) => {
+                        oModel.read("/Employee", {
+                            filters: [
+                                new Filter("SapUserName", FilterOperator.EQ, sSapUser)
+                            ],
+                            success: (oDataSuccess: any) => resolve(oDataSuccess),
+                            error: (oError: any) => reject(oError)
+                        });
+                    });
+                    if (oResult && oResult.results && oResult.results.length > 0) {
+                        const oEmp = oResult.results[0];
+                        const oUserObj = {
+                            registered: true,
+                            employeeId: String(oEmp["EmployeeId"] ?? ""),
+                            employeeName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
+                            id: sSapUser,
+                            displayName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
+                            role: String(oEmp["PositionTitle"] ?? "Employee")
+                        };
+                        oUiModel.setProperty("/currentUser", oUserObj);
+                        return oUserObj;
+                    }
+                } catch (oErr) {
+                    console.error("[Requests] Querying Employee by SapUserName failed:", oErr);
+                }
+            }
+        }
+
+        const oMockUser = {
+            registered: true,
+            employeeId: "1001",
+            employeeName: "Nguyen Van A",
+            role: "Employee"
+        };
+        oUiModel.setProperty("/currentUser", oMockUser);
+        return oMockUser;
+    }
+
+    private async _applyFilters(sKey?: string, sSearchQuery?: string): Promise<void> {
         const oTable = this.getView().byId("tableRequests") as InstanceType<typeof Table> | undefined;
         if (!oTable) {
             return;
         }
-
         const oBinding = oTable.getBinding("items");
         if (!oBinding) {
             return;
         }
-
+        const oBtn = this.getView().byId("filterStatusButton") as any;
+        const sSelectedKey = sKey || (oBtn ? oBtn.getSelectedKey() : "pending");
+        const oSearchField = this.getView().byId("filterEmployeeRequests") as any;
+        const sQuery = sSearchQuery !== undefined ? sSearchQuery : (oSearchField ? oSearchField.getValue() : "");
         const aFilters: InstanceType<typeof Filter>[] = [];
-        if (sKey === "SUBMITTED") {
+        // 1. Tab-based Filters
+        const oCurrentUser = await this._getCurrentUser();
+        // LeaveRequest.EmployeeId lưu KHÔNG padding (vd "1002"), khác với Employee.EmployeeId
+        // (vd "00001002"). Không pad ở đây, chỉ chuẩn hóa về dạng số nguyên dạng string.
+        const sCurrentEmployeeId = String(parseInt(oCurrentUser.employeeId, 10));
+        if (sSelectedKey === "pending") {
             aFilters.push(new Filter("Status", FilterOperator.EQ, "SUBMITTED"));
+            if (sCurrentEmployeeId) {
+                aFilters.push(new Filter("EmployeeId", FilterOperator.NE, sCurrentEmployeeId));
+            }
+        } else if (sSelectedKey === "my") {
+            if (sCurrentEmployeeId) {
+                aFilters.push(new Filter("EmployeeId", FilterOperator.EQ, sCurrentEmployeeId));
+            } else {
+                aFilters.push(new Filter("EmployeeId", FilterOperator.EQ, ""));
+            }
         }
-
-        // Clear selection to avoid applying actions on hidden/invalid items
+        // 2. Search-based Filters
+        if (sQuery) {
+            const aOrFilters: InstanceType<typeof Filter>[] = [
+                new Filter("RequestId", FilterOperator.Contains, sQuery),
+                new Filter("LeaveType", FilterOperator.Contains, sQuery)
+            ];
+            const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
+            const oMap = oUiModel?.getProperty("/employeesMap") as Record<string, string> | undefined;
+            if (oMap) {
+                const sQueryLower = sQuery.toLowerCase();
+                Object.entries(oMap).forEach(([sId, sName]) => {
+                    if (sName && sName.toLowerCase().includes(sQueryLower)) {
+                        // Chỉ filter theo dạng không padding, khớp với LeaveRequest.EmployeeId
+                        aOrFilters.push(new Filter("EmployeeId", FilterOperator.EQ, String(parseInt(sId, 10))));
+                    }
+                });
+            }
+            aFilters.push(new Filter({ filters: aOrFilters, and: false }));
+        }
+        // Clear selection to avoid actions on hidden/invalid items
         oTable.removeSelections();
         this.onSelectionChange();
-
+        console.log("Current User", sCurrentEmployeeId);
+        console.log("Filters", aFilters);
         oBinding.filter(aFilters);
     }
 
@@ -170,9 +302,8 @@ export default class Requests extends Controller {
         const oBtnApprove = this.getView().byId("btnApproveSelected") as InstanceType<typeof Button> | undefined;
         const oBtnReject = this.getView().byId("btnRejectSelected") as InstanceType<typeof Button> | undefined;
         const oBtnDelete = this.getView().byId("btnDeleteSelected") as InstanceType<typeof Button> | undefined;
-
-        const bIsSubmitted = sKey === "SUBMITTED";
-
+        const bIsSubmitted = sKey === "pending" || sKey === "SUBMITTED";
+        const bIsMy = sKey === "my";
         if (oBtnApprove) {
             oBtnApprove.setVisible(bIsSubmitted);
         }
@@ -180,7 +311,7 @@ export default class Requests extends Controller {
             oBtnReject.setVisible(bIsSubmitted);
         }
         if (oBtnDelete) {
-            oBtnDelete.setVisible(!bIsSubmitted);
+            oBtnDelete.setVisible(bIsMy);
         }
     }
 
@@ -468,89 +599,12 @@ export default class Requests extends Controller {
 
     public onSearch(oEvent: any): void {
         const sQuery: string = (oEvent.getParameter && (oEvent.getParameter("query") || oEvent.getParameter("newValue"))) || "";
-        const aTopFilters: any[] = [];
-
-        if (sQuery) {
-            // --- 1. Direct OData field filters (RequestId, LeaveType) ---
-            const aOrFilters: any[] = [
-                new Filter("RequestId", FilterOperator.Contains, sQuery),
-                new Filter("LeaveType", FilterOperator.Contains, sQuery)
-            ];
-
-            // --- 2. Client-side name lookup: find EmployeeIds whose name matches the query ---
-            const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
-            const oMap: Record<string, string> | undefined = oUiModel?.getProperty("/employeesMap");
-            if (oMap) {
-                const sQueryLower = sQuery.toLowerCase();
-                Object.entries(oMap).forEach(([sId, sName]: [string, string]) => {
-                    if (sName && sName.toLowerCase().includes(sQueryLower)) {
-                        // Match by exact EmployeeId (padded or raw)
-                        aOrFilters.push(new Filter("EmployeeId", FilterOperator.EQ, sId));
-                    }
-                });
-            }
-
-            aTopFilters.push(new Filter({ filters: aOrFilters, and: false }));
-        }
-
-        const oTable = (this as any).byId("tableRequests");
-        const oBinding = oTable.getBinding("items");
-        oBinding.filter(aTopFilters.length ? aTopFilters : []);
+        void this._applyFilters(undefined, sQuery);
     }
 
     public onFilter(oEvent: any): void {
-
-        const sValue =
-            oEvent.getParameter("query") ||
-            oEvent.getParameter("newValue") ||
-            "";
-
-        const oTable = this.byId("tableRequests") as InstanceType<typeof Table>;
-        const oBinding = oTable.getBinding("items");
-
-        if (!oBinding) {
-            return;
-        }
-
-        const aFilters: InstanceType<typeof Filter>[] = [];
-
-        if (sValue) {
-
-            const aOrFilters: InstanceType<typeof Filter>[] = [
-                new Filter("RequestId", FilterOperator.Contains, sValue),
-                new Filter("LeaveType", FilterOperator.Contains, sValue)
-            ];
-
-            const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel>;
-            const oMap =
-                oUiModel.getProperty("/employeesMap") as Record<string, string>;
-
-            const sQueryLower = sValue.toLowerCase();
-
-            Object.entries(oMap || {}).forEach(([sId, sName]) => {
-
-                if (
-                    sName &&
-                    sName.toLowerCase().includes(sQueryLower)
-                ) {
-
-                    const sRawId = String(parseInt(sId, 10));
-
-                    aOrFilters.push(
-                        new Filter("EmployeeId", FilterOperator.EQ, sRawId)
-                    );
-                }
-            });
-
-            aFilters.push(
-                new Filter({
-                    filters: aOrFilters,
-                    and: false
-                })
-            );
-        }
-
-        oBinding.filter(aFilters);
+        const sValue = (oEvent.getParameter && (oEvent.getParameter("query") || oEvent.getParameter("newValue"))) || "";
+        void this._applyFilters(undefined, sValue);
     }
     public onRefresh(): void {
         const oModel = (this as any).getView().getModel();
@@ -657,7 +711,7 @@ export default class Requests extends Controller {
                 text: (this as any).getView().getModel("i18n").getProperty("save"),
                 press: () => {
                     const oEntry: any = {
-                        EmployeeID: oEmpId.getValue(),
+                        EmployeeId: oEmpId.getValue(),
                         EmployeeName: oEmpName.getValue(),
                         LeaveType: oLeaveType.getValue(),
                         StartDate: oStart.getDateValue() ? ((oStart.getDateValue() as Date).toISOString()) : null,
@@ -682,4 +736,30 @@ export default class Requests extends Controller {
         });
         oDialog.open();
     }
+
+    private _autoDetectAdminView(): void {
+        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
+        const oTable = this.getView().byId("tableRequests") as InstanceType<typeof Table> | undefined;
+        if (!oTable) { return; }
+
+        oModel.read("/LeaveRequestAdmin", {
+            urlParameters: { "$top": "1" },
+            success: () => {
+                // User có quyền admin → rebind table sang LeaveRequestAdmin
+                const oBindingInfo = oTable.getBindingInfo("items") as any;
+                if (oBindingInfo && oBindingInfo.path !== "/LeaveRequestAdmin") {
+                    oBindingInfo.path = "/LeaveRequestAdmin";
+                    oTable.bindItems(oBindingInfo);
+                    // Re-apply filter sau khi rebind
+                    const oSelect = this.getView().byId("filterStatus") as InstanceType<typeof Select> | undefined;
+                    const sKey = oSelect ? oSelect.getSelectedKey() : "SUBMITTED";
+                    this.applyStatusFilter(sKey);
+                }
+            },
+            error: () => {
+                // User thường → giữ nguyên /LeaveRequest binding từ XML view
+            }
+        });
+    }
 }
+

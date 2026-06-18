@@ -8,12 +8,13 @@
         <content>
             <VBox>
                 <SearchField id="filterEmployeeRequests" placeholder="{i18n>employee}" search=".onFilter" width="18rem" class="tableFilter"/>
-                <Select id="filterStatus" change=".onStatusFilterChange" selectedKey="SUBMITTED" class="sapUiSmallMarginBottom" width="18rem">
+                <SegmentedButton id="filterStatusButton" select=".onFilterTabChange" selectedKey="pending" class="sapUiSmallMarginBottom">
                     <items>
-                        <core:Item key="ALL" text="All Requests"/>
-                        <core:Item key="SUBMITTED" text="Pending Approval"/>
+                        <SegmentedButtonItem key="all" text="All Requests" />
+                        <SegmentedButtonItem key="pending" text="Pending Approval" />
+                        <SegmentedButtonItem key="my" text="My Requests" />
                     </items>
-                </Select>
+                </SegmentedButton>
                 <Table id="tableRequests" mode="MultiSelect" selectionChange=".onSelectionChange" inset="false" items="{/LeaveRequest}" growing="true" growingScrollToLoad="true" class="leaveTable">
                     <headerToolbar>
                         <OverflowToolbar>
