@@ -111,7 +111,7 @@ export default class ErrorHandler {
         const oParams = oEvent.getParameters();
         // responseText may contain a JSON OData error body
         const iStatus = this._extractStatusCode(oParams);
-        this._handleStatusCode(iStatus, oParams);
+        this._handleStatusCode(iStatus, oParams, true);
     }
 
     /**
@@ -127,7 +127,7 @@ export default class ErrorHandler {
 
         const oParams = oEvent.getParameters();
         const iStatus = this._extractStatusCode(oParams);
-        this._handleStatusCode(iStatus, oParams);
+        this._handleStatusCode(iStatus, oParams, false);
     }
 
     // -----------------------------------------------------------------------
@@ -139,15 +139,18 @@ export default class ErrorHandler {
      *
      * @param iStatus - Numeric HTTP status code (0 means network error).
      * @param oParams - Raw event parameters (used for error message extraction).
+     * @param bIsMetadata - Indicates if the failure came from metadata load.
      */
-    private _handleStatusCode(iStatus: number, oParams: any): void {
+    private _handleStatusCode(iStatus: number, oParams: any, bIsMetadata: boolean): void {
         switch (iStatus) {
             case 401:
                 this._handleUnauthorized();
                 break;
 
             case 403:
-                this._handleForbidden();
+                if (bIsMetadata) {
+                    this._handleForbidden();
+                }
                 break;
 
             case 500:
@@ -204,6 +207,8 @@ export default class ErrorHandler {
             oRouter.navTo("Unauthorized", {}, true /* replace history */);
         }
     }
+
+
 
     /**
      * 500 – Backend technical / ABAP short-dump error.

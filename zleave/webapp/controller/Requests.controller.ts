@@ -39,6 +39,7 @@ export default class Requests extends Controller {
         const oTable = this.getView().byId("tableRequests") as InstanceType<typeof Table> | undefined;
         if (oTable) {
             oTable.setBusy(true);
+            oTable.setMode("MultiSelect");
         }
         this._loadEmployees();
         void this._applyFilters("all").then(() => {
@@ -68,7 +69,7 @@ export default class Requests extends Controller {
         if (oBtnApprove) { oBtnApprove.setEnabled(bEnabled); }
         if (oBtnReject) { oBtnReject.setEnabled(bEnabled); }
         if (oBtnDelete) {
-            oBtnDelete.setEnabled(aSelectedItems.length > 0);
+            oBtnDelete.setEnabled(aSelectedItems.length === 1);
         }
     }
 
@@ -149,6 +150,14 @@ export default class Requests extends Controller {
     public onFilterTabChange(oEvent: InstanceType<typeof Event>): void {
         const oSegmentedButton = oEvent.getSource() as InstanceType<typeof SegmentedButton>;
         const key = oSegmentedButton.getSelectedKey();
+        const oTable = this.getView().byId("tableRequests") as InstanceType<typeof Table> | undefined;
+        if (oTable) {
+            if (key === "my") {
+                oTable.setMode("SingleSelectLeft");
+            } else {
+                oTable.setMode("MultiSelect");
+            }
+        }
         switch (key) {
             case "pending":
                 void this._applyFilters("pending");
@@ -311,7 +320,7 @@ export default class Requests extends Controller {
             oBtnReject.setVisible(bIsSubmitted);
         }
         if (oBtnDelete) {
-            oBtnDelete.setVisible(bIsMy);
+            oBtnDelete.setVisible(sKey === "my");
         }
     }
 
@@ -751,9 +760,9 @@ export default class Requests extends Controller {
                     oBindingInfo.path = "/LeaveRequestAdmin";
                     oTable.bindItems(oBindingInfo);
                     // Re-apply filter sau khi rebind
-                    const oSelect = this.getView().byId("filterStatus") as InstanceType<typeof Select> | undefined;
-                    const sKey = oSelect ? oSelect.getSelectedKey() : "SUBMITTED";
-                    this.applyStatusFilter(sKey);
+                    const oSegmentedButton = this.getView().byId("filterStatusButton") as InstanceType<typeof SegmentedButton> | undefined;
+                    const sKey = oSegmentedButton ? oSegmentedButton.getSelectedKey() : "pending";
+                    void this._applyFilters(sKey);
                 }
             },
             error: () => {
