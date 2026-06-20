@@ -26,11 +26,47 @@ interface DashboardStats {
     totalDays: number;
 }
 
+interface LeaveQuota {
+    LeaveTypeName: string;
+    RemainingDays: number;
+    UsedDays: number;
+    TotalDays: number;
+}
+
+interface LeaveQuotaResult {
+    results: LeaveQuota[];
+}
+
 export default class Dashboard extends Controller {
 
     public onInit(): void {
         const oRouter = (this as any).getOwnerComponent().getRouter();
         oRouter.getRoute("dashboard").attachPatternMatched(this._onPatternMatched, this);
+        this.loadLeaveQuota();
+    }
+
+    public loadLeaveQuota(): void {
+        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+        if (!oModel) {
+            return;
+        }
+
+        this.getView().setBusy(true);
+
+        oModel.read("/LeaveQuota", {
+            success: (oData: LeaveQuotaResult): void => {
+                this.getView().setBusy(false);
+                const oQuotaModel = new JSONModel(oData);
+                this.getView().setModel(oQuotaModel, "quota");
+            },
+            error: (): void => {
+                this.getView().setBusy(false);
+                MessageToast.show("Failed to load leave quota data");
+                // Set empty results so the Leave Balance section stays visible
+                const oQuotaModel = new JSONModel({ results: [] });
+                this.getView().setModel(oQuotaModel, "quota");
+            }
+        });
     }
 
     private _onPatternMatched(): void {

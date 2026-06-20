@@ -27,32 +27,21 @@
 
                     <!-- Leave Balance Section -->
                     <Panel headerText="Leave Balance" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
-                        <FlexBox wrap="Wrap" justify="SpaceBetween" class="sapUiTinyMarginTop">
-                            <GenericTile header="Annual Leave" subheader="Remaining" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" press=".onTilePress">
+                        <FlexBox wrap="Wrap" justify="SpaceBetween" class="sapUiTinyMarginTop"
+                            items="{quota>/results}">
+                            <GenericTile
+                                header="{quota>LeaveTypeName}"
+                                subheader="Remaining"
+                                class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                                press=".onTilePress">
                                 <tileContent>
-                                    <TileContent>
+                                    <TileContent
+                                        footer="{= 'Used: ' + ${quota>UsedDays} + ' / ' + ${quota>TotalDays} + ' Days'}">
                                         <content>
-                                            <NumericContent value="{ui>/dashboard/annualLeaveRemaining}" valueColor="{= ${ui>/dashboard/annualLeaveRemaining} > 5 ? 'Good' : ${ui>/dashboard/annualLeaveRemaining} > 2 ? 'Critical' : 'Error' }" indicator="None"/>
-                                        </content>
-                                    </TileContent>
-                                </tileContent>
-                            </GenericTile>
-
-                            <GenericTile header="Sick Leave" subheader="Remaining" class="sapUiTinyMarginEnd sapUiTinyMarginBottom" press=".onTilePress">
-                                <tileContent>
-                                    <TileContent>
-                                        <content>
-                                            <NumericContent value="{ui>/dashboard/sickLeaveRemaining}" valueColor="{= ${ui>/dashboard/sickLeaveRemaining} > 2 ? 'Good' : 'Error' }" indicator="None"/>
-                                        </content>
-                                    </TileContent>
-                                </tileContent>
-                            </GenericTile>
-
-                            <GenericTile header="Unpaid Leave" subheader="Used" class="sapUiTinyMarginBottom" press=".onTilePress">
-                                <tileContent>
-                                    <TileContent>
-                                        <content>
-                                            <NumericContent value="{ui>/dashboard/unpaidLeaveUsed}" valueColor="Neutral" indicator="None"/>
+                                            <NumericContent
+                                                value="{quota>RemainingDays}"
+                                                valueColor="{= ${quota>RemainingDays} > 5 ? 'Good' : ${quota>RemainingDays} > 0 ? 'Critical' : 'Error'}"
+                                                indicator="None"/>
                                         </content>
                                     </TileContent>
                                 </tileContent>
