@@ -1,604 +1,653 @@
 <?xml version="1.0" encoding="utf-8"?>
-<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData">
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_AGGREGATION',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="Org.OData.Aggregation.V1" Alias="Aggregation"/>
-    </edmx:Reference>
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_ANALYTICS',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="com.sap.vocabularies.Analytics.v1" Alias="Analytics"/>
-    </edmx:Reference>
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_CAPABILITIES',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="Org.OData.Capabilities.V1" Alias="Capabilities"/>
-    </edmx:Reference>
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_CODELIST',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="com.sap.vocabularies.CodeList.v1" Alias="SAP__CodeList"/>
-    </edmx:Reference>
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMON',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="Common"/>
-        <edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="SAP__common"/>
-    </edmx:Reference>
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMUNICATION',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="com.sap.vocabularies.Communication.v1" Alias="Communication"/>
-    </edmx:Reference>
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_CORE',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="Org.OData.Core.V1" Alias="SAP__core"/>
-    </edmx:Reference>
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_MEASURES',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="Org.OData.Measures.V1" Alias="Measures"/>
-    </edmx:Reference>
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_PDF',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="com.sap.vocabularies.PDF.v1" Alias="SAP__PDF"/>
-    </edmx:Reference>
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_PERSONALDATA',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="com.sap.vocabularies.PersonalData.v1" Alias="PersonalData"/>
-    </edmx:Reference>
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_UI',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="com.sap.vocabularies.UI.v1" Alias="UI"/>
-    </edmx:Reference>
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_VALIDATION',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="Org.OData.Validation.V1" Alias="Validation"/>
-    </edmx:Reference>
-    <edmx:Reference Uri="./sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='SAP__SELF',Version='0001',SAP__Origin='')/$value" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
-        <edmx:Include Namespace="com.sap.vocabularies.PDF.v1" Alias="SAP__PDF"/>
-    </edmx:Reference>
-    <edmx:DataServices m:DataServiceVersion="2.0">
-        <Schema Namespace="cds_zui_leave_mgmt" xml:lang="de" sap:schema-version="1" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
-            <Annotation Term="Core.SchemaVersion" String="1.0.0" xmlns="http://docs.oasis-open.org/odata/ns/edm"/>
-            <EntityType Name="LeaveRequestType" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="UUID"/>
-                </Key>
-                <Property Name="approveLeave_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="printLeave_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="rejectLeave_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Delete_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Update_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="UUID" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:quickinfo="16 byte UUID in 16 bytes (raw format)" sap:creatable="false" sap:updatable="false"/>
-                <Property Name="RequestId" Type="Edm.String" MaxLength="20"/>
-                <Property Name="EmployeeID" Type="Edm.String" MaxLength="10" sap:display-format="NonNegative" sap:value-list="standard"/>
-                <Property Name="EmployeeName" Type="Edm.String" MaxLength="50" sap:creatable="false" sap:updatable="false"/>
-                <Property Name="DepartmentID" Type="Edm.String" MaxLength="10" sap:creatable="false" sap:updatable="false"/>
-                <Property Name="LeaveType" Type="Edm.String" MaxLength="5" sap:label="" sap:value-list="standard"/>
-                <Property Name="StartDate" Type="Edm.DateTime" Precision="0" sap:display-format="Date" sap:label=""/>
-                <Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:display-format="Date" sap:label=""/>
-                <Property Name="TotalDays" Type="Edm.Decimal" Precision="5" Scale="2" sap:label=""/>
-                <Property Name="Status" Type="Edm.String" MaxLength="1" sap:label="" sap:creatable="false" sap:updatable="false"/>
-                <Property Name="StatusCriticality" Type="Edm.Byte"/>
-                <Property Name="ManagerID" Type="Edm.String" MaxLength="10" sap:display-format="NonNegative" sap:label=""/>
-                <Property Name="Reason" Type="Edm.String" sap:label=""/>
-                <Property Name="ApprovalComment" Type="Edm.String" MaxLength="255" sap:label=""/>
-                <Property Name="AttachmentURL" Type="Edm.String" MaxLength="255" sap:label=""/>
-                <Property Name="CreatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:heading="" sap:creatable="false" sap:updatable="false"/>
-                <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:heading="" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
-                <Property Name="LastChangedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:heading="" sap:creatable="false" sap:updatable="false"/>
-                <Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:heading="" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
-            </EntityType>
-            <EntityType Name="EmployeeType" sap:value-list="true" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="EmployeeId"/>
-                </Key>
-                <Property Name="EmployeeId" Type="Edm.String" Nullable="false" MaxLength="10"/>
-                <Property Name="SapUserName" Type="Edm.String" MaxLength="12"/>
-                <Property Name="FullName" Type="Edm.String" MaxLength="50"/>
-                <Property Name="Email" Type="Edm.String" MaxLength="100"/>
-                <Property Name="Department" Type="Edm.String" MaxLength="10"/>
-                <Property Name="PositionTitle" Type="Edm.String" MaxLength="30"/>
-                <Property Name="ManagerSapUser" Type="Edm.String" MaxLength="12"/>
-                <Property Name="IsActive" Type="Edm.Boolean"/>
-            </EntityType>
-            <EntityType Name="ZI_LEAVE_TYPEType" sap:value-list="true" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="LeaveType"/>
-                </Key>
-                <Property Name="LeaveType" Type="Edm.String" Nullable="false" MaxLength="2"/>
-                <Property Name="LeaveName" Type="Edm.String" MaxLength="100"/>
-                <Property Name="IsPaid" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
-                <Property Name="MaxDays" Type="Edm.Int16"/>
-            </EntityType>
-            <EntityType Name="SAP__Currency" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="CurrencyCode"/>
-                </Key>
-                <Property Name="CurrencyCode" Type="Edm.String" Nullable="false" MaxLength="5" sap:label="Währung" sap:semantics="currency-code"/>
-                <Property Name="ISOCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="Iso-Code"/>
-                <Property Name="Text" Type="Edm.String" Nullable="false" MaxLength="15" sap:label="Kurztext"/>
-                <Property Name="DecimalPlaces" Type="Edm.Byte" Nullable="false" sap:label="Dezimalen"/>
-            </EntityType>
-            <EntityType Name="SAP__UnitOfMeasure" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="UnitCode"/>
-                </Key>
-                <Property Name="UnitCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="Interne Maßeinheit" sap:semantics="unit-of-measure"/>
-                <Property Name="ISOCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="ISO-Code"/>
-                <Property Name="ExternalCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="Kaufmännisch"/>
-                <Property Name="Text" Type="Edm.String" Nullable="false" MaxLength="30" sap:label="Maßeinheitentext"/>
-                <Property Name="DecimalPlaces" Type="Edm.Int16" sap:label="Dezimalstellen"/>
-            </EntityType>
-            <EntityType Name="SAP__DocumentDescription" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="Id"/>
-                </Key>
-                <Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID"/>
-                <Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
-                <Property Name="CreatedAt" Type="Edm.DateTime" Nullable="false" Precision="0" sap:label="Zeitstempel"/>
-                <Property Name="FileName" Type="Edm.String" Nullable="false" MaxLength="256"/>
-                <Property Name="Title" Type="Edm.String" Nullable="false" MaxLength="256"/>
-                <NavigationProperty Name="Format" Relationship="cds_zui_leave_mgmt.to_format" FromRole="FromRole_to_format" ToRole="ToRole_to_format"/>
-                <NavigationProperty Name="TableColumns" Relationship="cds_zui_leave_mgmt.to_tablecolumns" FromRole="FromRole_to_tablecolumns" ToRole="ToRole_to_tablecolumns"/>
-                <NavigationProperty Name="CoverPage" Relationship="cds_zui_leave_mgmt.to_coverpage" FromRole="FromRole_to_coverpage" ToRole="ToRole_to_coverpage"/>
-                <NavigationProperty Name="Signature" Relationship="cds_zui_leave_mgmt.to_signature" FromRole="FromRole_to_signature" ToRole="ToRole_to_signature"/>
-                <NavigationProperty Name="PDFStandard" Relationship="cds_zui_leave_mgmt.to_pdfstandard" FromRole="FromRole_to_pdfstandard" ToRole="ToRole_to_pdfstandard"/>
-            </EntityType>
-            <EntityType Name="SAP__Format" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="Id"/>
-                </Key>
-                <Property Name="FitToPage" Type="cds_zui_leave_mgmt.SAP__FitToPage" Nullable="false"/>
-                <Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="FontSize" Type="Edm.Int32" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Orientation" Type="Edm.String" Nullable="false" MaxLength="10" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="PaperSize" Type="Edm.String" Nullable="false" MaxLength="10" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="BorderSize" Type="Edm.Int32" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="MarginSize" Type="Edm.Int32" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="FontName" Type="Edm.String" Nullable="false" MaxLength="255" sap:label="Font Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-            </EntityType>
-            <EntityType Name="SAP__PDFStandard" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="Id"/>
-                </Key>
-                <Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="UsePDFAConformance" Type="Edm.Boolean" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="DoEnableAccessibility" Type="Edm.Boolean" Nullable="false" sap:label="Flag" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-            </EntityType>
-            <EntityType Name="SAP__TableColumns" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="Id"/>
-                    <PropertyRef Name="Name"/>
-                    <PropertyRef Name="Header"/>
-                </Key>
-                <Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Header" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="HorizontalAlignment" Type="Edm.String" Nullable="false" MaxLength="10" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-            </EntityType>
-            <EntityType Name="SAP__CoverPage" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="Title"/>
-                    <PropertyRef Name="Id"/>
-                    <PropertyRef Name="Name"/>
-                </Key>
-                <Property Name="Title" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Value" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-            </EntityType>
-            <EntityType Name="SAP__Signature" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="Id"/>
-                </Key>
-                <Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="DoSign" Type="Edm.Boolean" Nullable="false" sap:label="Flag" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="Reason" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-            </EntityType>
-            <EntityType Name="SAP__ValueHelp" sap:content-version="1">
-                <Key>
-                    <PropertyRef Name="VALUEHELP"/>
-                </Key>
-                <Property Name="VALUEHELP" Type="Edm.String" Nullable="false"/>
-                <Property Name="FIELD_VALUE" Type="Edm.String" Nullable="false" MaxLength="10"/>
-                <Property Name="DESCRIPTION" Type="Edm.String"/>
-            </EntityType>
-            <ComplexType Name="SAP__FitToPage">
-                <Property Name="ErrorRecoveryBehavior" Type="Edm.String" Nullable="false" MaxLength="8" sap:label="Error behavior" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="IsEnabled" Type="Edm.Boolean" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-                <Property Name="MinimumFontSize" Type="Edm.Int32" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-            </ComplexType>
-            <Association Name="to_format" sap:content-version="1">
-                <End Type="cds_zui_leave_mgmt.SAP__DocumentDescription" Multiplicity="1" Role="FromRole_to_format"/>
-                <End Type="cds_zui_leave_mgmt.SAP__Format" Multiplicity="1" Role="ToRole_to_format"/>
-                <ReferentialConstraint>
-                    <Principal Role="FromRole_to_format">
-                        <PropertyRef Name="Id"/>
-                    </Principal>
-                    <Dependent Role="ToRole_to_format">
-                        <PropertyRef Name="Id"/>
-                    </Dependent>
-                </ReferentialConstraint>
-            </Association>
-            <Association Name="to_tablecolumns" sap:content-version="1">
-                <End Type="cds_zui_leave_mgmt.SAP__DocumentDescription" Multiplicity="1" Role="FromRole_to_tablecolumns"/>
-                <End Type="cds_zui_leave_mgmt.SAP__TableColumns" Multiplicity="*" Role="ToRole_to_tablecolumns"/>
-                <ReferentialConstraint>
-                    <Principal Role="FromRole_to_tablecolumns">
-                        <PropertyRef Name="Id"/>
-                    </Principal>
-                    <Dependent Role="ToRole_to_tablecolumns">
-                        <PropertyRef Name="Id"/>
-                    </Dependent>
-                </ReferentialConstraint>
-            </Association>
-            <Association Name="to_coverpage" sap:content-version="1">
-                <End Type="cds_zui_leave_mgmt.SAP__DocumentDescription" Multiplicity="1" Role="FromRole_to_coverpage"/>
-                <End Type="cds_zui_leave_mgmt.SAP__CoverPage" Multiplicity="*" Role="ToRole_to_coverpage"/>
-                <ReferentialConstraint>
-                    <Principal Role="FromRole_to_coverpage">
-                        <PropertyRef Name="Id"/>
-                    </Principal>
-                    <Dependent Role="ToRole_to_coverpage">
-                        <PropertyRef Name="Id"/>
-                    </Dependent>
-                </ReferentialConstraint>
-            </Association>
-            <Association Name="to_signature" sap:content-version="1">
-                <End Type="cds_zui_leave_mgmt.SAP__DocumentDescription" Multiplicity="1" Role="FromRole_to_signature"/>
-                <End Type="cds_zui_leave_mgmt.SAP__Signature" Multiplicity="1" Role="ToRole_to_signature"/>
-                <ReferentialConstraint>
-                    <Principal Role="FromRole_to_signature">
-                        <PropertyRef Name="Id"/>
-                    </Principal>
-                    <Dependent Role="ToRole_to_signature">
-                        <PropertyRef Name="Id"/>
-                    </Dependent>
-                </ReferentialConstraint>
-            </Association>
-            <Association Name="to_pdfstandard" sap:content-version="1">
-                <End Type="cds_zui_leave_mgmt.SAP__DocumentDescription" Multiplicity="1" Role="FromRole_to_pdfstandard"/>
-                <End Type="cds_zui_leave_mgmt.SAP__PDFStandard" Multiplicity="1" Role="ToRole_to_pdfstandard"/>
-                <ReferentialConstraint>
-                    <Principal Role="FromRole_to_pdfstandard">
-                        <PropertyRef Name="Id"/>
-                    </Principal>
-                    <Dependent Role="ToRole_to_pdfstandard">
-                        <PropertyRef Name="Id"/>
-                    </Dependent>
-                </ReferentialConstraint>
-            </Association>
-            <EntityContainer Name="cds_zui_leave_mgmt_Entities" m:IsDefaultEntityContainer="true" sap:message-scope-supported="true" sap:supported-formats="atom json xlsx pdf">
-                <EntitySet Name="SAP__FormatSet" EntityType="cds_zui_leave_mgmt.SAP__Format" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="SAP__PDFStandardSet" EntityType="cds_zui_leave_mgmt.SAP__PDFStandard" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="SAP__TableColumnsSet" EntityType="cds_zui_leave_mgmt.SAP__TableColumns" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="SAP__CoverPageSet" EntityType="cds_zui_leave_mgmt.SAP__CoverPage" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="SAP__SignatureSet" EntityType="cds_zui_leave_mgmt.SAP__Signature" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
-                <EntitySet Name="SAP__ValueHelpSet" EntityType="cds_zui_leave_mgmt.SAP__ValueHelp" sap:content-version="1"/>
-                <EntitySet Name="LeaveRequest" EntityType="cds_zui_leave_mgmt.LeaveRequestType" sap:content-version="1" sap:deletable-path="Delete_mc" sap:updatable-path="Update_mc"/>
-                <EntitySet Name="Employee" EntityType="cds_zui_leave_mgmt.EmployeeType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
-                <EntitySet Name="ZI_LEAVE_TYPE" EntityType="cds_zui_leave_mgmt.ZI_LEAVE_TYPEType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
-                <EntitySet Name="SAP__Currencies" EntityType="cds_zui_leave_mgmt.SAP__Currency" sap:content-version="1"/>
-                <EntitySet Name="SAP__UnitsOfMeasure" EntityType="cds_zui_leave_mgmt.SAP__UnitOfMeasure" sap:content-version="1"/>
-                <EntitySet Name="SAP__MyDocumentDescriptions" EntityType="cds_zui_leave_mgmt.SAP__DocumentDescription" sap:content-version="1"/>
-                <AssociationSet Name="to_formatSet" Association="cds_zui_leave_mgmt.to_format" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
-                    <End EntitySet="SAP__MyDocumentDescriptions" Role="FromRole_to_format"/>
-                    <End EntitySet="SAP__FormatSet" Role="ToRole_to_format"/>
-                </AssociationSet>
-                <AssociationSet Name="to_pdfstandardSet" Association="cds_zui_leave_mgmt.to_pdfstandard" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
-                    <End EntitySet="SAP__MyDocumentDescriptions" Role="FromRole_to_pdfstandard"/>
-                    <End EntitySet="SAP__PDFStandardSet" Role="ToRole_to_pdfstandard"/>
-                </AssociationSet>
-                <AssociationSet Name="to_tablecolumnsSet" Association="cds_zui_leave_mgmt.to_tablecolumns" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
-                    <End EntitySet="SAP__MyDocumentDescriptions" Role="FromRole_to_tablecolumns"/>
-                    <End EntitySet="SAP__TableColumnsSet" Role="ToRole_to_tablecolumns"/>
-                </AssociationSet>
-                <AssociationSet Name="to_signatureSet" Association="cds_zui_leave_mgmt.to_signature" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
-                    <End EntitySet="SAP__MyDocumentDescriptions" Role="FromRole_to_signature"/>
-                    <End EntitySet="SAP__SignatureSet" Role="ToRole_to_signature"/>
-                </AssociationSet>
-                <AssociationSet Name="to_coverpageSet" Association="cds_zui_leave_mgmt.to_coverpage" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
-                    <End EntitySet="SAP__MyDocumentDescriptions" Role="FromRole_to_coverpage"/>
-                    <End EntitySet="SAP__CoverPageSet" Role="ToRole_to_coverpage"/>
-                </AssociationSet>
-                <FunctionImport Name="approveLeave" ReturnType="cds_zui_leave_mgmt.LeaveRequestType" EntitySet="LeaveRequest" m:HttpMethod="POST" sap:action-for="cds_zui_leave_mgmt.LeaveRequestType" sap:applicable-path="approveLeave_ac">
-                    <Parameter Name="UUID" Type="Edm.Guid" Mode="In" sap:label="UUID"/>
-                </FunctionImport>
-                <FunctionImport Name="login" ReturnType="cds_zui_leave_mgmt.LeaveRequestType" EntitySet="LeaveRequest" m:HttpMethod="POST">
-                    <Parameter Name="EmployeeID" Type="Edm.String" Mode="In" MaxLength="10" Nullable="true" sap:value-list="standard"/>
-                    <Parameter Name="Password" Type="Edm.String" Mode="In" MaxLength="20" Nullable="true"/>
-                </FunctionImport>
-                <FunctionImport Name="printLeave" ReturnType="cds_zui_leave_mgmt.LeaveRequestType" EntitySet="LeaveRequest" m:HttpMethod="POST" sap:action-for="cds_zui_leave_mgmt.LeaveRequestType" sap:applicable-path="printLeave_ac">
-                    <Parameter Name="UUID" Type="Edm.Guid" Mode="In" sap:label="UUID"/>
-                </FunctionImport>
-                <FunctionImport Name="rejectLeave" ReturnType="cds_zui_leave_mgmt.LeaveRequestType" EntitySet="LeaveRequest" m:HttpMethod="POST" sap:action-for="cds_zui_leave_mgmt.LeaveRequestType" sap:applicable-path="rejectLeave_ac">
-                    <Parameter Name="UUID" Type="Edm.Guid" Mode="In" sap:label="UUID"/>
-                </FunctionImport>
-            </EntityContainer>
-            <Annotations Target="cds_zui_leave_mgmt.LeaveRequestType/EmployeeID" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="Common.ValueList">
-                    <Record>
-                        <PropertyValue Property="Label" String=""/>
-                        <PropertyValue Property="CollectionPath" String="Employee"/>
-                        <PropertyValue Property="SearchSupported" Bool="false"/>
-                        <PropertyValue Property="Parameters">
-                            <Collection>
-                                <Record Type="Common.ValueListParameterInOut">
-                                    <PropertyValue Property="LocalDataProperty" PropertyPath="EmployeeID"/>
-                                    <PropertyValue Property="ValueListProperty" String="EmployeeId"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="FullName"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="Email"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="Department"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="PositionTitle"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="ManagerSapUser"/>
-                                </Record>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-                <Annotation Term="Common.FieldControl" EnumMember="Common.FieldControlType/Mandatory"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.LeaveRequestType/LeaveType" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="Common.ValueList">
-                    <Record>
-                        <PropertyValue Property="Label" String=""/>
-                        <PropertyValue Property="CollectionPath" String="ZI_LEAVE_TYPE"/>
-                        <PropertyValue Property="SearchSupported" Bool="false"/>
-                        <PropertyValue Property="Parameters">
-                            <Collection>
-                                <Record Type="Common.ValueListParameterInOut">
-                                    <PropertyValue Property="LocalDataProperty" PropertyPath="LeaveType"/>
-                                    <PropertyValue Property="ValueListProperty" String="LeaveType"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="LeaveName"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="IsPaid"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="MaxDays"/>
-                                </Record>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-                <Annotation Term="Common.FieldControl" EnumMember="Common.FieldControlType/Mandatory"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities/login/EmployeeID" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="Common.ValueList">
-                    <Record>
-                        <PropertyValue Property="Label" String=""/>
-                        <PropertyValue Property="CollectionPath" String="Employee"/>
-                        <PropertyValue Property="SearchSupported" Bool="false"/>
-                        <PropertyValue Property="Parameters">
-                            <Collection>
-                                <Record Type="Common.ValueListParameterInOut">
-                                    <PropertyValue Property="LocalDataProperty" PropertyPath="EmployeeID"/>
-                                    <PropertyValue Property="ValueListProperty" String="EmployeeId"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="FullName"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="Email"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="Department"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="PositionTitle"/>
-                                </Record>
-                                <Record Type="Common.ValueListParameterDisplayOnly">
-                                    <PropertyValue Property="ValueListProperty" String="ManagerSapUser"/>
-                                </Record>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="Common.ApplyMultiUnitBehaviorForSortingAndFiltering" Bool="true"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.LeaveRequestType/EndDate" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="Common.FieldControl" EnumMember="Common.FieldControlType/Mandatory"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.LeaveRequestType/StartDate" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="Common.FieldControl" EnumMember="Common.FieldControlType/Mandatory"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities/LeaveRequest" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="Capabilities.FilterRestrictions">
-                    <Record>
-                        <PropertyValue Property="NonFilterableProperties">
-                            <Collection>
-                                <PropertyPath>approveLeave_ac</PropertyPath>
-                                <PropertyPath>printLeave_ac</PropertyPath>
-                                <PropertyPath>rejectLeave_ac</PropertyPath>
-                                <PropertyPath>Delete_mc</PropertyPath>
-                                <PropertyPath>Update_mc</PropertyPath>
-                            </Collection>
-                        </PropertyValue>
-                        <PropertyValue Property="FilterExpressionRestrictions">
-                            <Collection>
-                                <Record>
-                                    <PropertyValue Property="Property" PropertyPath="Reason"/>
-                                    <PropertyValue Property="AllowedExpressions" String="SearchExpression"/>
-                                </Record>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__core.OptimisticConcurrency">
-                    <Collection/>
-                </Annotation>
-                <Annotation Term="Capabilities.SortRestrictions">
-                    <Record>
-                        <PropertyValue Property="NonSortableProperties">
-                            <Collection>
-                                <PropertyPath>approveLeave_ac</PropertyPath>
-                                <PropertyPath>printLeave_ac</PropertyPath>
-                                <PropertyPath>rejectLeave_ac</PropertyPath>
-                                <PropertyPath>Delete_mc</PropertyPath>
-                                <PropertyPath>Update_mc</PropertyPath>
-                                <PropertyPath>Reason</PropertyPath>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="Org.OData.Capabilities.V1.BatchSupport">
-                    <Record Type="Org.OData.Capabilities.V1.BatchSupportType">
-                        <PropertyValue Property="ReferencesAcrossChangeSetsSupported" Bool="true"/>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__CodeList.CurrencyCodes">
-                    <Record>
-                        <PropertyValue Property="Url" String="./$metadata"/>
-                        <PropertyValue Property="CollectionPath" String="SAP__Currencies"/>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__CodeList.UnitsOfMeasure">
-                    <Record>
-                        <PropertyValue Property="Url" String="./$metadata"/>
-                        <PropertyValue Property="CollectionPath" String="SAP__UnitsOfMeasure"/>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__PDF.Features">
-                    <Record>
-                        <PropertyValue Property="DocumentDescriptionReference" String="./$metadata"/>
-                        <PropertyValue Property="DocumentDescriptionCollection" String="SAP__MyDocumentDescriptions"/>
-                        <PropertyValue Property="ArchiveFormat" Bool="true"/>
-                        <PropertyValue Property="CoverPage" Bool="true"/>
-                        <PropertyValue Property="Signature" Bool="true"/>
-                        <PropertyValue Property="FitToPage" Bool="true"/>
-                        <PropertyValue Property="FontName" Bool="true"/>
-                        <PropertyValue Property="FontSize" Bool="true"/>
-                        <PropertyValue Property="Margin" Bool="true"/>
-                        <PropertyValue Property="Border" Bool="true"/>
-                        <PropertyValue Property="ResultSizeDefault" Int="20000"/>
-                        <PropertyValue Property="ResultSizeMaximum" Int="20000"/>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__CodeList.SAP__DocumentDescription">
-                    <Record>
-                        <PropertyValue Property="Url" String="./$metadata"/>
-                        <PropertyValue Property="CollectionPath" String="SAP__MyDocumentDescriptions"/>
-                    </Record>
-                </Annotation>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.SAP__Currency/CurrencyCode" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="SAP__common.Text" Path="Text"/>
-                <Annotation Term="SAP__common.UnitSpecificScale" Path="DecimalPlaces"/>
-                <Annotation Term="SAP__CodeList.StandardCode" Path="ISOCode"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.SAP__UnitOfMeasure/UnitCode" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="SAP__common.Text" Path="Text"/>
-                <Annotation Term="SAP__common.UnitSpecificScale" Path="DecimalPlaces"/>
-                <Annotation Term="SAP__CodeList.StandardCode" Path="ISOCode"/>
-                <Annotation Term="SAP__CodeList.ExternalCode" Path="ExternalCode"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.SAP__UnitOfMeasure" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="SAP__core.AlternateKeys">
-                    <Collection>
-                        <Record>
-                            <PropertyValue Property="Key">
-                                <Collection>
-                                    <Record>
-                                        <PropertyValue Property="Name" Path="ExternalCode"/>
-                                        <PropertyValue Property="Alias" String="ExternalCode"/>
-                                    </Record>
-                                </Collection>
-                            </PropertyValue>
-                        </Record>
-                    </Collection>
-                </Annotation>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.SAP__DocumentDescription/CreatedBy" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="SAP__core.Computed"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.SAP__DocumentDescription/CreatedAt" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="SAP__core.Computed"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.SAP__DocumentDescription" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="SAP__capabilties.InsertRestrictions">
-                    <Record>
-                        <PropertyValue Property="Insertable" Bool="false"/>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__capabilties.UpdateRestrictions">
-                    <Record>
-                        <PropertyValue Property="Updatable" Bool="false"/>
-                        <PropertyValue Property="QueryOptions">
-                            <Record>
-                                <PropertyValue Property="SelectSupported" Bool="true"/>
-                            </Record>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__capabilties.DeleteRestrictions">
-                    <Record>
-                        <PropertyValue Property="Deletable" Bool="false"/>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__capabilties.FilterRestrictions">
-                    <Record>
-                        <PropertyValue Property="FilterExpressionRestrictions">
-                            <Collection>
-                                <Record>
-                                    <PropertyValue Property="Property" PropertyPath="Format/Orientation"/>
-                                    <PropertyValue Property="AllowedExpressions" String="Multivalue"/>
-                                </Record>
-                                <Record>
-                                    <PropertyValue Property="Property" PropertyPath="Format/PaperSize"/>
-                                    <PropertyValue Property="AllowedExpressions" String="Multivalue"/>
-                                </Record>
-                            </Collection>
-                        </PropertyValue>
-                    </Record>
-                </Annotation>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.SAP__Format/FitToPage/ErrorRecoveryBehavior" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="SAP__common.ValueListReferences">
-                    <Record>
-                        <PropertyValue Property="Url" String="./$metadata"/>
-                        <PropertyValue Property="CollectionPath" String="../../../../SAP__ValueHelpSet?$filter=VALUEHELP%20eq%20%27ErrorRecoveryBehaviour%27"/>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__common.ValueListWithFixedValues"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.SAP__Format/FontName" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="SAP__common.ValueListReferences">
-                    <Record>
-                        <PropertyValue Property="Url" String="./$metadata"/>
-                        <PropertyValue Property="CollectionPath" String="SAP__ValueHelpSet?$filter=VALUEHELP%20eq%20%27FontName%27"/>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__common.ValueListWithFixedValues"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.SAP__Format/PaperSize" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="SAP__common.ValueListReferences">
-                    <Record>
-                        <PropertyValue Property="Url" String="./$metadata"/>
-                        <PropertyValue Property="CollectionPath" String="SAP__ValueHelpSet?$filter=VALUEHELP%20eq%20%27PaperSize%27"/>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__common.ValueListWithFixedValues"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.SAP__Format/Orientation" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="SAP__common.ValueListReferences">
-                    <Record>
-                        <PropertyValue Property="Url" String="./$metadata"/>
-                        <PropertyValue Property="CollectionPath" String="SAP__ValueHelpSet?$filter=VALUEHELP%20eq%20%27FontName%27"/>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__common.ValueListWithFixedValues"/>
-            </Annotations>
-            <Annotations Target="cds_zui_leave_mgmt.SAP__TableColumns/HorizontalAlignment" xmlns="http://docs.oasis-open.org/odata/ns/edm">
-                <Annotation Term="SAP__common.ValueListReferences">
-                    <Record>
-                        <PropertyValue Property="Url" String="./$metadata"/>
-                        <PropertyValue Property="CollectionPath" String="SAP__ValueHelpSet?$filter=VALUEHELP%20eq%20%27HorizontalAlignment%27"/>
-                    </Record>
-                </Annotation>
-                <Annotation Term="SAP__common.ValueListWithFixedValues"/>
-            </Annotations>
-            <atom:link rel="self" href="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/sap/ZUI_LEAVE_MGMT_O2/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
-            <atom:link rel="latest-version" href="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/sap/ZUI_LEAVE_MGMT_O2/$metadata" xmlns:atom="http://www.w3.org/2005/Atom"/>
-        </Schema>
-    </edmx:DataServices>
+<edmx:Edmx xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx" xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata" xmlns:sap="http://www.sap.com/Protocols/SAPData" Version="1.0">
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_AGGREGATION',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="Org.OData.Aggregation.V1" Alias="Aggregation"/>
+</edmx:Reference>
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_ANALYTICS',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="com.sap.vocabularies.Analytics.v1" Alias="Analytics"/>
+</edmx:Reference>
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_CAPABILITIES',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="Org.OData.Capabilities.V1" Alias="Capabilities"/>
+</edmx:Reference>
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_CODELIST',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="com.sap.vocabularies.CodeList.v1" Alias="SAP__CodeList"/>
+</edmx:Reference>
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMON',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="Common"/>
+<edmx:Include Namespace="com.sap.vocabularies.Common.v1" Alias="SAP__common"/>
+</edmx:Reference>
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_COMMUNICATION',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="com.sap.vocabularies.Communication.v1" Alias="Communication"/>
+</edmx:Reference>
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_CORE',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="Org.OData.Core.V1" Alias="SAP__core"/>
+</edmx:Reference>
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_MEASURES',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="Org.OData.Measures.V1" Alias="Measures"/>
+</edmx:Reference>
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_PDF',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="com.sap.vocabularies.PDF.v1" Alias="SAP__PDF"/>
+</edmx:Reference>
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_PERSONALDATA',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="com.sap.vocabularies.PersonalData.v1" Alias="PersonalData"/>
+</edmx:Reference>
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_UI',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="com.sap.vocabularies.UI.v1" Alias="UI"/>
+</edmx:Reference>
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='%2FIWBEP%2FVOC_VALIDATION',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="Org.OData.Validation.V1" Alias="Validation"/>
+</edmx:Reference>
+<edmx:Reference xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Uri="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/iwfnd/catalogservice;v=2/Vocabularies(TechnicalName='SAP__SELF',Version='0001',SAP__Origin='')/$value">
+<edmx:Include Namespace="com.sap.vocabularies.PDF.v1" Alias="SAP__PDF"/>
+</edmx:Reference>
+<edmx:DataServices m:DataServiceVersion="2.0">
+<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="cds_zui_leave_mgmt" xml:lang="vi" sap:schema-version="1">
+<Annotation xmlns="http://docs.oasis-open.org/odata/ns/edm" Term="Core.SchemaVersion" String="1.0.0"/>
+<EntityType Name="LeaveRequestType" sap:content-version="1">
+<Key>
+<PropertyRef Name="UUID"/>
+</Key>
+<Property Name="approveResult_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="rejectResult_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Delete_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Update_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="UUID" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:quickinfo="16 byte UUID in 16 bytes (raw format)" sap:creatable="false" sap:updatable="false"/>
+<Property Name="RequestId" Type="Edm.String" MaxLength="20" sap:creatable="false" sap:updatable="false"/>
+<Property Name="EmployeeId" Type="Edm.String" MaxLength="8" sap:display-format="NonNegative" sap:creatable="false" sap:updatable="false"/>
+<Property Name="ApproverId" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:value-list="standard"/>
+<Property Name="LeaveType" Type="Edm.String" Nullable="false" MaxLength="5" sap:value-list="standard"/>
+<Property Name="StartDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:display-format="Date"/>
+<Property Name="StartSession" Type="Edm.String" MaxLength="1"/>
+<Property Name="EndDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:display-format="Date"/>
+<Property Name="EndSession" Type="Edm.String" MaxLength="1"/>
+<Property Name="TotalDays" Type="Edm.Decimal" Precision="5" Scale="2" sap:creatable="false" sap:updatable="false"/>
+<Property Name="Status" Type="Edm.String" MaxLength="10" sap:creatable="false" sap:updatable="false"/>
+<Property Name="StatusCriticality" Type="Edm.Byte"/>
+<Property Name="Reason" Type="Edm.String"/>
+<Property Name="AttachmentUrl" Type="Edm.String" MaxLength="255"/>
+<Property Name="CreatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:creatable="false" sap:updatable="false"/>
+<Property Name="ApprovalComment" Type="Edm.String" MaxLength="255"/>
+<Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
+<Property Name="LastChangedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:creatable="false" sap:updatable="false"/>
+<Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
+</EntityType>
+<EntityType Name="EmployeeType" sap:content-version="1">
+<Key>
+<PropertyRef Name="EmployeeId"/>
+</Key>
+<Property Name="EmployeeId" Type="Edm.String" Nullable="false" MaxLength="10"/>
+<Property Name="SapUserName" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="FullName" Type="Edm.String" MaxLength="100"/>
+<Property Name="Email" Type="Edm.String" MaxLength="100"/>
+<Property Name="Department" Type="Edm.String" MaxLength="50"/>
+<Property Name="PositionTitle" Type="Edm.String" MaxLength="100"/>
+<Property Name="ManagerSapUser" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="IsActive" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
+</EntityType>
+<EntityType Name="LeaveQuotaType" sap:content-version="1">
+<Key>
+<PropertyRef Name="EmployeeId"/>
+<PropertyRef Name="LeaveTypeId"/>
+<PropertyRef Name="QuotaYear"/>
+</Key>
+<Property Name="EmployeeId" Type="Edm.String" Nullable="false" MaxLength="10" sap:display-format="NonNegative"/>
+<Property Name="LeaveTypeId" Type="Edm.String" Nullable="false" MaxLength="5"/>
+<Property Name="QuotaYear" Type="Edm.String" Nullable="false" MaxLength="4" sap:display-format="NonNegative"/>
+<Property Name="LeaveTypeName" Type="Edm.String" MaxLength="50"/>
+<Property Name="SapUserName" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="EmployeeName" Type="Edm.String" MaxLength="100"/>
+<Property Name="TotalDays" Type="Edm.Decimal" Precision="5" Scale="2"/>
+<Property Name="UsedDays" Type="Edm.Decimal" Precision="5" Scale="2"/>
+<Property Name="RemainingDays" Type="Edm.Decimal" Precision="5" Scale="2"/>
+<Property Name="ValidFrom" Type="Edm.DateTime" Precision="0" sap:display-format="Date"/>
+<Property Name="ValidTo" Type="Edm.DateTime" Precision="0" sap:display-format="Date"/>
+<Property Name="RemCriticality" Type="Edm.Byte"/>
+</EntityType>
+<EntityType Name="LeaveRequestAdminType" sap:content-version="1">
+<Key>
+<PropertyRef Name="UUID"/>
+</Key>
+<Property Name="UUID" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:quickinfo="16 byte UUID in 16 bytes (raw format)"/>
+<Property Name="RequestId" Type="Edm.String" MaxLength="20"/>
+<Property Name="EmployeeId" Type="Edm.String" MaxLength="8" sap:display-format="NonNegative"/>
+<Property Name="CreatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="ApproverId" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="LeaveType" Type="Edm.String" MaxLength="5"/>
+<Property Name="StartDate" Type="Edm.DateTime" Precision="0" sap:display-format="Date"/>
+<Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:display-format="Date"/>
+<Property Name="TotalDays" Type="Edm.Decimal" Precision="5" Scale="2"/>
+<Property Name="Reason" Type="Edm.String"/>
+<Property Name="Status" Type="Edm.String" MaxLength="10"/>
+<Property Name="StatusCriticality" Type="Edm.Byte"/>
+<Property Name="ApprovalComment" Type="Edm.String" MaxLength="255"/>
+<Property Name="AttachmentUrl" Type="Edm.String" MaxLength="255"/>
+<Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)"/>
+<Property Name="LastChangedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)"/>
+<NavigationProperty Name="to_Employee" Relationship="cds_zui_leave_mgmt.assoc_B73E8D2FFB90D7B9AB76E055300BFB54" FromRole="FromRole_assoc_B73E8D2FFB90D7B9AB76E055300BFB54" ToRole="ToRole_assoc_B73E8D2FFB90D7B9AB76E055300BFB54"/>
+</EntityType>
+<EntityType Name="LeaveTypeType" sap:value-list="true" sap:content-version="1">
+<Key>
+<PropertyRef Name="LeaveType"/>
+</Key>
+<Property Name="LeaveType" Type="Edm.String" Nullable="false" MaxLength="5"/>
+<Property Name="LeaveName" Type="Edm.String" MaxLength="50"/>
+<Property Name="IsPaid" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
+<Property Name="MaxDays" Type="Edm.Decimal" Precision="5" Scale="2"/>
+</EntityType>
+<EntityType Name="ZI_MANAGER_VHType" sap:value-list="true" sap:content-version="1">
+<Key>
+<PropertyRef Name="ManagerUser"/>
+</Key>
+<Property Name="ManagerUser" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="ManagerName" Type="Edm.String" MaxLength="100"/>
+</EntityType>
+<EntityType Name="SAP__Currency" sap:content-version="1">
+<Key>
+<PropertyRef Name="CurrencyCode"/>
+</Key>
+<Property Name="CurrencyCode" Type="Edm.String" Nullable="false" MaxLength="5" sap:label="Währung" sap:semantics="currency-code"/>
+<Property Name="ISOCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="Iso-Code"/>
+<Property Name="Text" Type="Edm.String" Nullable="false" MaxLength="15" sap:label="Kurztext"/>
+<Property Name="DecimalPlaces" Type="Edm.Byte" Nullable="false" sap:label="Dezimalen"/>
+</EntityType>
+<EntityType Name="SAP__UnitOfMeasure" sap:content-version="1">
+<Key>
+<PropertyRef Name="UnitCode"/>
+</Key>
+<Property Name="UnitCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="Interne Maßeinheit" sap:semantics="unit-of-measure"/>
+<Property Name="ISOCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="ISO-Code"/>
+<Property Name="ExternalCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="Kaufmännisch"/>
+<Property Name="Text" Type="Edm.String" Nullable="false" MaxLength="30" sap:label="Maßeinheitentext"/>
+<Property Name="DecimalPlaces" Type="Edm.Int16" sap:label="Dezimalstellen"/>
+</EntityType>
+<EntityType Name="SAP__DocumentDescription" sap:content-version="1">
+<Key>
+<PropertyRef Name="Id"/>
+</Key>
+<Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID"/>
+<Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
+<Property Name="CreatedAt" Type="Edm.DateTime" Nullable="false" Precision="0" sap:label="Zeitstempel"/>
+<Property Name="FileName" Type="Edm.String" Nullable="false" MaxLength="256"/>
+<Property Name="Title" Type="Edm.String" Nullable="false" MaxLength="256"/>
+<NavigationProperty Name="Format" Relationship="cds_zui_leave_mgmt.to_format" FromRole="FromRole_to_format" ToRole="ToRole_to_format"/>
+<NavigationProperty Name="TableColumns" Relationship="cds_zui_leave_mgmt.to_tablecolumns" FromRole="FromRole_to_tablecolumns" ToRole="ToRole_to_tablecolumns"/>
+<NavigationProperty Name="CoverPage" Relationship="cds_zui_leave_mgmt.to_coverpage" FromRole="FromRole_to_coverpage" ToRole="ToRole_to_coverpage"/>
+<NavigationProperty Name="Signature" Relationship="cds_zui_leave_mgmt.to_signature" FromRole="FromRole_to_signature" ToRole="ToRole_to_signature"/>
+<NavigationProperty Name="PDFStandard" Relationship="cds_zui_leave_mgmt.to_pdfstandard" FromRole="FromRole_to_pdfstandard" ToRole="ToRole_to_pdfstandard"/>
+</EntityType>
+<EntityType Name="SAP__Format" sap:content-version="1">
+<Key>
+<PropertyRef Name="Id"/>
+</Key>
+<Property Name="FitToPage" Type="cds_zui_leave_mgmt.SAP__FitToPage" Nullable="false"/>
+<Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="FontSize" Type="Edm.Int32" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Orientation" Type="Edm.String" Nullable="false" MaxLength="10" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="PaperSize" Type="Edm.String" Nullable="false" MaxLength="10" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="BorderSize" Type="Edm.Int32" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="MarginSize" Type="Edm.Int32" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="FontName" Type="Edm.String" Nullable="false" MaxLength="255" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+</EntityType>
+<EntityType Name="SAP__PDFStandard" sap:content-version="1">
+<Key>
+<PropertyRef Name="Id"/>
+</Key>
+<Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="UsePDFAConformance" Type="Edm.Boolean" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="DoEnableAccessibility" Type="Edm.Boolean" Nullable="false" sap:label="Flag" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+</EntityType>
+<EntityType Name="SAP__TableColumns" sap:content-version="1">
+<Key>
+<PropertyRef Name="Id"/>
+<PropertyRef Name="Name"/>
+<PropertyRef Name="Header"/>
+</Key>
+<Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Header" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="HorizontalAlignment" Type="Edm.String" Nullable="false" MaxLength="10" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+</EntityType>
+<EntityType Name="SAP__CoverPage" sap:content-version="1">
+<Key>
+<PropertyRef Name="Title"/>
+<PropertyRef Name="Id"/>
+<PropertyRef Name="Name"/>
+</Key>
+<Property Name="Title" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Name" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Value" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+</EntityType>
+<EntityType Name="SAP__Signature" sap:content-version="1">
+<Key>
+<PropertyRef Name="Id"/>
+</Key>
+<Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="DoSign" Type="Edm.Boolean" Nullable="false" sap:label="Flag" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Reason" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+</EntityType>
+<EntityType Name="SAP__ValueHelp" sap:content-version="1">
+<Key>
+<PropertyRef Name="VALUEHELP"/>
+</Key>
+<Property Name="VALUEHELP" Type="Edm.String" Nullable="false"/>
+<Property Name="FIELD_VALUE" Type="Edm.String" Nullable="false" MaxLength="10"/>
+<Property Name="DESCRIPTION" Type="Edm.String"/>
+</EntityType>
+<ComplexType Name="SAP__FitToPage">
+<Property Name="ErrorRecoveryBehavior" Type="Edm.String" Nullable="false" MaxLength="8" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="IsEnabled" Type="Edm.Boolean" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="MinimumFontSize" Type="Edm.Int32" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+</ComplexType>
+<Association Name="to_format" sap:content-version="1">
+<End Type="cds_zui_leave_mgmt.SAP__DocumentDescription" Multiplicity="1" Role="FromRole_to_format"/>
+<End Type="cds_zui_leave_mgmt.SAP__Format" Multiplicity="1" Role="ToRole_to_format"/>
+<ReferentialConstraint>
+<Principal Role="FromRole_to_format">
+<PropertyRef Name="Id"/>
+</Principal>
+<Dependent Role="ToRole_to_format">
+<PropertyRef Name="Id"/>
+</Dependent>
+</ReferentialConstraint>
+</Association>
+<Association Name="to_tablecolumns" sap:content-version="1">
+<End Type="cds_zui_leave_mgmt.SAP__DocumentDescription" Multiplicity="1" Role="FromRole_to_tablecolumns"/>
+<End Type="cds_zui_leave_mgmt.SAP__TableColumns" Multiplicity="*" Role="ToRole_to_tablecolumns"/>
+<ReferentialConstraint>
+<Principal Role="FromRole_to_tablecolumns">
+<PropertyRef Name="Id"/>
+</Principal>
+<Dependent Role="ToRole_to_tablecolumns">
+<PropertyRef Name="Id"/>
+</Dependent>
+</ReferentialConstraint>
+</Association>
+<Association Name="to_coverpage" sap:content-version="1">
+<End Type="cds_zui_leave_mgmt.SAP__DocumentDescription" Multiplicity="1" Role="FromRole_to_coverpage"/>
+<End Type="cds_zui_leave_mgmt.SAP__CoverPage" Multiplicity="*" Role="ToRole_to_coverpage"/>
+<ReferentialConstraint>
+<Principal Role="FromRole_to_coverpage">
+<PropertyRef Name="Id"/>
+</Principal>
+<Dependent Role="ToRole_to_coverpage">
+<PropertyRef Name="Id"/>
+</Dependent>
+</ReferentialConstraint>
+</Association>
+<Association Name="to_signature" sap:content-version="1">
+<End Type="cds_zui_leave_mgmt.SAP__DocumentDescription" Multiplicity="1" Role="FromRole_to_signature"/>
+<End Type="cds_zui_leave_mgmt.SAP__Signature" Multiplicity="1" Role="ToRole_to_signature"/>
+<ReferentialConstraint>
+<Principal Role="FromRole_to_signature">
+<PropertyRef Name="Id"/>
+</Principal>
+<Dependent Role="ToRole_to_signature">
+<PropertyRef Name="Id"/>
+</Dependent>
+</ReferentialConstraint>
+</Association>
+<Association Name="to_pdfstandard" sap:content-version="1">
+<End Type="cds_zui_leave_mgmt.SAP__DocumentDescription" Multiplicity="1" Role="FromRole_to_pdfstandard"/>
+<End Type="cds_zui_leave_mgmt.SAP__PDFStandard" Multiplicity="1" Role="ToRole_to_pdfstandard"/>
+<ReferentialConstraint>
+<Principal Role="FromRole_to_pdfstandard">
+<PropertyRef Name="Id"/>
+</Principal>
+<Dependent Role="ToRole_to_pdfstandard">
+<PropertyRef Name="Id"/>
+</Dependent>
+</ReferentialConstraint>
+</Association>
+<Association Name="assoc_B73E8D2FFB90D7B9AB76E055300BFB54" sap:content-version="1">
+<End Type="cds_zui_leave_mgmt.LeaveRequestAdminType" Multiplicity="1" Role="FromRole_assoc_B73E8D2FFB90D7B9AB76E055300BFB54"/>
+<End Type="cds_zui_leave_mgmt.EmployeeType" Multiplicity="0..1" Role="ToRole_assoc_B73E8D2FFB90D7B9AB76E055300BFB54"/>
+</Association>
+<EntityContainer Name="cds_zui_leave_mgmt_Entities" m:IsDefaultEntityContainer="true" sap:message-scope-supported="true" sap:supported-formats="atom json xlsx pdf">
+<EntitySet Name="SAP__Currencies" EntityType="cds_zui_leave_mgmt.SAP__Currency" sap:content-version="1"/>
+<EntitySet Name="SAP__UnitsOfMeasure" EntityType="cds_zui_leave_mgmt.SAP__UnitOfMeasure" sap:content-version="1"/>
+<EntitySet Name="SAP__MyDocumentDescriptions" EntityType="cds_zui_leave_mgmt.SAP__DocumentDescription" sap:content-version="1"/>
+<EntitySet Name="SAP__FormatSet" EntityType="cds_zui_leave_mgmt.SAP__Format" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="SAP__PDFStandardSet" EntityType="cds_zui_leave_mgmt.SAP__PDFStandard" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="SAP__TableColumnsSet" EntityType="cds_zui_leave_mgmt.SAP__TableColumns" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="SAP__CoverPageSet" EntityType="cds_zui_leave_mgmt.SAP__CoverPage" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="SAP__SignatureSet" EntityType="cds_zui_leave_mgmt.SAP__Signature" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
+<EntitySet Name="SAP__ValueHelpSet" EntityType="cds_zui_leave_mgmt.SAP__ValueHelp" sap:content-version="1"/>
+<EntitySet Name="LeaveRequest" EntityType="cds_zui_leave_mgmt.LeaveRequestType" sap:content-version="1" sap:deletable-path="Delete_mc" sap:updatable-path="Update_mc"/>
+<EntitySet Name="Employee" EntityType="cds_zui_leave_mgmt.EmployeeType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
+<EntitySet Name="LeaveQuota" EntityType="cds_zui_leave_mgmt.LeaveQuotaType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
+<EntitySet Name="LeaveRequestAdmin" EntityType="cds_zui_leave_mgmt.LeaveRequestAdminType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
+<EntitySet Name="LeaveType" EntityType="cds_zui_leave_mgmt.LeaveTypeType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
+<EntitySet Name="ZI_MANAGER_VH" EntityType="cds_zui_leave_mgmt.ZI_MANAGER_VHType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
+<AssociationSet Name="to_formatSet" Association="cds_zui_leave_mgmt.to_format" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+<End EntitySet="SAP__MyDocumentDescriptions" Role="FromRole_to_format"/>
+<End EntitySet="SAP__FormatSet" Role="ToRole_to_format"/>
+</AssociationSet>
+<AssociationSet Name="to_pdfstandardSet" Association="cds_zui_leave_mgmt.to_pdfstandard" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+<End EntitySet="SAP__MyDocumentDescriptions" Role="FromRole_to_pdfstandard"/>
+<End EntitySet="SAP__PDFStandardSet" Role="ToRole_to_pdfstandard"/>
+</AssociationSet>
+<AssociationSet Name="to_tablecolumnsSet" Association="cds_zui_leave_mgmt.to_tablecolumns" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+<End EntitySet="SAP__MyDocumentDescriptions" Role="FromRole_to_tablecolumns"/>
+<End EntitySet="SAP__TableColumnsSet" Role="ToRole_to_tablecolumns"/>
+</AssociationSet>
+<AssociationSet Name="assoc_B73E8D2FFB90D7B9AB76E055300BFB54" Association="cds_zui_leave_mgmt.assoc_B73E8D2FFB90D7B9AB76E055300BFB54" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+<End EntitySet="LeaveRequestAdmin" Role="FromRole_assoc_B73E8D2FFB90D7B9AB76E055300BFB54"/>
+<End EntitySet="Employee" Role="ToRole_assoc_B73E8D2FFB90D7B9AB76E055300BFB54"/>
+</AssociationSet>
+<AssociationSet Name="to_signatureSet" Association="cds_zui_leave_mgmt.to_signature" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+<End EntitySet="SAP__MyDocumentDescriptions" Role="FromRole_to_signature"/>
+<End EntitySet="SAP__SignatureSet" Role="ToRole_to_signature"/>
+</AssociationSet>
+<AssociationSet Name="to_coverpageSet" Association="cds_zui_leave_mgmt.to_coverpage" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1">
+<End EntitySet="SAP__MyDocumentDescriptions" Role="FromRole_to_coverpage"/>
+<End EntitySet="SAP__CoverPageSet" Role="ToRole_to_coverpage"/>
+</AssociationSet>
+<FunctionImport Name="approveResult" ReturnType="cds_zui_leave_mgmt.LeaveRequestType" EntitySet="LeaveRequest" m:HttpMethod="POST" sap:action-for="cds_zui_leave_mgmt.LeaveRequestType" sap:applicable-path="approveResult_ac">
+<Parameter Name="UUID" Type="Edm.Guid" Mode="In" sap:label="UUID"/>
+</FunctionImport>
+<FunctionImport Name="rejectResult" ReturnType="cds_zui_leave_mgmt.LeaveRequestType" EntitySet="LeaveRequest" m:HttpMethod="POST" sap:action-for="cds_zui_leave_mgmt.LeaveRequestType" sap:applicable-path="rejectResult_ac">
+<Parameter Name="UUID" Type="Edm.Guid" Mode="In" sap:label="UUID"/>
+</FunctionImport>
+</EntityContainer>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.LeaveRequestType/ApproverId">
+<Annotation Term="Common.ValueList">
+<Record>
+<PropertyValue Property="Label" String=""/>
+<PropertyValue Property="CollectionPath" String="ZI_MANAGER_VH"/>
+<PropertyValue Property="SearchSupported" Bool="false"/>
+<PropertyValue Property="Parameters">
+<Collection>
+<Record Type="Common.ValueListParameterInOut">
+<PropertyValue Property="LocalDataProperty" PropertyPath="ApproverId"/>
+<PropertyValue Property="ValueListProperty" String="ManagerUser"/>
+</Record>
+<Record Type="Common.ValueListParameterDisplayOnly">
+<PropertyValue Property="ValueListProperty" String="ManagerName"/>
+</Record>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.LeaveRequestType/LeaveType">
+<Annotation Term="Common.ValueList">
+<Record>
+<PropertyValue Property="Label" String=""/>
+<PropertyValue Property="CollectionPath" String="LeaveType"/>
+<PropertyValue Property="SearchSupported" Bool="false"/>
+<PropertyValue Property="Parameters">
+<Collection>
+<Record Type="Common.ValueListParameterInOut">
+<PropertyValue Property="LocalDataProperty" PropertyPath="LeaveType"/>
+<PropertyValue Property="ValueListProperty" String="LeaveType"/>
+</Record>
+<Record Type="Common.ValueListParameterDisplayOnly">
+<PropertyValue Property="ValueListProperty" String="LeaveName"/>
+</Record>
+<Record Type="Common.ValueListParameterDisplayOnly">
+<PropertyValue Property="ValueListProperty" String="IsPaid"/>
+</Record>
+<Record Type="Common.ValueListParameterDisplayOnly">
+<PropertyValue Property="ValueListProperty" String="MaxDays"/>
+</Record>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities">
+<Annotation Term="Common.ApplyMultiUnitBehaviorForSortingAndFiltering" Bool="true"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities/LeaveRequest">
+<Annotation Term="Capabilities.FilterRestrictions">
+<Record>
+<PropertyValue Property="NonFilterableProperties">
+<Collection>
+<PropertyPath>approveResult_ac</PropertyPath>
+<PropertyPath>rejectResult_ac</PropertyPath>
+<PropertyPath>Delete_mc</PropertyPath>
+<PropertyPath>Update_mc</PropertyPath>
+</Collection>
+</PropertyValue>
+<PropertyValue Property="FilterExpressionRestrictions">
+<Collection>
+<Record>
+<PropertyValue Property="Property" PropertyPath="Reason"/>
+<PropertyValue Property="AllowedExpressions" String="SearchExpression"/>
+</Record>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+<Annotation Term="Capabilities.InsertRestrictions">
+<Record>
+<PropertyValue Property="RequiredProperties">
+<Collection>
+<PropertyPath>ApproverId</PropertyPath>
+<PropertyPath>LeaveType</PropertyPath>
+<PropertyPath>StartDate</PropertyPath>
+<PropertyPath>EndDate</PropertyPath>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+<Annotation Term="SAP__core.OptimisticConcurrency">
+<Collection/>
+</Annotation>
+<Annotation Term="Capabilities.SortRestrictions">
+<Record>
+<PropertyValue Property="NonSortableProperties">
+<Collection>
+<PropertyPath>approveResult_ac</PropertyPath>
+<PropertyPath>rejectResult_ac</PropertyPath>
+<PropertyPath>Delete_mc</PropertyPath>
+<PropertyPath>Update_mc</PropertyPath>
+<PropertyPath>Reason</PropertyPath>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities/LeaveRequestAdmin">
+<Annotation Term="Capabilities.FilterRestrictions">
+<Record>
+<PropertyValue Property="FilterExpressionRestrictions">
+<Collection>
+<Record>
+<PropertyValue Property="Property" PropertyPath="Reason"/>
+<PropertyValue Property="AllowedExpressions" String="SearchExpression"/>
+</Record>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+<Annotation Term="Capabilities.NavigationRestrictions">
+<Record>
+<PropertyValue Property="RestrictedProperties">
+<Collection>
+<Record>
+<PropertyValue Property="NavigationProperty" NavigationPropertyPath="to_Employee"/>
+<PropertyValue Property="InsertRestrictions">
+<Record>
+<PropertyValue Property="Insertable" Bool="false"/>
+</Record>
+</PropertyValue>
+</Record>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+<Annotation Term="Capabilities.SortRestrictions">
+<Record>
+<PropertyValue Property="NonSortableProperties">
+<Collection>
+<PropertyPath>Reason</PropertyPath>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities">
+<Annotation Term="Org.OData.Capabilities.V1.BatchSupport">
+<Record Type="Org.OData.Capabilities.V1.BatchSupportType">
+<PropertyValue Property="ReferencesAcrossChangeSetsSupported" Bool="true"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__CodeList.CurrencyCodes">
+<Record>
+<PropertyValue Property="Url" String="./$metadata"/>
+<PropertyValue Property="CollectionPath" String="SAP__Currencies"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__CodeList.UnitsOfMeasure">
+<Record>
+<PropertyValue Property="Url" String="./$metadata"/>
+<PropertyValue Property="CollectionPath" String="SAP__UnitsOfMeasure"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__PDF.Features">
+<Record>
+<PropertyValue Property="DocumentDescriptionReference" String="./$metadata"/>
+<PropertyValue Property="DocumentDescriptionCollection" String="SAP__MyDocumentDescriptions"/>
+<PropertyValue Property="ArchiveFormat" Bool="true"/>
+<PropertyValue Property="CoverPage" Bool="true"/>
+<PropertyValue Property="Signature" Bool="true"/>
+<PropertyValue Property="FitToPage" Bool="true"/>
+<PropertyValue Property="FontName" Bool="true"/>
+<PropertyValue Property="FontSize" Bool="true"/>
+<PropertyValue Property="Margin" Bool="true"/>
+<PropertyValue Property="Border" Bool="true"/>
+<PropertyValue Property="ResultSizeDefault" Int="20000"/>
+<PropertyValue Property="ResultSizeMaximum" Int="20000"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__CodeList.SAP__DocumentDescription">
+<Record>
+<PropertyValue Property="Url" String="./$metadata"/>
+<PropertyValue Property="CollectionPath" String="SAP__MyDocumentDescriptions"/>
+</Record>
+</Annotation>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.SAP__Currency/CurrencyCode">
+<Annotation Term="SAP__common.Text" Path="Text"/>
+<Annotation Term="SAP__common.UnitSpecificScale" Path="DecimalPlaces"/>
+<Annotation Term="SAP__CodeList.StandardCode" Path="ISOCode"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.SAP__UnitOfMeasure/UnitCode">
+<Annotation Term="SAP__common.Text" Path="Text"/>
+<Annotation Term="SAP__common.UnitSpecificScale" Path="DecimalPlaces"/>
+<Annotation Term="SAP__CodeList.StandardCode" Path="ISOCode"/>
+<Annotation Term="SAP__CodeList.ExternalCode" Path="ExternalCode"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.SAP__UnitOfMeasure">
+<Annotation Term="SAP__core.AlternateKeys">
+<Collection>
+<Record>
+<PropertyValue Property="Key">
+<Collection>
+<Record>
+<PropertyValue Property="Name" Path="ExternalCode"/>
+<PropertyValue Property="Alias" String="ExternalCode"/>
+</Record>
+</Collection>
+</PropertyValue>
+</Record>
+</Collection>
+</Annotation>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.SAP__DocumentDescription/CreatedBy">
+<Annotation Term="SAP__core.Computed"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.SAP__DocumentDescription/CreatedAt">
+<Annotation Term="SAP__core.Computed"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.SAP__DocumentDescription">
+<Annotation Term="SAP__capabilties.InsertRestrictions">
+<Record>
+<PropertyValue Property="Insertable" Bool="false"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__capabilties.UpdateRestrictions">
+<Record>
+<PropertyValue Property="Updatable" Bool="false"/>
+<PropertyValue Property="QueryOptions">
+<Record>
+<PropertyValue Property="SelectSupported" Bool="true"/>
+</Record>
+</PropertyValue>
+</Record>
+</Annotation>
+<Annotation Term="SAP__capabilties.DeleteRestrictions">
+<Record>
+<PropertyValue Property="Deletable" Bool="false"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__capabilties.FilterRestrictions">
+<Record>
+<PropertyValue Property="FilterExpressionRestrictions">
+<Collection>
+<Record>
+<PropertyValue Property="Property" PropertyPath="Format/Orientation"/>
+<PropertyValue Property="AllowedExpressions" String="Multivalue"/>
+</Record>
+<Record>
+<PropertyValue Property="Property" PropertyPath="Format/PaperSize"/>
+<PropertyValue Property="AllowedExpressions" String="Multivalue"/>
+</Record>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.SAP__Format/FitToPage/ErrorRecoveryBehavior">
+<Annotation Term="SAP__common.ValueListReferences">
+<Record>
+<PropertyValue Property="Url" String="./$metadata"/>
+<PropertyValue Property="CollectionPath" String="../../../../SAP__ValueHelpSet?$filter=VALUEHELP%20eq%20%27ErrorRecoveryBehaviour%27"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__common.ValueListWithFixedValues"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.SAP__Format/FontName">
+<Annotation Term="SAP__common.ValueListReferences">
+<Record>
+<PropertyValue Property="Url" String="./$metadata"/>
+<PropertyValue Property="CollectionPath" String="SAP__ValueHelpSet?$filter=VALUEHELP%20eq%20%27FontName%27"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__common.ValueListWithFixedValues"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.SAP__Format/PaperSize">
+<Annotation Term="SAP__common.ValueListReferences">
+<Record>
+<PropertyValue Property="Url" String="./$metadata"/>
+<PropertyValue Property="CollectionPath" String="SAP__ValueHelpSet?$filter=VALUEHELP%20eq%20%27PaperSize%27"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__common.ValueListWithFixedValues"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.SAP__Format/Orientation">
+<Annotation Term="SAP__common.ValueListReferences">
+<Record>
+<PropertyValue Property="Url" String="./$metadata"/>
+<PropertyValue Property="CollectionPath" String="SAP__ValueHelpSet?$filter=VALUEHELP%20eq%20%27FontName%27"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__common.ValueListWithFixedValues"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.SAP__TableColumns/HorizontalAlignment">
+<Annotation Term="SAP__common.ValueListReferences">
+<Record>
+<PropertyValue Property="Url" String="./$metadata"/>
+<PropertyValue Property="CollectionPath" String="SAP__ValueHelpSet?$filter=VALUEHELP%20eq%20%27HorizontalAlignment%27"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__common.ValueListWithFixedValues"/>
+</Annotations>
+<atom:link xmlns:atom="http://www.w3.org/2005/Atom" rel="self" href="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/sap/ZUI_LEAVE_MGMT_O2/$metadata"/>
+<atom:link xmlns:atom="http://www.w3.org/2005/Atom" rel="latest-version" href="https://s40lp1.ucc.cit.tum.de/sap/opu/odata/sap/ZUI_LEAVE_MGMT_O2/$metadata"/>
+</Schema>
+</edmx:DataServices>
 </edmx:Edmx>

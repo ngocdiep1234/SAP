@@ -6,7 +6,7 @@ import MessageBox from "sap/m/MessageBox";
 import ODataModel from "sap/ui/model/odata/v2/ODataModel";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
-import LeaveRequestService, { LeaveRequestPayload, LeaveTypeEntry } from "../service/LeaveRequestService";
+import LeaveRequestService, { LeaveRequestPayload, LeaveTypeEntry, ManagerEntry } from "../service/LeaveRequestService";
 
 // ---------------------------------------------------------------------------
 // Local model shape interfaces
@@ -20,6 +20,9 @@ interface LeaveRequest {
     HalfDay: boolean;
     Reason: string;
     AttachmentUrl: string;
+    ApproverId: string;
+    StartSession: string;
+    EndSession: string;
 }
 
 interface Employee {
@@ -43,6 +46,7 @@ interface CreateFormModel {
     summary: Summary;
     busy: boolean;
     leaveTypes: LeaveTypeEntry[];
+    managers: ManagerEntry[];
     /** true = user found in Employee master; false/undefined = blocked */
     employeeRegistered: boolean;
 }
@@ -80,7 +84,10 @@ export default class CreateRequest extends Controller {
                 TotalDays: 0,
                 HalfDay: false,
                 Reason: "",
-                AttachmentUrl: ""
+                AttachmentUrl: "",
+                ApproverId: "",
+                StartSession: "Full",
+                EndSession: "Full"
             },
             employee: {
                 EmployeeID: "",
@@ -97,6 +104,7 @@ export default class CreateRequest extends Controller {
             },
             busy: false,
             leaveTypes: [],
+            managers: [],
             employeeRegistered: false   // <-- blocked by default until check passes
         } satisfies CreateFormModel);
 
@@ -123,6 +131,7 @@ export default class CreateRequest extends Controller {
 
         void this._checkAndLoadEmployee();
         void this._loadLeaveTypes();
+        void this._loadManagers();
     }
 
     // -----------------------------------------------------------------------
@@ -188,7 +197,8 @@ export default class CreateRequest extends Controller {
                     };
 
                     oFormModel.setProperty("/employee", oEmp);
-                    oFormModel.setProperty("/summary/Approver", oEmp.ManagerID);
+                    oFormModel.setProperty("/leaveRequest/ApproverId", oEmp.ManagerID);
+                    this._updateSummaryApprover();
                     oFormModel.setProperty("/employeeRegistered", true);
 
                     console.info(
@@ -298,10 +308,6 @@ export default class CreateRequest extends Controller {
         return "";
     }
 
-    // -----------------------------------------------------------------------
-    // Leave Types Loading
-    // -----------------------------------------------------------------------
-
     private async _loadLeaveTypes(): Promise<void> {
         const oService = this._getService();
         if (!oService) {
@@ -318,6 +324,34 @@ export default class CreateRequest extends Controller {
                     ? sErr
                     : "Failed to load leave types."
             );
+        }
+    }
+
+    private async _loadManagers(): Promise<void> {
+        const oService = this._getService();
+        if (!oService) {
+            return;
+        }
+
+        const oFormModel = this._getFormModel();
+        try {
+            const aManagers = await oService.readManagers();
+            oFormModel.setProperty("/managers", aManagers);
+            this._updateSummaryApprover();
+        } catch (sErr) {
+            console.error("Failed to load managers:", sErr);
+        }
+    }
+
+    private _updateSummaryApprover(): void {
+        const oFormModel = this._getFormModel();
+        const sApproverId = oFormModel.getProperty("/leaveRequest/ApproverId") as string;
+        const aManagers = oFormModel.getProperty("/managers") as ManagerEntry[] || [];
+        const oSelectedManager = aManagers.find(m => m.ManagerUser === sApproverId);
+        if (oSelectedManager) {
+            oFormModel.setProperty("/summary/Approver", `${oSelectedManager.ManagerName} (${oSelectedManager.ManagerUser})`);
+        } else {
+            oFormModel.setProperty("/summary/Approver", sApproverId || "");
         }
     }
 
@@ -339,6 +373,11 @@ export default class CreateRequest extends Controller {
         }
         oFormModel.setProperty("/summary/LeaveType", sTypeText);
 
+        this.onDatesChange();
+    }
+
+    public onApproverChange(): void {
+        this._updateSummaryApprover();
         this.onDatesChange();
     }
 
@@ -493,12 +532,25 @@ export default class CreateRequest extends Controller {
             return;
         }
 
+        const mapSession = (sSessionVal?: string): string => {
+            if (sSessionVal === "Morning") {
+                return "M";
+            }
+            if (sSessionVal === "Afternoon") {
+                return "A";
+            }
+            return ""; // blank for full day
+        };
+
         const oPayload: LeaveRequestPayload = {
             LeaveType: oRequest.LeaveType,
             StartDate: new Date(oRequest.StartDate!),
             EndDate: new Date(oRequest.EndDate!),
             Reason: oRequest.Reason,
-            AttachmentUrl: oRequest.AttachmentUrl
+            AttachmentUrl: oRequest.AttachmentUrl,
+            ApproverId: oRequest.ApproverId || (oFormModel.getProperty("/employee/ManagerID") as string) || "",
+            StartSession: mapSession(oRequest.StartSession),
+            EndSession: mapSession(oRequest.EndSession)
         };
 
         this.getView().setBusy(true);
@@ -569,7 +621,10 @@ export default class CreateRequest extends Controller {
             TotalDays: 0,
             HalfDay: false,
             Reason: "",
-            AttachmentUrl: ""
+            AttachmentUrl: "",
+            ApproverId: oFormModel.getProperty("/employee/ManagerID") || "",
+            StartSession: "Full",
+            EndSession: "Full"
         });
         oFormModel.setProperty("/summary", {
             LeaveType: "-",
@@ -585,6 +640,7 @@ export default class CreateRequest extends Controller {
             DepartmentID: "",
             ManagerID: ""
         });
+        this._updateSummaryApprover();
     }
 
     private _navToRequests(): void {

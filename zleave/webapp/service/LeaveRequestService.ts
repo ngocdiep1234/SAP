@@ -15,6 +15,14 @@ export interface LeaveTypeEntry {
 }
 
 /**
+ * A single Manager entry from the /ZI_MANAGER_VH EntitySet.
+ */
+export interface ManagerEntry {
+    ManagerUser: string;
+    ManagerName: string;
+}
+
+/**
  * The writable fields for creating a new LeaveRequest.
  * Read-only fields (UUID, RequestId, EmployeeId, TotalDays, Status, …)
  * are intentionally excluded – the backend derives them automatically.
@@ -25,6 +33,9 @@ export interface LeaveRequestPayload {
     EndDate: Date;
     Reason: string;
     AttachmentUrl: string;
+    ApproverId: string;
+    StartSession?: string;
+    EndSession?: string;
 }
 
 /**
@@ -108,6 +119,28 @@ export default class LeaveRequestService {
         return new Promise<LeaveTypeEntry[]>((resolve, reject) => {
             this._oModel.read("/LeaveType", {
                 success: (oData: { results: LeaveTypeEntry[] }): void => {
+                    resolve(oData.results ?? []);
+                },
+                error: (oErr: { responseText?: string; message?: string }): void => {
+                    reject(parseODataError(oErr));
+                }
+            });
+        });
+    }
+
+    // -----------------------------------------------------------------------
+    // Manager – value help
+    // -----------------------------------------------------------------------
+
+    /**
+     * Reads all entries from the /ZI_MANAGER_VH EntitySet.
+     *
+     * @returns A Promise that resolves with an array of ManagerEntry objects.
+     */
+    public readManagers(): Promise<ManagerEntry[]> {
+        return new Promise<ManagerEntry[]>((resolve, reject) => {
+            this._oModel.read("/ZI_MANAGER_VH", {
+                success: (oData: { results: ManagerEntry[] }): void => {
                     resolve(oData.results ?? []);
                 },
                 error: (oErr: { responseText?: string; message?: string }): void => {

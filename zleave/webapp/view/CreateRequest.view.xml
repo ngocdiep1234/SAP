@@ -4,7 +4,7 @@
     xmlns:f="sap.ui.layout.form"
     xmlns:l="sap.ui.layout"
     xmlns:core="sap.ui.core"
-    xmlns:upload="sap.m.upload">
+    xmlns:unified="sap.ui.unified">
     <Page id="createRequestPage"
         title="{i18n>createLeaveRequestTitle}"
         showNavButton="true"
@@ -12,29 +12,31 @@
         showFooter="true">
         <content>
             <l:Grid id="mainGrid" defaultSpan="XL12 L12 M12 S12" hSpacing="1" vSpacing="1" class="sapUiSmallMargin">
-                <!-- Left Column: Input Forms -->
+                <!-- Left Column: Input Forms (70%) -->
                 <VBox id="formsContainer">
                     <layoutData>
                         <l:GridData span="XL8 L8 M12 S12"/>
                     </layoutData>
 
-                    <!-- Employee Information -->
+                    <!-- Employee Information Card -->
                     <Panel headerText="{i18n>employeeInfoSection}" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
-                        <f:SimpleForm editable="false" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
-                            <f:content>
-                                <Label text="{i18n>employeeId}"/>
-                                <Text text="{createForm>/employee/EmployeeID}"/>
-                                <Label text="{i18n>employeeName}"/>
-                                <Text text="{createForm>/employee/EmployeeName}"/>
-                                <Label text="Department"/>
-                                <Text text="{createForm>/employee/DepartmentID}"/>
-                                <Label text="Manager"/>
-                                <Text text="{createForm>/employee/ManagerID}"/>
-                            </f:content>
-                        </f:SimpleForm>
+                        <HBox wrap="Wrap" class="sapUiSmallMargin">
+                            <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
+                                <Label text="{i18n>employeeName}" class="sapUiTinyMarginBottom"/>
+                                <ObjectIdentifier title="{createForm>/employee/EmployeeName}" text="{= 'ID: ' + ${createForm>/employee/EmployeeID} }"/>
+                            </VBox>
+                            <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
+                                <Label text="Department" class="sapUiTinyMarginBottom"/>
+                                <Text text="{createForm>/employee/DepartmentID}" design="Bold"/>
+                            </VBox>
+                            <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
+                                <Label text="Manager" class="sapUiTinyMarginBottom"/>
+                                <Text text="{createForm>/employee/ManagerID}" design="Bold"/>
+                            </VBox>
+                        </HBox>
                     </Panel>
 
-                    <!-- Leave Details -->
+                    <!-- Leave Details Card -->
                     <Panel headerText="{i18n>leaveDetailsSection}" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
                         <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
                             <f:content>
@@ -54,7 +56,21 @@
                                     valueFormat="yyyy-MM-dd"
                                     displayFormat="yyyy-MM-dd"
                                     value="{createForm>/leaveRequest/StartDate}"
-                                    change=".onDatesChange"/>
+                                    change=".onDatesChange">
+                                    <layoutData>
+                                        <l:GridData span="XL5 L5 M5 S8"/>
+                                    </layoutData>
+                                </DatePicker>
+                                <Select id="rbHalfDayPeriod"
+                                    selectedKey="{createForm>/leaveRequest/StartSession}" 
+                                    change=".onDatesChange">
+                                    <layoutData>
+                                        <l:GridData span="XL4 L4 M4 S4"/>
+                                    </layoutData>
+                                    <core:Item key="Full" text="Full Day"/>
+                                    <core:Item key="Morning" text="Morning"/>
+                                    <core:Item key="Afternoon" text="Afternoon"/>
+                                </Select>
 
                                 <Label text="{i18n>endDate}" required="true"/>
                                 <DatePicker id="dpEndDate" 
@@ -62,78 +78,113 @@
                                     valueFormat="yyyy-MM-dd"
                                     displayFormat="yyyy-MM-dd"
                                     value="{createForm>/leaveRequest/EndDate}"
-                                    change=".onDatesChange"/>
+                                    change=".onDatesChange">
+                                    <layoutData>
+                                        <l:GridData span="XL5 L5 M5 S8"/>
+                                    </layoutData>
+                                </DatePicker>
+                                <Select selectedKey="{createForm>/leaveRequest/EndSession}" 
+                                    change=".onDatesChange">
+                                    <layoutData>
+                                        <l:GridData span="XL4 L4 M4 S4"/>
+                                    </layoutData>
+                                    <core:Item key="Full" text="Full Day"/>
+                                    <core:Item key="Morning" text="Morning"/>
+                                    <core:Item key="Afternoon" text="Afternoon"/>
+                                </Select>
 
-                                <Label text="{i18n>duration}"/>
-                                <Input value="{createForm>/leaveRequest/TotalDays}" editable="false" description="Days"/>
-
-                                <Label text="{i18n>halfDayLeave}"/>
-                                <CheckBox selected="{createForm>/leaveRequest/HalfDay}" select=".onHalfDaySelect"/>
-
-                                <Label text="{i18n>halfDayPeriod}" visible="{createForm>/leaveRequest/HalfDay}"/>
-                                <RadioButtonGroup id="rbHalfDayPeriod" 
-                                    visible="{createForm>/leaveRequest/HalfDay}" 
-                                    select=".onHalfDayPeriodSelect"
-                                    columns="2">
-                                    <RadioButton text="{i18n>morning}" key="Morning"/>
-                                    <RadioButton text="{i18n>afternoon}" key="Afternoon"/>
-                                </RadioButtonGroup>
+                                <Label text="Approver" required="true"/>
+                                <ComboBox id="cmbApprover"
+                                    required="true"
+                                    placeholder="Select Approver"
+                                    selectedKey="{createForm>/leaveRequest/ApproverId}"
+                                    selectionChange=".onApproverChange"
+                                    items="{createForm>/managers}">
+                                    <core:ListItem key="{createForm>ManagerUser}" text="{createForm>ManagerName}" additionalText="{createForm>ManagerUser}"/>
+                                </ComboBox>
                             </f:content>
                         </f:SimpleForm>
                     </Panel>
 
-                    <!-- Reason -->
+                    <!-- Reason Card -->
                     <Panel headerText="{i18n>reasonSection}" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
                         <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
                             <f:content>
                                 <Label text="{i18n>reason}"/>
                                 <TextArea value="{createForm>/leaveRequest/Reason}" 
-                                    rows="4" 
+                                    rows="5" 
+                                    growing="true"
                                     maxLength="500" 
-                                    placeholder="Enter reason (optional, min 5 chars)..."
+                                    placeholder="Hãy nhập lý do xin nghỉ chi tiết của bạn tại đây (tối thiểu 5 ký tự)..."
                                     liveChange=".onDatesChange"/>
                             </f:content>
                         </f:SimpleForm>
                     </Panel>
 
-                    <!-- Attachments -->
+                    <!-- Attachments Card -->
                     <Panel headerText="{i18n>attachmentsSection}" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
                         <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
                             <f:content>
-                                <Label text="Attachment URL"/>
-                                <Input id="inpAttachmentUrl" value="{createForm>/leaveRequest/AttachmentUrl}" placeholder="Enter attachment URL link..."/>
+                                <Label text="Attachment"/>
+                                <unified:FileUploader id="inpAttachmentUrl" 
+                                    value="{createForm>/leaveRequest/AttachmentUrl}" 
+                                    buttonText="Browse..."
+                                    placeholder="Choose a file for attachment..."
+                                    width="100%"/>
                             </f:content>
                         </f:SimpleForm>
                     </Panel>
                 </VBox>
 
-                <!-- Right Column: Request Summary -->
-                <Panel id="summaryPanel" headerText="{i18n>requestSummarySection}" backgroundDesign="Translucent">
+                <!-- Right Column: Request Summary Card (30%) -->
+                <Panel id="summaryPanel" headerText="{i18n>requestSummarySection}" backgroundDesign="Translucent" class="sapUiSmallMarginBottom">
                     <layoutData>
                         <l:GridData span="XL4 L4 M12 S12"/>
                     </layoutData>
                     <VBox class="sapUiContentPadding">
-                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom">
+                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom" alignItems="Center">
                             <Label text="Leave Type:" design="Bold"/>
                             <Text text="{createForm>/summary/LeaveType}"/>
                         </HBox>
-                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom">
+                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom" alignItems="Center">
                             <Label text="Duration:" design="Bold"/>
                             <Text text="{createForm>/summary/Duration}"/>
                         </HBox>
-                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom">
+                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom" alignItems="Center">
                             <Label text="Remaining Balance:" design="Bold"/>
                             <Text text="{createForm>/summary/RemainingBalance}"/>
                         </HBox>
-                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom">
+                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom" alignItems="Center">
                             <Label text="Approver:" design="Bold"/>
                             <Text text="{createForm>/summary/Approver}"/>
                         </HBox>
-                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom">
+                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom" alignItems="Center">
                             <Label text="Status:" design="Bold"/>
                             <ObjectStatus text="{createForm>/summary/Status}" state="Warning"/>
                         </HBox>
                     </VBox>
+                </Panel>
+
+                <!-- Right Column: Leave Balance Card (30%) -->
+                <Panel headerText="Leave Balance" backgroundDesign="Translucent" class="sapUiSmallMarginBottom">
+                    <layoutData>
+                        <l:GridData span="XL4 L4 M12 S12"/>
+                    </layoutData>
+                    <List items="{/LeaveQuota}" noDataText="No leave balance data available">
+                        <CustomListItem>
+                            <VBox class="sapUiContentPadding">
+                                <HBox justify="SpaceBetween" alignItems="Center">
+                                    <Label text="{LeaveTypeName}" design="Bold"/>
+                                    <Text text="{RemainingDays} / {TotalDays} Days"/>
+                                </HBox>
+                                <ProgressIndicator
+                                    percentValue="{= ${TotalDays} > 0 ? (${RemainingDays} / ${TotalDays}) * 100 : 0 }"
+                                    displayValue="{RemainingDays} Days Remaining"
+                                    state="{= ${RemainingDays} > 5 ? 'Success' : ${RemainingDays} > 2 ? 'Warning' : 'Error' }"
+                                    class="sapUiTinyMarginTop"/>
+                            </VBox>
+                        </CustomListItem>
+                    </List>
                 </Panel>
             </l:Grid>
         </content>
@@ -147,6 +198,7 @@
                     enabled="{createForm>/employeeRegistered}"/>
                 <Button id="btnSaveDraft"
                     text="{i18n>saveDraft}"
+                    type="Ghost"
                     press=".onSaveDraft"
                     enabled="{createForm>/employeeRegistered}"/>
                 <Button id="btnCancel" text="{i18n>cancel}" type="Transparent" press=".onCancel"/>
