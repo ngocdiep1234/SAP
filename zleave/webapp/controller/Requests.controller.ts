@@ -751,32 +751,30 @@ export default class Requests extends Controller {
     }
 
     private _autoDetectAdminView(): void {
-        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
         const oTable = this.getView().byId("tableRequests") as InstanceType<typeof Table> | undefined;
         if (!oTable) { return; }
 
-        console.log("[DEBUG] [AdminViewCheck] Checking admin access via /LeaveRequestAdmin...");
-        oModel.read("/LeaveRequestAdmin", {
-            urlParameters: { "$top": "1" },
-            success: () => {
-                console.log("[DEBUG] [AdminViewCheck] Admin check SUCCESS. User is admin.");
-                // User có quyền admin → rebind table sang LeaveRequestAdmin
+        this._getCurrentUser()
+            .then((oCurrentUser) => {
+                console.log("[DEBUG] [AdminViewCheck] Current user role:", oCurrentUser.role);
+
+                const sPath = oCurrentUser.role === "HR Admin" ? "/LeaveRequestAdmin" : "/LeaveRequest";
+                console.log("[DEBUG] [AdminViewCheck] Binding table to " + sPath);
+
                 const oBindingInfo = oTable.getBindingInfo("items") as any;
-                if (oBindingInfo && oBindingInfo.path !== "/LeaveRequestAdmin") {
-                    console.log("[DEBUG] [AdminViewCheck] Rebinding table to /LeaveRequestAdmin");
-                    oBindingInfo.path = "/LeaveRequestAdmin";
+                if (oBindingInfo && oBindingInfo.path !== sPath) {
+                    oBindingInfo.path = sPath;
                     oTable.bindItems(oBindingInfo);
-                    // Re-apply filter sau khi rebind
+
                     const oSegmentedButton = this.getView().byId("filterStatusButton") as InstanceType<typeof SegmentedButton> | undefined;
                     const sKey = oSegmentedButton ? oSegmentedButton.getSelectedKey() : "pending";
                     void this._applyFilters(sKey);
                 }
-            },
-            error: (oErr: any) => {
-                console.log("[DEBUG] [AdminViewCheck] Admin check FAILED. User is standard employee. Error details:", oErr);
-                // User thường → giữ nguyên /LeaveRequest binding từ XML view
-            }
-        });
+            })
+            .catch((oErr: unknown) => {
+                console.error("[DEBUG] [AdminViewCheck] Failed to get current user:", oErr);
+                // Fallback: giữ nguyên binding mặc định từ XML view
+            });
     }
 }
 
