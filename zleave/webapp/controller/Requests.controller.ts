@@ -27,6 +27,7 @@ export default class Requests extends Controller {
     }
 
     private _onPatternMatched(): void {
+        console.log("[DEBUG] Requests page loaded. Initializing pattern match...");
         const oUiModel = this.getView().getModel("ui") as any;
         if (oUiModel) {
             oUiModel.setProperty("/selectedSection", "requests");
@@ -184,6 +185,7 @@ export default class Requests extends Controller {
 
         const oCachedUser = oUiModel.getProperty("/currentUser") as any;
         if (oCachedUser && oCachedUser.employeeId && oCachedUser.role) {
+            console.log("[DEBUG] Current user role from cache:", oCachedUser.role, oCachedUser);
             return oCachedUser as { registered: boolean; employeeId: string; employeeName: string; role: string };
         }
 
@@ -231,6 +233,7 @@ export default class Requests extends Controller {
                             role: String(oEmp["PositionTitle"] ?? "Employee")
                         };
                         oUiModel.setProperty("/currentUser", oUserObj);
+                        console.log("[DEBUG] Current user role loaded from Employee query:", oUserObj.role, oUserObj);
                         return oUserObj;
                     }
                 } catch (oErr) {
@@ -246,6 +249,7 @@ export default class Requests extends Controller {
             role: "Employee"
         };
         oUiModel.setProperty("/currentUser", oMockUser);
+        console.log("[DEBUG] Current user role fallback (mock):", oMockUser.role, oMockUser);
         return oMockUser;
     }
 
@@ -751,12 +755,15 @@ export default class Requests extends Controller {
         const oTable = this.getView().byId("tableRequests") as InstanceType<typeof Table> | undefined;
         if (!oTable) { return; }
 
+        console.log("[DEBUG] [AdminViewCheck] Checking admin access via /LeaveRequestAdmin...");
         oModel.read("/LeaveRequestAdmin", {
             urlParameters: { "$top": "1" },
             success: () => {
+                console.log("[DEBUG] [AdminViewCheck] Admin check SUCCESS. User is admin.");
                 // User có quyền admin → rebind table sang LeaveRequestAdmin
                 const oBindingInfo = oTable.getBindingInfo("items") as any;
                 if (oBindingInfo && oBindingInfo.path !== "/LeaveRequestAdmin") {
+                    console.log("[DEBUG] [AdminViewCheck] Rebinding table to /LeaveRequestAdmin");
                     oBindingInfo.path = "/LeaveRequestAdmin";
                     oTable.bindItems(oBindingInfo);
                     // Re-apply filter sau khi rebind
@@ -765,7 +772,8 @@ export default class Requests extends Controller {
                     void this._applyFilters(sKey);
                 }
             },
-            error: () => {
+            error: (oErr: any) => {
+                console.log("[DEBUG] [AdminViewCheck] Admin check FAILED. User is standard employee. Error details:", oErr);
                 // User thường → giữ nguyên /LeaveRequest binding từ XML view
             }
         });
