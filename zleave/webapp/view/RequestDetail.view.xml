@@ -1,0 +1,235 @@
+<mvc:View controllerName="zleave.zleave.controller.RequestDetail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:uxap="sap.uxap"
+    xmlns:core="sap.ui.core"
+    xmlns:unified="sap.ui.unified">
+    <uxap:ObjectPageLayout id="requestDetailPageLayout" showTitleInHeaderContent="true" showHeaderContent="true" busy="{detailUi>/busy}">
+        <uxap:headerTitle>
+            <uxap:ObjectPageHeader id="requestDetailHeader"
+                objectTitle="Request Details: {RequestId}"
+                objectSubtitle="Employee: {EmployeeId} | Type: {LeaveType}">
+                <uxap:actions>
+                    <Button id="btnEdit" text="Edit" type="Emphasized" press=".onEdit" 
+                        visible="{= ${Status} === 'SUBMITTED' &amp;&amp; !${detailUi>/editMode} }" />
+                    <Button id="btnUpdate" text="Save" type="Emphasized" press=".onUpdate" 
+                        visible="{detailUi>/editMode}" />
+                    <Button id="btnCancelEdit" text="Cancel Edit" type="Transparent" press=".onCancelEdit" 
+                        visible="{detailUi>/editMode}" />
+                    <Button id="btnCancelRequest" text="Cancel Request" type="Reject" press=".onCancelRequest" 
+                        visible="{= ${Status} === 'SUBMITTED' &amp;&amp; !${detailUi>/editMode} }" />
+                    <Button id="btnBack" text="Back" type="Default" press=".onNavBack" />
+                </uxap:actions>
+            </uxap:ObjectPageHeader>
+        </uxap:headerTitle>
+
+        <uxap:headerContent>
+            <FlexBox id="headerContentFlex" wrap="Wrap" alignItems="Center">
+                <Label text="Current Status: " class="sapUiTinyMarginEnd" />
+                <ObjectStatus text="{Status}" 
+                    state="{= ${Status} === 'APPROVED' ? 'Success' : ${Status} === 'REJECTED' ? 'Error' : ${Status} === 'SUBMITTED' || ${Status} === 'PENDING' ? 'Warning' : 'None' }"/>
+            </FlexBox>
+        </uxap:headerContent>
+
+        <uxap:sections>
+            <!-- Section 2: Leave Information -->
+            <uxap:ObjectPageSection id="secLeaveInfo" title="Leave Information">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="subSecLeaveInfo" title="">
+                        <f:SimpleForm id="formLeaveInfo" editable="{detailUi>/editMode}" layout="ResponsiveGridLayout"
+                            labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
+                            <f:content>
+                                <Label text="Employee ID" />
+                                <Text text="{EmployeeId}" />
+
+                                <Label text="Leave Type" required="true" />
+                                <Text text="{LeaveType}" visible="{= !${detailUi>/editMode} }" />
+                                <ComboBox id="cmbLeaveType" 
+                                    required="true"
+                                    placeholder="Select Leave Type"
+                                    selectedKey="{LeaveType}"
+                                    selectionChange=".onLeaveTypeChange"
+                                    visible="{detailUi>/editMode}"
+                                    items="{detailUi>/leaveTypes}">
+                                    <core:Item key="{detailUi>LeaveType}" text="{detailUi>LeaveName}"/>
+                                </ComboBox>
+
+                                <Label text="Start Date" required="true" />
+                                <Text text="{path: 'StartDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" 
+                                    visible="{= !${detailUi>/editMode} }" />
+                                <DatePicker id="dpStartDate" 
+                                    required="true" 
+                                    valueFormat="yyyy-MM-dd"
+                                    displayFormat="yyyy-MM-dd"
+                                    value="{path: 'StartDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"
+                                    change=".onDatesChange"
+                                    visible="{detailUi>/editMode}" />
+
+                                <Label text="Start Session" />
+                                <Text text="{path: 'StartSession', formatter: '.formatSession'}" 
+                                    visible="{= !${detailUi>/editMode} }" />
+                                <Select id="selStartSession"
+                                    selectedKey="{StartSession}" 
+                                    change=".onDatesChange"
+                                    visible="{detailUi>/editMode}">
+                                    <core:Item key="" text="Full Day"/>
+                                    <core:Item key="M" text="Morning"/>
+                                    <core:Item key="A" text="Afternoon"/>
+                                </Select>
+
+                                <Label text="End Date" required="true" />
+                                <Text text="{path: 'EndDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" 
+                                    visible="{= !${detailUi>/editMode} }" />
+                                <DatePicker id="dpEndDate" 
+                                    required="true" 
+                                    valueFormat="yyyy-MM-dd"
+                                    displayFormat="yyyy-MM-dd"
+                                    value="{path: 'EndDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"
+                                    change=".onDatesChange"
+                                    visible="{detailUi>/editMode}" />
+
+                                <Label text="End Session" />
+                                <Text text="{path: 'EndSession', formatter: '.formatSession'}" 
+                                    visible="{= !${detailUi>/editMode} }" />
+                                <Select id="selEndSession"
+                                    selectedKey="{EndSession}" 
+                                    change=".onDatesChange"
+                                    visible="{detailUi>/editMode}">
+                                    <core:Item key="" text="Full Day"/>
+                                    <core:Item key="M" text="Morning"/>
+                                    <core:Item key="A" text="Afternoon"/>
+                                </Select>
+
+                                <Label text="Total Days" />
+                                <Text text="{path: 'TotalDays', type: 'sap.ui.model.type.Float', formatOptions: {minFractionDigits: 0, maxFractionDigits: 1}}" />
+                            </f:content>
+                        </f:SimpleForm>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Section 3: Reason -->
+            <uxap:ObjectPageSection id="secReason" title="Reason">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="subSecReason" title="">
+                        <f:SimpleForm id="formReason" editable="{detailUi>/editMode}" layout="ResponsiveGridLayout"
+                            labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
+                            <f:content>
+                                <Label text="Reason" required="true" />
+                                <TextArea id="taReason"
+                                    value="{Reason}" 
+                                    rows="4" 
+                                    growing="true"
+                                    editable="{detailUi>/editMode}" 
+                                    width="100%" 
+                                    placeholder="Enter reason for the leave (at least 5 characters)..."
+                                    liveChange=".onDatesChange" />
+                            </f:content>
+                        </f:SimpleForm>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Section 4: Attachments -->
+            <uxap:ObjectPageSection id="secAttachment" title="Attachments">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="subSecAttachment" title="">
+                        <f:SimpleForm id="formAttachment" editable="{detailUi>/editMode}" layout="ResponsiveGridLayout"
+                            labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
+                            <f:content>
+                                <Label text="Current Attachment" />
+                                <VBox id="attachmentBox" class="sapUiTinyMarginBottom">
+                                    <HBox wrap="Wrap" alignItems="Center" visible="{= !!${FileName} }">
+                                        <core:Icon src="sap-icon://attachment" class="sapUiTinyMarginEnd" />
+                                        <Text text="{FileName}" class="sapUiSmallMarginEnd" />
+                                        <Button id="btnDownload" text="Download" icon="sap-icon://download" press=".onDownloadAttachment" class="sapUiTinyMarginEnd" />
+                                        <Button id="btnOpen" text="Open/View" icon="sap-icon://open-folder" press=".onOpenAttachment" />
+                                    </HBox>
+                                    <Text text="No attachment available" visible="{= !${FileName} }" />
+                                </VBox>
+
+                                <Label text="Upload New File" visible="{detailUi>/editMode}" />
+                                <VBox id="uploadBox" visible="{detailUi>/editMode}">
+                                    <unified:FileUploader id="fileUploader"
+                                        buttonText="Browse..."
+                                        placeholder="Choose a PDF, JPG, JPEG, or PNG file..."
+                                        fileType="pdf,jpg,jpeg,png"
+                                        maximumFileSize="10"
+                                        fileSizeExceeds=".onFileSizeExceeds"
+                                        typeMissmatch=".onTypeMismatch"
+                                        change=".onFileChange"
+                                        width="100%" />
+                                    <Button id="btnUpload" text="Upload" icon="sap-icon://upload" 
+                                        press=".onUploadAttachment" 
+                                        enabled="{detailUi>/uploadButtonEnabled}" 
+                                        class="sapUiTinyMarginTop" />
+                                    <ProgressIndicator id="uploadProgress" 
+                                        percentValue="{detailUi>/uploadProgress}" 
+                                        displayValue="{detailUi>/uploadProgress}%" 
+                                        visible="{detailUi>/uploading}" 
+                                        class="sapUiTinyMarginTop" />
+                                    <Text id="uploadStatusText" text="{detailUi>/uploadStatusText}" 
+                                        visible="{= ${detailUi>/uploadStatusText} !== '' }" 
+                                        class="sapUiTinyMarginTop" />
+                                </VBox>
+                            </f:content>
+                        </f:SimpleForm>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Section 5: Approval Information -->
+            <uxap:ObjectPageSection id="secApproval" title="Approval Information">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="subSecApproval" title="">
+                        <f:SimpleForm id="formApproval" editable="{detailUi>/isHrAdmin}" layout="ResponsiveGridLayout"
+                            labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
+                            <f:content>
+                                <Label text="Approver ID" />
+                                <Text text="{ApproverId}" />
+
+                                <Label text="Status" />
+                                <ObjectStatus text="{Status}" 
+                                    state="{= ${Status} === 'APPROVED' ? 'Success' : ${Status} === 'REJECTED' ? 'Error' : ${Status} === 'SUBMITTED' || ${Status} === 'PENDING' ? 'Warning' : 'None' }"/>
+
+                                <Label text="Approval Comment" />
+                                <TextArea id="taApprovalComment"
+                                    value="{ApprovalComment}" 
+                                    rows="3" 
+                                    growing="true"
+                                    editable="{detailUi>/isHrAdmin}" 
+                                    width="100%" 
+                                    placeholder="Enter approver's feedback (HR Admin only)..." />
+                            </f:content>
+                        </f:SimpleForm>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Section 6: Audit Information -->
+            <uxap:ObjectPageSection id="secAudit" title="Audit Information">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection id="subSecAudit" title="">
+                        <f:SimpleForm id="formAudit" editable="false" layout="ResponsiveGridLayout"
+                            labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
+                            <f:content>
+                                <Label text="Created By" />
+                                <Text text="{CreatedBy}" />
+
+                                <Label text="Created At" />
+                                <Text text="{path: 'CreatedAt', type: 'sap.ui.model.type.DateTime', formatOptions: {pattern: 'yyyy-MM-dd HH:mm:ss'}}" />
+
+                                <Label text="Last Changed By" />
+                                <Text text="{LastChangedBy}" />
+
+                                <Label text="Last Changed At" />
+                                <Text text="{path: 'LastChangedAt', type: 'sap.ui.model.type.DateTime', formatOptions: {pattern: 'yyyy-MM-dd HH:mm:ss'}}" />
+                            </f:content>
+                        </f:SimpleForm>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+        </uxap:sections>
+    </uxap:ObjectPageLayout>
+</mvc:View>

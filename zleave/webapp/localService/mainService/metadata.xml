@@ -43,7 +43,7 @@
 <edmx:DataServices m:DataServiceVersion="2.0">
 <Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="cds_zui_leave_mgmt" xml:lang="vi" sap:schema-version="1">
 <Annotation xmlns="http://docs.oasis-open.org/odata/ns/edm" Term="Core.SchemaVersion" String="1.0.0"/>
-<EntityType Name="LeaveRequestType" sap:content-version="1">
+<EntityType Name="LeaveRequestType" m:HasStream="true" sap:content-version="1">
 <Key>
 <PropertyRef Name="UUID"/>
 </Key>
@@ -64,7 +64,8 @@
 <Property Name="Status" Type="Edm.String" MaxLength="10" sap:creatable="false" sap:updatable="false"/>
 <Property Name="StatusCriticality" Type="Edm.Byte"/>
 <Property Name="Reason" Type="Edm.String"/>
-<Property Name="AttachmentUrl" Type="Edm.String" MaxLength="255"/>
+<Property Name="MimeType" Type="Edm.String" MaxLength="128"/>
+<Property Name="FileName" Type="Edm.String" MaxLength="128"/>
 <Property Name="CreatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:creatable="false" sap:updatable="false"/>
 <Property Name="ApprovalComment" Type="Edm.String" MaxLength="255"/>
 <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
@@ -90,7 +91,7 @@
 <PropertyRef Name="LeaveTypeId"/>
 <PropertyRef Name="QuotaYear"/>
 </Key>
-<Property Name="EmployeeId" Type="Edm.String" Nullable="false" MaxLength="10" sap:display-format="NonNegative"/>
+<Property Name="EmployeeId" Type="Edm.String" Nullable="false" MaxLength="10"/>
 <Property Name="LeaveTypeId" Type="Edm.String" Nullable="false" MaxLength="5"/>
 <Property Name="QuotaYear" Type="Edm.String" Nullable="false" MaxLength="4" sap:display-format="NonNegative"/>
 <Property Name="LeaveTypeName" Type="Edm.String" MaxLength="50"/>
@@ -103,7 +104,7 @@
 <Property Name="ValidTo" Type="Edm.DateTime" Precision="0" sap:display-format="Date"/>
 <Property Name="RemCriticality" Type="Edm.Byte"/>
 </EntityType>
-<EntityType Name="LeaveRequestAdminType" sap:content-version="1">
+<EntityType Name="LeaveRequestAdminType" m:HasStream="true" sap:content-version="1">
 <Key>
 <PropertyRef Name="UUID"/>
 </Key>
@@ -120,7 +121,8 @@
 <Property Name="Status" Type="Edm.String" MaxLength="10"/>
 <Property Name="StatusCriticality" Type="Edm.Byte"/>
 <Property Name="ApprovalComment" Type="Edm.String" MaxLength="255"/>
-<Property Name="AttachmentUrl" Type="Edm.String" MaxLength="255"/>
+<Property Name="MimeType" Type="Edm.String" MaxLength="128"/>
+<Property Name="FileName" Type="Edm.String" MaxLength="128"/>
 <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)"/>
 <Property Name="LastChangedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
 <Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)"/>
@@ -397,6 +399,40 @@
 </Record>
 </Annotation>
 </Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.LeaveRequestAdminType">
+<Annotation Term="SAP__core.AcceptableMediaTypes">
+<Collection>
+<String>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</String>
+<String>application/vnd.openxmlformats-officedocument.wordprocessingml.document</String>
+<String>image/jpeg</String>
+<String>image/png</String>
+<String>application/pdf</String>
+</Collection>
+</Annotation>
+<Annotation Term="SAP__core.ContentDisposition">
+<Record>
+<PropertyValue Property="Filename" Path="FileName"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__core.MediaType" Path="MimeType"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.LeaveRequestType">
+<Annotation Term="SAP__core.AcceptableMediaTypes">
+<Collection>
+<String>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</String>
+<String>application/vnd.openxmlformats-officedocument.wordprocessingml.document</String>
+<String>image/jpeg</String>
+<String>image/png</String>
+<String>application/pdf</String>
+</Collection>
+</Annotation>
+<Annotation Term="SAP__core.ContentDisposition">
+<Record>
+<PropertyValue Property="Filename" Path="FileName"/>
+</Record>
+</Annotation>
+<Annotation Term="SAP__core.MediaType" Path="MimeType"/>
+</Annotations>
 <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities">
 <Annotation Term="Common.ApplyMultiUnitBehaviorForSortingAndFiltering" Bool="true"/>
 </Annotations>
@@ -488,6 +524,12 @@
 </PropertyValue>
 </Record>
 </Annotation>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.LeaveRequestAdminType/MimeType">
+<Annotation Term="SAP__core.IsMediaType"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.LeaveRequestType/MimeType">
+<Annotation Term="SAP__core.IsMediaType"/>
 </Annotations>
 <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities">
 <Annotation Term="Org.OData.Capabilities.V1.BatchSupport">

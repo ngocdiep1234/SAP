@@ -32,7 +32,6 @@ export interface LeaveRequestPayload {
     StartDate: Date;
     EndDate: Date;
     Reason: string;
-    AttachmentUrl: string;
     ApproverId: string;
     StartSession?: string;
     EndSession?: string;
@@ -164,16 +163,81 @@ export default class LeaveRequestService {
      * @returns A Promise that resolves when the create succeeds or rejects
      *          with a human-readable error string.
      */
-    public createLeaveRequest(oPayload: LeaveRequestPayload): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
+    public createLeaveRequest(oPayload: LeaveRequestPayload): Promise<{ UUID: string }> {
+        return new Promise<{ UUID: string }>((resolve, reject) => {
             this._oModel.create("/LeaveRequest", oPayload, {
-                success: (): void => {
+                success: (oData: any): void => {
                     // Refresh the model cache so other views see the new entry.
                     try {
                         this._oModel.refresh(true);
                     } catch {
                         // Non-fatal – navigation will reload data anyway.
                     }
+                    resolve(oData);
+                },
+                error: (oErr: { responseText?: string; message?: string }): void => {
+                    reject(parseODataError(oErr));
+                }
+            });
+        });
+    }
+
+    /**
+     * Uploads a file associated with a LeaveRequest.
+     *
+     * @param sUuid - The UUID of the LeaveRequest.
+     * @param oFile - The File object to upload.
+     * @returns A Promise that resolves when the upload succeeds or rejects with an error message.
+     */
+    public uploadAttachment(sUuid: string, oFile: File): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            const oModel = this._oModel;
+            let sServiceUrl = oModel.sServiceUrl;
+            if (sServiceUrl.endsWith("/")) {
+                sServiceUrl = sServiceUrl.slice(0, -1);
+            }
+            const sUrl = `${sServiceUrl}/LeaveRequest(guid'${sUuid}')/$value`;
+            const sToken = oModel.getSecurityToken() || "";
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("PUT", sUrl, true);
+            xhr.setRequestHeader("x-csrf-token", sToken);
+            xhr.setRequestHeader("Slug", oFile.name);
+            if (oFile.type) {
+                xhr.setRequestHeader("Content-Type", oFile.type);
+            }
+
+            xhr.onload = (): void => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    resolve();
+                } else {
+                    reject(`Upload failed with status: ${xhr.status} ${xhr.statusText}`);
+                }
+            };
+
+            xhr.onerror = (): void => {
+                reject("Upload failed due to a network error.");
+            };
+
+            xhr.send(oFile);
+        });
+    }
+
+    /**
+     * Updates metadata properties (MimeType, FileName) of a LeaveRequest if required by the backend.
+     *
+     * @param sUuid - The UUID of the LeaveRequest.
+     * @param sFileName - The file name.
+     * @param sMimeType - The mime type.
+     * @returns A Promise that resolves on success.
+     */
+    public updateAttachmentMetadata(sUuid: string, sFileName: string, sMimeType: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this._oModel.update(`/LeaveRequest(guid'${sUuid}')`, {
+                FileName: sFileName,
+                MimeType: sMimeType
+            }, {
+                success: (): void => {
                     resolve();
                 },
                 error: (oErr: { responseText?: string; message?: string }): void => {

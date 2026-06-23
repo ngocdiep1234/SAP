@@ -19,7 +19,6 @@ interface LeaveRequest {
     TotalDays: number;
     HalfDay: boolean;
     Reason: string;
-    AttachmentUrl: string;
     ApproverId: string;
     StartSession: string;
     EndSession: string;
@@ -70,6 +69,7 @@ interface CreateFormModel {
 export default class CreateRequest extends Controller {
 
     private _oService: LeaveRequestService;
+    private _selectedFile: File | null = null;
 
     // -----------------------------------------------------------------------
     // Lifecycle
@@ -84,7 +84,6 @@ export default class CreateRequest extends Controller {
                 TotalDays: 0,
                 HalfDay: false,
                 Reason: "",
-                AttachmentUrl: "",
                 ApproverId: "",
                 StartSession: "Full",
                 EndSession: "Full"
@@ -547,7 +546,6 @@ export default class CreateRequest extends Controller {
             StartDate: new Date(oRequest.StartDate!),
             EndDate: new Date(oRequest.EndDate!),
             Reason: oRequest.Reason,
-            AttachmentUrl: oRequest.AttachmentUrl,
             ApproverId: oRequest.ApproverId || (oFormModel.getProperty("/employee/ManagerID") as string) || "",
             StartSession: mapSession(oRequest.StartSession),
             EndSession: mapSession(oRequest.EndSession)
@@ -556,27 +554,88 @@ export default class CreateRequest extends Controller {
         this.getView().setBusy(true);
         oFormModel.setProperty("/busy", true);
 
-        void oService.createLeaveRequest(oPayload)
-            .then((): void => {
-                this.getView().setBusy(false);
-                oFormModel.setProperty("/busy", false);
+        if (this._selectedFile) {
+            let bCreated = false;
+            oService.createLeaveRequest(oPayload)
+                .then((oCreatedData: { UUID: string }): Promise<void> => {
+                    bCreated = true;
+                    const sUuid = oCreatedData.UUID;
+                    return oService.uploadAttachment(sUuid, this._selectedFile!);
+                })
+                .then((): void => {
+                    this.getView().setBusy(false);
+                    oFormModel.setProperty("/busy", false);
+                    MessageBox.success("Leave Request created successfully.", {
+                        onClose: (): void => {
+                            this._navToRequests();
+                        }
+                    });
+                })
+                .catch((sErr: unknown): void => {
+                    this.getView().setBusy(false);
+                    oFormModel.setProperty("/busy", false);
+                    if (bCreated) {
+                        MessageBox.error(
+                            "Leave request was created, but the attachment upload failed: " + (typeof sErr === "string" ? sErr : "Unknown error") + ". You can upload the attachment later.",
+                            {
+                                onClose: (): void => {
+                                    this._navToRequests();
+                                }
+                            }
+                        );
+                    } else {
+                        MessageBox.error(
+                            typeof sErr === "string"
+                                ? sErr
+                                : "An error occurred while submitting the leave request."
+                        );
+                    }
+                });
+        } else {
+            oService.createLeaveRequest(oPayload)
+                .then((): void => {
+                    this.getView().setBusy(false);
+                    oFormModel.setProperty("/busy", false);
+                    MessageBox.success("Leave Request created successfully.", {
+                        onClose: (): void => {
+                            this._navToRequests();
+                        }
+                    });
+                })
+                .catch((sErr: unknown): void => {
+                    this.getView().setBusy(false);
+                    oFormModel.setProperty("/busy", false);
+                    MessageBox.error(
+                        typeof sErr === "string"
+                            ? sErr
+                            : "An error occurred while submitting the leave request."
+                    );
+                });
+        }
+    }
 
-                const sMessage = sStatus === "Draft"
-                    ? oResourceBundle?.getText("successDraft") || "Leave request draft saved successfully."
-                    : oResourceBundle?.getText("successSubmit") || "Leave request submitted successfully.";
-                MessageToast.show(sMessage);
-                this._navToRequests();
-            })
-            .catch((sErr: unknown): void => {
-                this.getView().setBusy(false);
-                oFormModel.setProperty("/busy", false);
+    // -----------------------------------------------------------------------
+    // Upload Set Handlers
+    // -----------------------------------------------------------------------
 
-                MessageBox.error(
-                    typeof sErr === "string"
-                        ? sErr
-                        : "An error occurred while submitting the leave request."
-                );
-            });
+    public onAfterItemAdded(oEvent: any): void {
+        const oUploadSet = oEvent.getSource() as any;
+        const oItem = oEvent.getParameter("item") as any;
+
+        // Enforce single file selection
+        const aItems = oUploadSet.getItems() as any[];
+        aItems.forEach((oUploadSetItem) => {
+            if (oUploadSetItem !== oItem) {
+                oUploadSet.removeItem(oUploadSetItem);
+            }
+        });
+
+        const oFile = oItem.getFileObject() as File;
+        this._selectedFile = oFile;
+    }
+
+    public onAfterItemRemoved(oEvent: any): void {
+        this._selectedFile = null;
     }
 
     // -----------------------------------------------------------------------
@@ -614,6 +673,11 @@ export default class CreateRequest extends Controller {
 
     private _resetForm(): void {
         const oFormModel = this._getFormModel();
+        this._selectedFile = null;
+        const oUploadSet = this.byId("uploadSet") as any;
+        if (oUploadSet) {
+            oUploadSet.destroyItems();
+        }
         oFormModel.setProperty("/leaveRequest", {
             LeaveType: "",
             StartDate: null,
@@ -621,7 +685,6 @@ export default class CreateRequest extends Controller {
             TotalDays: 0,
             HalfDay: false,
             Reason: "",
-            AttachmentUrl: "",
             ApproverId: oFormModel.getProperty("/employee/ManagerID") || "",
             StartSession: "Full",
             EndSession: "Full"

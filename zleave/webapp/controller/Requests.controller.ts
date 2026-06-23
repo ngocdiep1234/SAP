@@ -117,35 +117,11 @@ export default class Requests extends Controller {
             return;
         }
 
-        const sRequestId = String(oContext.getProperty("RequestId") || "Unknown");
-        const sEmployeeId = String(oContext.getProperty("EmployeeId") || "");
-
-        const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
-        const oMap = oUiModel?.getProperty("/employeesMap") as Record<string, string> | undefined;
-        const sEmployeeName = oMap && sEmployeeId && oMap[sEmployeeId] ? oMap[sEmployeeId] : sEmployeeId || "Unknown";
-
-        const sLeaveType = String(oContext.getProperty("LeaveType") || "");
-        const oStartDate = oContext.getProperty("StartDate");
-        const oEndDate = oContext.getProperty("EndDate");
-        const sStartDate = oStartDate instanceof Date ? oStartDate.toLocaleDateString() : String(oStartDate || "");
-        const sEndDate = oEndDate instanceof Date ? oEndDate.toLocaleDateString() : String(oEndDate || "");
-        const sTotalDays = String(oContext.getProperty("TotalDays") || "0");
-        const sStatus = String(oContext.getProperty("Status") || "");
-        const sReason = String(oContext.getProperty("Reason") || "No reason provided");
-
-        MessageBox.information(
-            `Request ID: ${sRequestId}\n` +
-            `Employee ID: ${sEmployeeId}\n` +
-            `Type: ${sLeaveType}\n` +
-            `Start Date: ${sStartDate}\n` +
-            `End Date: ${sEndDate}\n` +
-            `Duration: ${sTotalDays} Day(s)\n` +
-            `Status: ${sStatus}\n` +
-            `Reason: ${sReason}`,
-            {
-                title: "Leave Request Details"
-            }
-        );
+        const sUuid = String(oContext.getProperty("UUID") || "");
+        const oRouter = (this.getOwnerComponent() as any).getRouter();
+        oRouter.navTo("requestDetail", {
+            uuid: sUuid
+        });
     }
 
     public onFilterTabChange(oEvent: InstanceType<typeof Event>): void {

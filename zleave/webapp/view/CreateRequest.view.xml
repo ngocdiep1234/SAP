@@ -4,7 +4,8 @@
     xmlns:f="sap.ui.layout.form"
     xmlns:l="sap.ui.layout"
     xmlns:core="sap.ui.core"
-    xmlns:unified="sap.ui.unified">
+    xmlns:unified="sap.ui.unified"
+    xmlns:upload="sap.m.upload">
     <Page id="createRequestPage"
         title="{i18n>createLeaveRequestTitle}"
         showNavButton="true"
@@ -126,10 +127,16 @@
                         <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
                             <f:content>
                                 <Label text="Attachment"/>
-                                <unified:FileUploader id="inpAttachmentUrl" 
-                                    value="{createForm>/leaveRequest/AttachmentUrl}" 
-                                    buttonText="Browse..."
-                                    placeholder="Choose a file for attachment..."
+                                <upload:UploadSet id="uploadSet"
+                                    instantUpload="false"
+                                    multiple="false"
+                                    uploadEnabled="true"
+                                    terminationEnabled="true"
+                                    showIcons="true"
+                                    fileTypes="pdf,doc,docx,xlsx,jpg,jpeg,png"
+                                    maxFileSize="10"
+                                    afterItemAdded=".onAfterItemAdded"
+                                    afterItemRemoved=".onAfterItemRemoved"
                                     width="100%"/>
                             </f:content>
                         </f:SimpleForm>

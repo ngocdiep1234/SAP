@@ -88,6 +88,7 @@
       "libs": {
         "sap.m": {},
         "sap.tnt": {},
+        "sap.uxap": {},
         "sap.ui.core": {}
       }
     },
@@ -137,6 +138,11 @@
           "target": "requests"
         },
         {
+          "name": "requestDetail",
+          "pattern": "requests/detail/{uuid}",
+          "target": "requestDetail"
+        },
+        {
           "name": "analytics",
           "pattern": "analytics",
           "target": "analytics"
@@ -162,6 +168,12 @@
         "requests": {
           "viewName": "Requests",
           "viewId": "Requests",
+          "viewType": "XML",
+          "transition": "slide"
+        },
+        "requestDetail": {
+          "viewName": "RequestDetail",
+          "viewId": "RequestDetail",
           "viewType": "XML",
           "transition": "slide"
         },
