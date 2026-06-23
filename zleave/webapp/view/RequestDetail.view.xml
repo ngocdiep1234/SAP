@@ -5,7 +5,7 @@
     xmlns:uxap="sap.uxap"
     xmlns:core="sap.ui.core"
     xmlns:unified="sap.ui.unified">
-    <uxap:ObjectPageLayout id="requestDetailPageLayout" showTitleInHeaderContent="true" showHeaderContent="true" busy="{detailUi>/busy}">
+    <uxap:ObjectPageLayout id="requestDetailPageLayout" showTitleInHeaderContent="false" showHeaderContent="true" busy="{detailUi>/busy}">
         <uxap:headerTitle>
             <uxap:ObjectPageHeader id="requestDetailHeader"
                 objectTitle="Request Details: {RequestId}"
