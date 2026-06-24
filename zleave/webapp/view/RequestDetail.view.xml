@@ -103,6 +103,8 @@
 
                                 <Label text="Total Days" />
                                 <Text text="{path: 'TotalDays', type: 'sap.ui.model.type.Float', formatOptions: {minFractionDigits: 0, maxFractionDigits: 1}}" />
+
+
                             </f:content>
                         </f:SimpleForm>
                     </uxap:ObjectPageSubSection>
@@ -144,7 +146,6 @@
                                         <core:Icon src="sap-icon://attachment" class="sapUiTinyMarginEnd" />
                                         <Text text="{FileName}" class="sapUiSmallMarginEnd" />
                                         <Button id="btnDownload" text="Download" icon="sap-icon://download" press=".onDownloadAttachment" class="sapUiTinyMarginEnd" />
-                                        <Button id="btnOpen" text="Open/View" icon="sap-icon://open-folder" press=".onOpenAttachment" />
                                     </HBox>
                                     <Text text="No attachment available" visible="{= !${FileName} }" />
                                 </VBox>

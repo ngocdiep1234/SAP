@@ -270,7 +270,9 @@ export default class RequestDetail extends Controller {
         const sLeaveType = oContext.getProperty("LeaveType") as string;
         const oStartDate = oContext.getProperty("StartDate") as Date | null;
         const oEndDate = oContext.getProperty("EndDate") as Date | null;
-        const sReason = (oContext.getProperty("Reason") as string || "").trim();
+        // Read Reason directly from the TextArea control to avoid OData two-way binding flush issue
+        const oTaReason = this.byId("taReason") as any;
+        const sReason = (oTaReason ? oTaReason.getValue() as string : (oContext.getProperty("Reason") as string || "")).trim();
         const nTotalDays = Number(oContext.getProperty("TotalDays") ?? 0);
 
         if (!sLeaveType) {

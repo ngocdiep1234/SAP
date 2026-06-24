@@ -124,22 +124,25 @@
 
                     <!-- Attachments Card -->
                     <Panel headerText="{i18n>attachmentsSection}" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
-                        <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" labelSpanS="12">
-                            <f:content>
-                                <Label text="Attachment"/>
-                                <upload:UploadSet id="uploadSet"
-                                    instantUpload="false"
-                                    multiple="false"
-                                    uploadEnabled="true"
-                                    terminationEnabled="true"
-                                    showIcons="true"
-                                    fileTypes="pdf,doc,docx,xlsx,jpg,jpeg,png"
-                                    maxFileSize="10"
-                                    afterItemAdded=".onAfterItemAdded"
-                                    afterItemRemoved=".onAfterItemRemoved"
-                                    width="100%"/>
-                            </f:content>
-                        </f:SimpleForm>
+                        <VBox class="sapUiSmallMargin">
+                            <upload:UploadSet id="uploadSet"
+                                instantUpload="false"
+                                multiple="false"
+                                uploadEnabled="true"
+                                terminationEnabled="true"
+                                showIcons="true"
+                                fileTypes="pdf,doc,docx,xlsx,jpg,jpeg,png"
+                                maxFileSize="10"
+                                afterItemAdded=".onAfterItemAdded"
+                                afterItemRemoved=".onAfterItemRemoved"
+                                width="100%"/>
+                            <MessageStrip
+                                text="File will be uploaded automatically when you click Submit. Allowed: PDF, DOC, DOCX, XLSX, JPG, JPEG, PNG (max 10 MB)."
+                                type="Information"
+                                showIcon="true"
+                                showCloseButton="false"
+                                class="sapUiTinyMarginTop"/>
+                        </VBox>
                     </Panel>
                 </VBox>
 
@@ -202,11 +205,6 @@
                     text="{i18n>submit}"
                     type="Emphasized"
                     press=".onSubmit"
-                    enabled="{createForm>/employeeRegistered}"/>
-                <Button id="btnSaveDraft"
-                    text="{i18n>saveDraft}"
-                    type="Ghost"
-                    press=".onSaveDraft"
                     enabled="{createForm>/employeeRegistered}"/>
                 <Button id="btnCancel" text="{i18n>cancel}" type="Transparent" press=".onCancel"/>
             </OverflowToolbar>

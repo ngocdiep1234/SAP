@@ -554,15 +554,36 @@ export default class CreateRequest extends Controller {
         this.getView().setBusy(true);
         oFormModel.setProperty("/busy", true);
 
+        // Fallback: re-fetch the file from UploadSet in case afterItemAdded stored null
+        if (!this._selectedFile) {
+            const oUploadSet = this.byId("uploadSet") as any;
+            if (oUploadSet) {
+                const aIncomplete = (oUploadSet.getIncompleteItems ? oUploadSet.getIncompleteItems() : oUploadSet.getItems()) as any[];
+                if (aIncomplete && aIncomplete.length > 0) {
+                    const oFirstItem = aIncomplete[0];
+                    const oFallbackFile = oFirstItem.getFileObject ? oFirstItem.getFileObject() as File : null;
+                    if (oFallbackFile) {
+                        this._selectedFile = oFallbackFile;
+                        console.info("[CreateRequest] Recovered file from UploadSet at submit time:", oFallbackFile.name);
+                    }
+                }
+            }
+        }
+
+        console.info("[CreateRequest] _selectedFile at submit:", this._selectedFile ? this._selectedFile.name : "null (no file)");
+
         if (this._selectedFile) {
             let bCreated = false;
             oService.createLeaveRequest(oPayload)
                 .then((oCreatedData: { UUID: string }): Promise<void> => {
                     bCreated = true;
                     const sUuid = oCreatedData.UUID;
+                    console.info("[CreateRequest] LeaveRequest created with UUID:", sUuid);
                     return oService.uploadAttachment(sUuid, this._selectedFile!);
                 })
                 .then((): void => {
+                    // Refresh model AFTER upload so CSRF token is not invalidated mid-flow
+                    try { this.getView().getModel()?.refresh(true); } catch { /* non-fatal */ }
                     this.getView().setBusy(false);
                     oFormModel.setProperty("/busy", false);
                     MessageBox.success("Leave Request created successfully.", {
@@ -594,6 +615,7 @@ export default class CreateRequest extends Controller {
         } else {
             oService.createLeaveRequest(oPayload)
                 .then((): void => {
+                    try { this.getView().getModel()?.refresh(true); } catch { /* non-fatal */ }
                     this.getView().setBusy(false);
                     oFormModel.setProperty("/busy", false);
                     MessageBox.success("Leave Request created successfully.", {
@@ -622,13 +644,19 @@ export default class CreateRequest extends Controller {
         const oUploadSet = oEvent.getSource() as any;
         const oItem = oEvent.getParameter("item") as any;
 
-        // Enforce single file selection
+        // Enforce single file selection – remove any previously staged item
         const aItems = oUploadSet.getItems() as any[];
         aItems.forEach((oUploadSetItem) => {
             if (oUploadSetItem !== oItem) {
                 oUploadSet.removeItem(oUploadSetItem);
             }
         });
+
+        // Mark as "Complete" so the UploadSet does NOT render the "pending 0%" progress bar.
+        // The real upload is triggered via XHR when the user clicks Submit.
+        if (oItem.setUploadState) {
+            oItem.setUploadState("Complete");
+        }
 
         const oFile = oItem.getFileObject() as File;
         this._selectedFile = oFile;

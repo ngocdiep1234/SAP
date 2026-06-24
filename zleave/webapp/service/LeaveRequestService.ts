@@ -167,12 +167,8 @@ export default class LeaveRequestService {
         return new Promise<{ UUID: string }>((resolve, reject) => {
             this._oModel.create("/LeaveRequest", oPayload, {
                 success: (oData: any): void => {
-                    // Refresh the model cache so other views see the new entry.
-                    try {
-                        this._oModel.refresh(true);
-                    } catch {
-                        // Non-fatal – navigation will reload data anyway.
-                    }
+                    // NOTE: Do NOT call refresh(true) here — it can invalidate the CSRF token
+                    // before the subsequent file upload PUT request. Refresh happens after upload.
                     resolve(oData);
                 },
                 error: (oErr: { responseText?: string; message?: string }): void => {
@@ -192,35 +188,56 @@ export default class LeaveRequestService {
     public uploadAttachment(sUuid: string, oFile: File): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             const oModel = this._oModel;
-            let sServiceUrl = oModel.sServiceUrl;
+            let sServiceUrl = (oModel as any).sServiceUrl as string || "";
             if (sServiceUrl.endsWith("/")) {
                 sServiceUrl = sServiceUrl.slice(0, -1);
             }
             const sUrl = `${sServiceUrl}/LeaveRequest(guid'${sUuid}')/$value`;
-            const sToken = oModel.getSecurityToken() || "";
 
-            const xhr = new XMLHttpRequest();
-            xhr.open("PUT", sUrl, true);
-            xhr.setRequestHeader("x-csrf-token", sToken);
-            xhr.setRequestHeader("Slug", oFile.name);
-            if (oFile.type) {
-                xhr.setRequestHeader("Content-Type", oFile.type);
-            }
-
-            xhr.onload = (): void => {
-                if (xhr.status >= 200 && xhr.status < 300) {
-                    resolve();
-                } else {
-                    reject(`Upload failed with status: ${xhr.status} ${xhr.statusText}`);
-                }
-            };
-
-            xhr.onerror = (): void => {
-                reject("Upload failed due to a network error.");
-            };
-
-            xhr.send(oFile);
+            // Refresh CSRF token before upload to ensure it is valid after the POST
+            oModel.refreshSecurityToken(
+                (): void => {
+                    const sToken = oModel.getSecurityToken() || "";
+                    this._sendFileXhr(sUrl, sToken, oFile, resolve, reject);
+                },
+                (): void => {
+                    // Token refresh failed – try with the cached token anyway
+                    const sToken = oModel.getSecurityToken() || "";
+                    this._sendFileXhr(sUrl, sToken, oFile, resolve, reject);
+                },
+                false
+            );
         });
+    }
+
+    private _sendFileXhr(
+        sUrl: string,
+        sToken: string,
+        oFile: File,
+        resolve: () => void,
+        reject: (reason: string) => void
+    ): void {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", sUrl, true);
+        xhr.setRequestHeader("x-csrf-token", sToken);
+        xhr.setRequestHeader("Slug", encodeURIComponent(oFile.name));
+        if (oFile.type) {
+            xhr.setRequestHeader("Content-Type", oFile.type);
+        }
+
+        xhr.onload = (): void => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve();
+            } else {
+                reject(`Upload failed — HTTP ${xhr.status} ${xhr.statusText}. URL: ${sUrl}`);
+            }
+        };
+
+        xhr.onerror = (): void => {
+            reject(`Upload failed due to a network error. URL: ${sUrl}`);
+        };
+
+        xhr.send(oFile);
     }
 
     /**
