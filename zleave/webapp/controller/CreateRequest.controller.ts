@@ -516,14 +516,13 @@ export default class CreateRequest extends Controller {
         this._submitRequest("Pending");
     }
 
-    private _submitRequest(sStatus: string): void {
+    private async _submitRequest(sStatus: string): Promise<void> {
         if (!this._validateForm()) {
             return;
         }
 
         const oFormModel = this._getFormModel();
         const oRequest = oFormModel.getProperty("/leaveRequest") as LeaveRequest;
-        const oResourceBundle = (this.getOwnerComponent() as any)?.getModel("i18n")?.getResourceBundle();
 
         const oService = this._getService();
         if (!oService) {
@@ -532,137 +531,109 @@ export default class CreateRequest extends Controller {
         }
 
         const mapSession = (sSessionVal?: string): string => {
-            if (sSessionVal === "Morning") {
-                return "M";
-            }
-            if (sSessionVal === "Afternoon") {
-                return "A";
-            }
-            return ""; // blank for full day
+            if (sSessionVal === "Morning") { return "M"; }
+            if (sSessionVal === "Afternoon") { return "A"; }
+            return "";
         };
 
         const oPayload: LeaveRequestPayload = {
-            LeaveType: oRequest.LeaveType,
-            StartDate: new Date(oRequest.StartDate!),
-            EndDate: new Date(oRequest.EndDate!),
-            Reason: oRequest.Reason,
-            ApproverId: oRequest.ApproverId || (oFormModel.getProperty("/employee/ManagerID") as string) || "",
+            LeaveType:    oRequest.LeaveType,
+            StartDate:    new Date(oRequest.StartDate!),
+            EndDate:      new Date(oRequest.EndDate!),
+            Reason:       oRequest.Reason,
+            ApproverId:   oRequest.ApproverId || (oFormModel.getProperty("/employee/ManagerID") as string) || "",
             StartSession: mapSession(oRequest.StartSession),
-            EndSession: mapSession(oRequest.EndSession)
+            EndSession:   mapSession(oRequest.EndSession)
         };
 
-        this.getView().setBusy(true);
-        oFormModel.setProperty("/busy", true);
+        // Resolve file once before going async so we capture the latest state
+        const oFile = this._getSelectedFile();
+        console.info("[CreateRequest] File at submit:", oFile ? oFile.name : "none");
 
-        // Fallback: re-fetch the file from UploadSet in case afterItemAdded stored null
-        if (!this._selectedFile) {
-            const oUploadSet = this.byId("uploadSet") as any;
-            if (oUploadSet) {
-                const aIncomplete = (oUploadSet.getIncompleteItems ? oUploadSet.getIncompleteItems() : oUploadSet.getItems()) as any[];
-                if (aIncomplete && aIncomplete.length > 0) {
-                    const oFirstItem = aIncomplete[0];
-                    const oFallbackFile = oFirstItem.getFileObject ? oFirstItem.getFileObject() as File : null;
-                    if (oFallbackFile) {
-                        this._selectedFile = oFallbackFile;
-                        console.info("[CreateRequest] Recovered file from UploadSet at submit time:", oFallbackFile.name);
-                    }
+        // Lock UI – user sees only a spinner, no intermediate status text
+        this.getView().setBusy(true);
+
+        try {
+            // ── Step 1: Create the leave request ──────────────────────────────
+            const oCreatedData = await oService.createLeaveRequest(oPayload);
+            const sUuid = (oCreatedData as { UUID: string }).UUID;
+            console.info("[CreateRequest] Request created, UUID:", sUuid);
+
+            // ── Step 2: Upload attachment (only if file was selected) ─────────
+            if (oFile && sUuid) {
+                try {
+                    await oService.uploadAttachment(sUuid, oFile);
+                    console.info("[CreateRequest] Attachment uploaded successfully.");
+                } catch (oUploadErr) {
+                    // Request created but upload failed → warn and navigate away
+                    this.getView().setBusy(false);
+                    MessageBox.warning(
+                        "Yêu cầu đã được tạo nhưng file đính kèm upload thất bại: " +
+                        (typeof oUploadErr === "string" ? oUploadErr : "Unknown error") +
+                        ". Bạn có thể upload lại trong trang chi tiết.",
+                        { onClose: (): void => { this._navToRequests(); } }
+                    );
+                    try { this.getView().getModel()?.refresh(true); } catch { /* non-fatal */ }
+                    return;
                 }
             }
-        }
 
-        console.info("[CreateRequest] _selectedFile at submit:", this._selectedFile ? this._selectedFile.name : "null (no file)");
+            // ── Step 3: Refresh model & show success ──────────────────────────
+            try { this.getView().getModel()?.refresh(true); } catch { /* non-fatal */ }
+            this.getView().setBusy(false);
+            MessageBox.success("Leave Request created successfully.", {
+                onClose: (): void => { this._navToRequests(); }
+            });
 
-        if (this._selectedFile) {
-            let bCreated = false;
-            oService.createLeaveRequest(oPayload)
-                .then((oCreatedData: { UUID: string }): Promise<void> => {
-                    bCreated = true;
-                    const sUuid = oCreatedData.UUID;
-                    console.info("[CreateRequest] LeaveRequest created with UUID:", sUuid);
-                    return oService.uploadAttachment(sUuid, this._selectedFile!);
-                })
-                .then((): void => {
-                    // Refresh model AFTER upload so CSRF token is not invalidated mid-flow
-                    try { this.getView().getModel()?.refresh(true); } catch { /* non-fatal */ }
-                    this.getView().setBusy(false);
-                    oFormModel.setProperty("/busy", false);
-                    MessageBox.success("Leave Request created successfully.", {
-                        onClose: (): void => {
-                            this._navToRequests();
-                        }
-                    });
-                })
-                .catch((sErr: unknown): void => {
-                    this.getView().setBusy(false);
-                    oFormModel.setProperty("/busy", false);
-                    if (bCreated) {
-                        MessageBox.error(
-                            "Leave request was created, but the attachment upload failed: " + (typeof sErr === "string" ? sErr : "Unknown error") + ". You can upload the attachment later.",
-                            {
-                                onClose: (): void => {
-                                    this._navToRequests();
-                                }
-                            }
-                        );
-                    } else {
-                        MessageBox.error(
-                            typeof sErr === "string"
-                                ? sErr
-                                : "An error occurred while submitting the leave request."
-                        );
-                    }
-                });
-        } else {
-            oService.createLeaveRequest(oPayload)
-                .then((): void => {
-                    try { this.getView().getModel()?.refresh(true); } catch { /* non-fatal */ }
-                    this.getView().setBusy(false);
-                    oFormModel.setProperty("/busy", false);
-                    MessageBox.success("Leave Request created successfully.", {
-                        onClose: (): void => {
-                            this._navToRequests();
-                        }
-                    });
-                })
-                .catch((sErr: unknown): void => {
-                    this.getView().setBusy(false);
-                    oFormModel.setProperty("/busy", false);
-                    MessageBox.error(
-                        typeof sErr === "string"
-                            ? sErr
-                            : "An error occurred while submitting the leave request."
-                    );
-                });
+        } catch (oCreateErr) {
+            // Request creation failed
+            this.getView().setBusy(false);
+            MessageBox.error(
+                typeof oCreateErr === "string"
+                    ? oCreateErr
+                    : "An error occurred while submitting the leave request."
+            );
         }
     }
 
+    /**
+     * Returns the File object chosen by the user, or null if none.
+     * The file is stored by onFileChange when the user selects a file via FileUploader.
+     */
+    private _getSelectedFile(): File | null {
+        return this._selectedFile;
+    }
+
     // -----------------------------------------------------------------------
-    // Upload Set Handlers
+    // FileUploader Handlers
     // -----------------------------------------------------------------------
 
-    public onAfterItemAdded(oEvent: any): void {
-        const oUploadSet = oEvent.getSource() as any;
-        const oItem = oEvent.getParameter("item") as any;
-
-        // Enforce single file selection – remove any previously staged item
-        const aItems = oUploadSet.getItems() as any[];
-        aItems.forEach((oUploadSetItem) => {
-            if (oUploadSetItem !== oItem) {
-                oUploadSet.removeItem(oUploadSetItem);
+    public onFileChange(oEvent: any): void {
+        const aFiles = oEvent.getParameter("files") as FileList | null;
+        if (aFiles && aFiles.length > 0) {
+            const oFile = aFiles[0];
+            const nSizeMb = oFile.size / (1024 * 1024);
+            if (nSizeMb > 10) {
+                MessageBox.error("File size must not exceed 10 MB.");
+                this._selectedFile = null;
+                const oUploader = this.byId("createFileUploader") as any;
+                if (oUploader) { oUploader.clear(); }
+                return;
             }
-        });
-
-        // Mark as "Complete" so the UploadSet does NOT render the "pending 0%" progress bar.
-        // The real upload is triggered via XHR when the user clicks Submit.
-        if (oItem.setUploadState) {
-            oItem.setUploadState("Complete");
+            this._selectedFile = oFile;
+            console.info("[CreateRequest] File selected:", oFile.name);
+        } else {
+            this._selectedFile = null;
         }
-
-        const oFile = oItem.getFileObject() as File;
-        this._selectedFile = oFile;
     }
 
-    public onAfterItemRemoved(oEvent: any): void {
+    public onFileSizeExceeds(): void {
+        MessageBox.error("File size must not exceed 10 MB.");
+        this._selectedFile = null;
+    }
+
+    public onTypeMismatch(): void {
+        MessageBox.error("Only PDF, DOC, DOCX, XLSX, JPG, JPEG, PNG files are allowed.");
         this._selectedFile = null;
     }
 
@@ -702,9 +673,9 @@ export default class CreateRequest extends Controller {
     private _resetForm(): void {
         const oFormModel = this._getFormModel();
         this._selectedFile = null;
-        const oUploadSet = this.byId("uploadSet") as any;
-        if (oUploadSet) {
-            oUploadSet.destroyItems();
+        const oFileUploader = this.byId("createFileUploader") as any;
+        if (oFileUploader) {
+            oFileUploader.clear();
         }
         oFormModel.setProperty("/leaveRequest", {
             LeaveType: "",

@@ -43,11 +43,28 @@
 <edmx:DataServices m:DataServiceVersion="2.0">
 <Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="cds_zui_leave_mgmt" xml:lang="vi" sap:schema-version="1">
 <Annotation xmlns="http://docs.oasis-open.org/odata/ns/edm" Term="Core.SchemaVersion" String="1.0.0"/>
+<EntityType Name="EmployeeAdminType" sap:content-version="1">
+<Key>
+<PropertyRef Name="EmployeeId"/>
+</Key>
+<Property Name="Delete_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Update_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="EmployeeId" Type="Edm.String" Nullable="false" MaxLength="10" sap:creatable="false" sap:updatable="false"/>
+<Property Name="SapUser" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="FullName" Type="Edm.String" Nullable="false" MaxLength="100"/>
+<Property Name="Department" Type="Edm.String" MaxLength="50"/>
+<Property Name="PositionTitle" Type="Edm.String" MaxLength="100"/>
+<Property Name="Email" Type="Edm.String" MaxLength="100"/>
+<Property Name="ManagerUser" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:value-list="standard"/>
+<Property Name="IsActive" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
+</EntityType>
 <EntityType Name="LeaveRequestType" m:HasStream="true" sap:content-version="1">
 <Key>
 <PropertyRef Name="UUID"/>
 </Key>
 <Property Name="approveResult_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="hrApproveResult_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="hrRejectResult_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 <Property Name="rejectResult_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 <Property Name="Delete_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 <Property Name="Update_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
@@ -55,19 +72,21 @@
 <Property Name="RequestId" Type="Edm.String" MaxLength="20" sap:creatable="false" sap:updatable="false"/>
 <Property Name="EmployeeId" Type="Edm.String" MaxLength="8" sap:display-format="NonNegative" sap:creatable="false" sap:updatable="false"/>
 <Property Name="ApproverId" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:value-list="standard"/>
+<Property Name="HrApproverId" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:creatable="false" sap:updatable="false"/>
 <Property Name="LeaveType" Type="Edm.String" Nullable="false" MaxLength="5" sap:value-list="standard"/>
 <Property Name="StartDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:display-format="Date"/>
 <Property Name="StartSession" Type="Edm.String" MaxLength="1"/>
 <Property Name="EndDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:display-format="Date"/>
 <Property Name="EndSession" Type="Edm.String" MaxLength="1"/>
 <Property Name="TotalDays" Type="Edm.Decimal" Precision="5" Scale="2" sap:creatable="false" sap:updatable="false"/>
-<Property Name="Status" Type="Edm.String" MaxLength="10" sap:creatable="false" sap:updatable="false"/>
+<Property Name="Status" Type="Edm.String" MaxLength="15" sap:creatable="false" sap:updatable="false"/>
 <Property Name="StatusCriticality" Type="Edm.Byte"/>
 <Property Name="Reason" Type="Edm.String"/>
 <Property Name="MimeType" Type="Edm.String" MaxLength="128"/>
 <Property Name="FileName" Type="Edm.String" MaxLength="128"/>
 <Property Name="CreatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:creatable="false" sap:updatable="false"/>
 <Property Name="ApprovalComment" Type="Edm.String" MaxLength="255"/>
+<Property Name="HrComment" Type="Edm.String" MaxLength="255"/>
 <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
 <Property Name="LastChangedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:creatable="false" sap:updatable="false"/>
 <Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
@@ -118,7 +137,7 @@
 <Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:display-format="Date"/>
 <Property Name="TotalDays" Type="Edm.Decimal" Precision="5" Scale="2"/>
 <Property Name="Reason" Type="Edm.String"/>
-<Property Name="Status" Type="Edm.String" MaxLength="10"/>
+<Property Name="Status" Type="Edm.String" MaxLength="15"/>
 <Property Name="StatusCriticality" Type="Edm.Byte"/>
 <Property Name="ApprovalComment" Type="Edm.String" MaxLength="255"/>
 <Property Name="MimeType" Type="Edm.String" MaxLength="128"/>
@@ -316,6 +335,7 @@
 <EntitySet Name="SAP__CoverPageSet" EntityType="cds_zui_leave_mgmt.SAP__CoverPage" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
 <EntitySet Name="SAP__SignatureSet" EntityType="cds_zui_leave_mgmt.SAP__Signature" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
 <EntitySet Name="SAP__ValueHelpSet" EntityType="cds_zui_leave_mgmt.SAP__ValueHelp" sap:content-version="1"/>
+<EntitySet Name="EmployeeAdmin" EntityType="cds_zui_leave_mgmt.EmployeeAdminType" sap:content-version="1" sap:deletable-path="Delete_mc" sap:updatable-path="Update_mc"/>
 <EntitySet Name="LeaveRequest" EntityType="cds_zui_leave_mgmt.LeaveRequestType" sap:content-version="1" sap:deletable-path="Delete_mc" sap:updatable-path="Update_mc"/>
 <EntitySet Name="Employee" EntityType="cds_zui_leave_mgmt.EmployeeType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:content-version="1"/>
 <EntitySet Name="LeaveQuota" EntityType="cds_zui_leave_mgmt.LeaveQuotaType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
@@ -349,10 +369,36 @@
 <FunctionImport Name="approveResult" ReturnType="cds_zui_leave_mgmt.LeaveRequestType" EntitySet="LeaveRequest" m:HttpMethod="POST" sap:action-for="cds_zui_leave_mgmt.LeaveRequestType" sap:applicable-path="approveResult_ac">
 <Parameter Name="UUID" Type="Edm.Guid" Mode="In" sap:label="UUID"/>
 </FunctionImport>
+<FunctionImport Name="hrApproveResult" ReturnType="cds_zui_leave_mgmt.LeaveRequestType" EntitySet="LeaveRequest" m:HttpMethod="POST" sap:action-for="cds_zui_leave_mgmt.LeaveRequestType" sap:applicable-path="hrApproveResult_ac">
+<Parameter Name="UUID" Type="Edm.Guid" Mode="In" sap:label="UUID"/>
+</FunctionImport>
+<FunctionImport Name="hrRejectResult" ReturnType="cds_zui_leave_mgmt.LeaveRequestType" EntitySet="LeaveRequest" m:HttpMethod="POST" sap:action-for="cds_zui_leave_mgmt.LeaveRequestType" sap:applicable-path="hrRejectResult_ac">
+<Parameter Name="UUID" Type="Edm.Guid" Mode="In" sap:label="UUID"/>
+</FunctionImport>
 <FunctionImport Name="rejectResult" ReturnType="cds_zui_leave_mgmt.LeaveRequestType" EntitySet="LeaveRequest" m:HttpMethod="POST" sap:action-for="cds_zui_leave_mgmt.LeaveRequestType" sap:applicable-path="rejectResult_ac">
 <Parameter Name="UUID" Type="Edm.Guid" Mode="In" sap:label="UUID"/>
 </FunctionImport>
 </EntityContainer>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.EmployeeAdminType/ManagerUser">
+<Annotation Term="Common.ValueList">
+<Record>
+<PropertyValue Property="Label" String=""/>
+<PropertyValue Property="CollectionPath" String="ZI_MANAGER_VH"/>
+<PropertyValue Property="SearchSupported" Bool="false"/>
+<PropertyValue Property="Parameters">
+<Collection>
+<Record Type="Common.ValueListParameterInOut">
+<PropertyValue Property="LocalDataProperty" PropertyPath="ManagerUser"/>
+<PropertyValue Property="ValueListProperty" String="ManagerUser"/>
+</Record>
+<Record Type="Common.ValueListParameterDisplayOnly">
+<PropertyValue Property="ValueListProperty" String="ManagerName"/>
+</Record>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+</Annotations>
 <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.LeaveRequestType/ApproverId">
 <Annotation Term="Common.ValueList">
 <Record>
@@ -436,12 +482,49 @@
 <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities">
 <Annotation Term="Common.ApplyMultiUnitBehaviorForSortingAndFiltering" Bool="true"/>
 </Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities/EmployeeAdmin">
+<Annotation Term="Capabilities.FilterRestrictions">
+<Record>
+<PropertyValue Property="NonFilterableProperties">
+<Collection>
+<PropertyPath>Delete_mc</PropertyPath>
+<PropertyPath>Update_mc</PropertyPath>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+<Annotation Term="Capabilities.InsertRestrictions">
+<Record>
+<PropertyValue Property="RequiredProperties">
+<Collection>
+<PropertyPath>SapUser</PropertyPath>
+<PropertyPath>FullName</PropertyPath>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+<Annotation Term="SAP__core.OptimisticConcurrency">
+<Collection/>
+</Annotation>
+<Annotation Term="Capabilities.SortRestrictions">
+<Record>
+<PropertyValue Property="NonSortableProperties">
+<Collection>
+<PropertyPath>Delete_mc</PropertyPath>
+<PropertyPath>Update_mc</PropertyPath>
+</Collection>
+</PropertyValue>
+</Record>
+</Annotation>
+</Annotations>
 <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.cds_zui_leave_mgmt_Entities/LeaveRequest">
 <Annotation Term="Capabilities.FilterRestrictions">
 <Record>
 <PropertyValue Property="NonFilterableProperties">
 <Collection>
 <PropertyPath>approveResult_ac</PropertyPath>
+<PropertyPath>hrApproveResult_ac</PropertyPath>
+<PropertyPath>hrRejectResult_ac</PropertyPath>
 <PropertyPath>rejectResult_ac</PropertyPath>
 <PropertyPath>Delete_mc</PropertyPath>
 <PropertyPath>Update_mc</PropertyPath>
@@ -477,6 +560,8 @@
 <PropertyValue Property="NonSortableProperties">
 <Collection>
 <PropertyPath>approveResult_ac</PropertyPath>
+<PropertyPath>hrApproveResult_ac</PropertyPath>
+<PropertyPath>hrRejectResult_ac</PropertyPath>
 <PropertyPath>rejectResult_ac</PropertyPath>
 <PropertyPath>Delete_mc</PropertyPath>
 <PropertyPath>Update_mc</PropertyPath>

@@ -194,73 +194,45 @@ export default class LeaveRequestService {
             }
             const sUrl = `${sServiceUrl}/LeaveRequest(guid'${sUuid}')/$value`;
 
-            // Refresh CSRF token before upload to ensure it is valid after the POST
-            oModel.refreshSecurityToken(
-                (): void => {
-                    const sToken = oModel.getSecurityToken() || "";
-                    this._sendFileXhr(sUrl, sToken, oFile, resolve, reject);
-                },
-                (): void => {
-                    // Token refresh failed – try with the cached token anyway
-                    const sToken = oModel.getSecurityToken() || "";
-                    this._sendFileXhr(sUrl, sToken, oFile, resolve, reject);
-                },
-                false
-            );
-        });
-    }
+            // Use getSecurityToken() directly – same as RequestDetail.onUploadAttachment
+            const sToken = oModel.getSecurityToken() || "";
 
-    private _sendFileXhr(
-        sUrl: string,
-        sToken: string,
-        oFile: File,
-        resolve: () => void,
-        reject: (reason: string) => void
-    ): void {
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", sUrl, true);
-        xhr.setRequestHeader("x-csrf-token", sToken);
-        xhr.setRequestHeader("Slug", encodeURIComponent(oFile.name));
-        if (oFile.type) {
-            xhr.setRequestHeader("Content-Type", oFile.type);
-        }
-
-        xhr.onload = (): void => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                resolve();
-            } else {
-                reject(`Upload failed — HTTP ${xhr.status} ${xhr.statusText}. URL: ${sUrl}`);
+            const xhr = new XMLHttpRequest();
+            xhr.open("PUT", sUrl, true);
+            xhr.setRequestHeader("x-csrf-token", sToken);
+            xhr.setRequestHeader("Slug", oFile.name);
+            if (oFile.type) {
+                xhr.setRequestHeader("Content-Type", oFile.type);
             }
-        };
 
-        xhr.onerror = (): void => {
-            reject(`Upload failed due to a network error. URL: ${sUrl}`);
-        };
-
-        xhr.send(oFile);
-    }
-
-    /**
-     * Updates metadata properties (MimeType, FileName) of a LeaveRequest if required by the backend.
-     *
-     * @param sUuid - The UUID of the LeaveRequest.
-     * @param sFileName - The file name.
-     * @param sMimeType - The mime type.
-     * @returns A Promise that resolves on success.
-     */
-    public updateAttachmentMetadata(sUuid: string, sFileName: string, sMimeType: string): Promise<void> {
-        return new Promise<void>((resolve, reject) => {
-            this._oModel.update(`/LeaveRequest(guid'${sUuid}')`, {
-                FileName: sFileName,
-                MimeType: sMimeType
-            }, {
-                success: (): void => {
-                    resolve();
-                },
-                error: (oErr: { responseText?: string; message?: string }): void => {
-                    reject(parseODataError(oErr));
+            xhr.onload = (): void => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    // ── Mirror RequestDetail: update FileName & MimeType via OData model ──
+                    oModel.update(`/LeaveRequest(guid'${sUuid}')`, {
+                        FileName: oFile.name,
+                        MimeType: oFile.type || ""
+                    }, {
+                        success: (): void => {
+                            resolve();
+                        },
+                        error: (oErr: { responseText?: string; message?: string }): void => {
+                            // File was uploaded; metadata update failed – non-fatal, resolve anyway
+                            console.warn("[LeaveRequestService] File uploaded but metadata update failed:", parseODataError(oErr));
+                            resolve();
+                        }
+                    });
+                } else {
+                    reject(`Upload failed — HTTP ${xhr.status} ${xhr.statusText}. URL: ${sUrl}`);
                 }
-            });
+            };
+
+            xhr.onerror = (): void => {
+                reject(`Upload failed due to a network error. URL: ${sUrl}`);
+            };
+
+            xhr.send(oFile);
         });
     }
+
+
 }

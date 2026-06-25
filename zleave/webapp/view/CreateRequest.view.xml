@@ -4,8 +4,7 @@
     xmlns:f="sap.ui.layout.form"
     xmlns:l="sap.ui.layout"
     xmlns:core="sap.ui.core"
-    xmlns:unified="sap.ui.unified"
-    xmlns:upload="sap.m.upload">
+    xmlns:unified="sap.ui.unified">
     <Page id="createRequestPage"
         title="{i18n>createLeaveRequestTitle}"
         showNavButton="true"
@@ -125,16 +124,14 @@
                     <!-- Attachments Card -->
                     <Panel headerText="{i18n>attachmentsSection}" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
                         <VBox class="sapUiSmallMargin">
-                            <upload:UploadSet id="uploadSet"
-                                instantUpload="false"
-                                multiple="false"
-                                uploadEnabled="true"
-                                terminationEnabled="true"
-                                showIcons="true"
-                                fileTypes="pdf,doc,docx,xlsx,jpg,jpeg,png"
-                                maxFileSize="10"
-                                afterItemAdded=".onAfterItemAdded"
-                                afterItemRemoved=".onAfterItemRemoved"
+                            <unified:FileUploader id="createFileUploader"
+                                buttonText="Browse..."
+                                placeholder="Choose a PDF, DOC, DOCX, XLSX, JPG, JPEG, or PNG file..."
+                                fileType="pdf,doc,docx,xlsx,jpg,jpeg,png"
+                                maximumFileSize="10"
+                                fileSizeExceeds=".onFileSizeExceeds"
+                                typeMissmatch=".onTypeMismatch"
+                                change=".onFileChange"
                                 width="100%"/>
                             <MessageStrip
                                 text="File will be uploaded automatically when you click Submit. Allowed: PDF, DOC, DOCX, XLSX, JPG, JPEG, PNG (max 10 MB)."
