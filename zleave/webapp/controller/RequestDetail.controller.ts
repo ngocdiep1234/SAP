@@ -52,7 +52,7 @@ export default class RequestDetail extends Controller {
 
         try {
             const oCurrentUser = await this._getCurrentUser();
-            const bIsHrAdmin = oCurrentUser.role === "HR Admin";
+            const bIsHrAdmin = oCurrentUser.is_admin === "X";
             oUiModel.setProperty("/isHrAdmin", bIsHrAdmin);
 
             const sEntitySet = bIsHrAdmin ? "/LeaveRequestAdmin" : "/LeaveRequest";
@@ -103,15 +103,15 @@ export default class RequestDetail extends Controller {
         });
     }
 
-    private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string }> {
+    private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string }> {
         const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
         if (!oUiModel) {
-            return { registered: true, employeeId: "1001", employeeName: "Nguyen Van A", role: "Employee" };
+            return { registered: true, employeeId: "1001", employeeName: "Nguyen Van A", role: "Employee", is_manager: "", is_hr: "", is_admin: "" };
         }
 
         const oCachedUser = oUiModel.getProperty("/currentUser") as any;
         if (oCachedUser && oCachedUser.employeeId && oCachedUser.role) {
-            return oCachedUser as { registered: boolean; employeeId: string; employeeName: string; role: string };
+            return oCachedUser as { registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string };
         }
 
         let sSapUser = oCachedUser?.id as string | undefined;
@@ -154,9 +154,13 @@ export default class RequestDetail extends Controller {
                             employeeName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
                             id: sSapUser,
                             displayName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
-                            role: String(oEmp["PositionTitle"] ?? "Employee")
+                            role: String(oEmp["PositionTitle"] ?? "Employee"),
+                            is_manager: String(oEmp["IsManager"] ?? ""),
+                            is_hr: String(oEmp["IsHR"] ?? ""),
+                            is_admin: String(oEmp["IsAdmin"] ?? "")
                         };
                         oUiModel.setProperty("/currentUser", oUserObj);
+                        console.log("[DEBUG] [RequestDetail] Current user loaded:", oUserObj);
                         return oUserObj;
                     }
                 } catch (oErr) {
@@ -169,7 +173,10 @@ export default class RequestDetail extends Controller {
             registered: true,
             employeeId: "1001",
             employeeName: "Nguyen Van A",
-            role: "Employee"
+            role: "Employee",
+            is_manager: "",
+            is_hr: "",
+            is_admin: ""
         };
         oUiModel.setProperty("/currentUser", oMockUser);
         return oMockUser;

@@ -103,6 +103,9 @@
 <Property Name="PositionTitle" Type="Edm.String" MaxLength="100"/>
 <Property Name="ManagerSapUser" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
 <Property Name="IsActive" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
+<Property Name="IsManager" Type="Edm.String" MaxLength="1"/>
+<Property Name="IsHR" Type="Edm.String" MaxLength="1"/>
+<Property Name="IsAdmin" Type="Edm.String" MaxLength="1"/>
 </EntityType>
 <EntityType Name="LeaveQuotaType" sap:content-version="1">
 <Key>

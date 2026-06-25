@@ -21,6 +21,9 @@ import JSONModel from "sap/ui/model/json/JSONModel";
 
 export default class Requests extends Controller {
 
+    // Tracks which status the "pending" tab is filtering (SUBMITTED for Manager, MGR_APPROVED for HR)
+    private _sPendingStatusFilter: string = "SUBMITTED";
+
     public onInit(): void {
         const oRouter = (this as any).getOwnerComponent().getRouter();
         oRouter.getRoute("requests").attachPatternMatched(this._onPatternMatched, this);
@@ -35,7 +38,8 @@ export default class Requests extends Controller {
         const oSegmentedButton =
             this.getView().byId("filterStatusButton");
         if (oSegmentedButton) {
-            oSegmentedButton.setSelectedKey("all");
+            // Khởi động tại tab "pending" để _applyFilters kiểm tra role ngay lập tức
+            oSegmentedButton.setSelectedKey("pending");
         }
         const oTable = this.getView().byId("tableRequests") as InstanceType<typeof Table> | undefined;
         if (oTable) {
@@ -43,8 +47,8 @@ export default class Requests extends Controller {
             oTable.setMode("MultiSelect");
         }
         this._loadEmployees();
-        void this._applyFilters("all").then(() => {
-            this.updateToolbarVisibility("all");
+        void this._applyFilters("pending").then(() => {
+            this.updateToolbarVisibility("pending");
             if (oTable) {
                 oTable.setBusy(false);
             }
@@ -60,11 +64,13 @@ export default class Requests extends Controller {
         const oBtnReject = this.getView().byId("btnRejectSelected") as InstanceType<typeof Button> | undefined;
         const oBtnDelete = this.getView().byId("btnDeleteSelected") as InstanceType<typeof Button> | undefined;
 
+        // Dùng _sPendingStatusFilter để check đúng status theo role (SUBMITTED cho Manager, MGR_APPROVED cho HR)
+        const sExpectedStatus = this._sPendingStatusFilter.toUpperCase();
         const bEnabled = aSelectedItems.length > 0 && aSelectedItems.some((oItem: InstanceType<typeof ListItemBase>) => {
             const oContext = oItem.getBindingContext();
             if (!oContext) { return false; }
             const sStatus = String(oContext.getProperty("Status") || "").toUpperCase();
-            return sStatus === "SUMMITED" || sStatus === "SUBMITTED" || sStatus === "PENDING";
+            return sStatus === sExpectedStatus;
         });
 
         if (oBtnApprove) { oBtnApprove.setEnabled(bEnabled); }
@@ -153,16 +159,16 @@ export default class Requests extends Controller {
         }
     }
 
-    private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string }> {
+    private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string }> {
         const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
         if (!oUiModel) {
-            return { registered: true, employeeId: "1001", employeeName: "Nguyen Van A", role: "Employee" };
+            return { registered: true, employeeId: "1001", employeeName: "Nguyen Van A", role: "Employee", is_manager: "", is_hr: "", is_admin: "" };
         }
 
         const oCachedUser = oUiModel.getProperty("/currentUser") as any;
         if (oCachedUser && oCachedUser.employeeId && oCachedUser.role) {
-            console.log("[DEBUG] Current user role from cache:", oCachedUser.role, oCachedUser);
-            return oCachedUser as { registered: boolean; employeeId: string; employeeName: string; role: string };
+            console.log("[DEBUG] Current user from cache:", oCachedUser);
+            return oCachedUser as { registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string };
         }
 
         let sSapUser = oCachedUser?.id as string | undefined;
@@ -206,10 +212,13 @@ export default class Requests extends Controller {
                             employeeName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
                             id: sSapUser,
                             displayName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
-                            role: String(oEmp["PositionTitle"] ?? "Employee")
+                            role: String(oEmp["PositionTitle"] ?? "Employee"),
+                            is_manager: String(oEmp["IsManager"] ?? ""),
+                            is_hr: String(oEmp["IsHR"] ?? ""),
+                            is_admin: String(oEmp["IsAdmin"] ?? "")
                         };
                         oUiModel.setProperty("/currentUser", oUserObj);
-                        console.log("[DEBUG] Current user role loaded from Employee query:", oUserObj.role, oUserObj);
+                        console.log("[DEBUG] Current user loaded from Employee query:", oUserObj);
                         return oUserObj;
                     }
                 } catch (oErr) {
@@ -222,10 +231,13 @@ export default class Requests extends Controller {
             registered: true,
             employeeId: "1001",
             employeeName: "Nguyen Van A",
-            role: "Employee"
+            role: "Employee",
+            is_manager: "",
+            is_hr: "",
+            is_admin: ""
         };
         oUiModel.setProperty("/currentUser", oMockUser);
-        console.log("[DEBUG] Current user role fallback (mock):", oMockUser.role, oMockUser);
+        console.log("[DEBUG] Current user fallback (mock):", oMockUser);
         return oMockUser;
     }
 
@@ -249,7 +261,16 @@ export default class Requests extends Controller {
         // (vd "00001002"). Không pad ở đây, chỉ chuẩn hóa về dạng số nguyên dạng string.
         const sCurrentEmployeeId = String(parseInt(oCurrentUser.employeeId, 10));
         if (sSelectedKey === "pending") {
-            aFilters.push(new Filter("Status", FilterOperator.EQ, "SUBMITTED"));
+            // HR approves requests that managers already approved (MGR_APPROVED)
+            // Managers approve newly submitted requests (SUBMITTED)
+            // Support multiple truthy formats: ABAP "X", JS true, "true", "1"
+            const vIsHr = oCurrentUser.is_hr;
+            const bIsHr = vIsHr === "X" || vIsHr === "true" || vIsHr === "1";
+            const sPendingStatus = bIsHr ? "MGR_APPROVED" : "SUBMITTED";
+            this._sPendingStatusFilter = sPendingStatus;
+            console.log("[DEBUG][Pending] Full currentUser:", JSON.stringify(oCurrentUser));
+            console.log("[DEBUG][Pending] is_hr raw:", JSON.stringify(vIsHr), "| bIsHr:", bIsHr, "| Status filter:", sPendingStatus);
+            aFilters.push(new Filter("Status", FilterOperator.EQ, sPendingStatus));
             if (sCurrentEmployeeId) {
                 aFilters.push(new Filter("EmployeeId", FilterOperator.NE, sCurrentEmployeeId));
             }
@@ -282,8 +303,8 @@ export default class Requests extends Controller {
         // Clear selection to avoid actions on hidden/invalid items
         oTable.removeSelections();
         this.onSelectionChange();
-        console.log("Current User", sCurrentEmployeeId);
-        console.log("Filters", aFilters);
+        console.log("[DEBUG][_applyFilters] CurrentEmployeeId:", sCurrentEmployeeId, "| SelectedKey:", sSelectedKey);
+        console.log("[DEBUG][_applyFilters] Applied filters:", aFilters.map((f: any) => f.sPath + " " + f.sOperator + " " + f.oValue1));
         oBinding.filter(aFilters);
     }
 
@@ -291,7 +312,7 @@ export default class Requests extends Controller {
         const oBtnApprove = this.getView().byId("btnApproveSelected") as InstanceType<typeof Button> | undefined;
         const oBtnReject = this.getView().byId("btnRejectSelected") as InstanceType<typeof Button> | undefined;
         const oBtnDelete = this.getView().byId("btnDeleteSelected") as InstanceType<typeof Button> | undefined;
-        const bIsSubmitted = sKey === "pending" || sKey === "SUBMITTED";
+        const bIsSubmitted = sKey === "pending" || sKey === "SUBMITTED" || sKey === "MGR_APPROVED";
         const bIsMy = sKey === "my";
         if (oBtnApprove) {
             oBtnApprove.setVisible(bIsSubmitted);
@@ -401,7 +422,7 @@ export default class Requests extends Controller {
         });
     }
 
-    private _getActionName(sActionType: "approve" | "reject"): string {
+    private _getActionName(sActionType: "approve" | "reject", bIsHr: boolean): string {
         const oModel = (this as any).getView().getModel() as any;
         if (oModel && typeof oModel.getServiceMetadata === "function") {
             const oMetadata = oModel.getServiceMetadata();
@@ -413,8 +434,12 @@ export default class Requests extends Controller {
                         for (const oContainer of aContainers) {
                             if (oContainer.functionImport) {
                                 const aFuncs = Array.isArray(oContainer.functionImport) ? oContainer.functionImport : [oContainer.functionImport];
-                                const sTargetName = sActionType === "approve" ? "approveResult" : "rejectResult";
-                                const sAltName = sActionType === "approve" ? "approveLeave" : "rejectLeave";
+                                const sTargetName = bIsHr 
+                                    ? (sActionType === "approve" ? "hrApproveResult" : "hrRejectResult")
+                                    : (sActionType === "approve" ? "approveResult" : "rejectResult");
+                                const sAltName = bIsHr
+                                    ? (sActionType === "approve" ? "hrApproveLeave" : "hrRejectLeave")
+                                    : (sActionType === "approve" ? "approveLeave" : "rejectLeave");
                                 if (aFuncs.some((f: any) => f.name === sTargetName)) {
                                     return sTargetName;
                                 }
@@ -427,7 +452,9 @@ export default class Requests extends Controller {
                 }
             }
         }
-        return sActionType === "approve" ? "approveLeave" : "rejectLeave";
+        return bIsHr
+            ? (sActionType === "approve" ? "hrApproveResult" : "hrRejectResult")
+            : (sActionType === "approve" ? "approveLeave" : "rejectLeave");
     }
 
     private _callAction(sActionName: string, sUuid: string): Promise<{ success: boolean; uuid: string; error?: string }> {
@@ -460,37 +487,50 @@ export default class Requests extends Controller {
     }
 
     public onApproveSelected(): void {
-        this._processMultipleRequests("approve");
+        void this._processMultipleRequests("approve");
     }
 
     public onRejectSelected(): void {
-        this._processMultipleRequests("reject");
+        void this._processMultipleRequests("reject");
     }
 
-    private _processMultipleRequests(sActionType: "approve" | "reject"): void {
+    private async _processMultipleRequests(sActionType: "approve" | "reject"): Promise<void> {
         const oTable = (this as any).byId("tableRequests") as any;
         if (!oTable) { return; }
         const aSelectedItems = oTable.getSelectedItems() || [];
         if (aSelectedItems.length === 0) { return; }
 
         const oResourceBundle = ((this as any).getView().getModel("i18n") as any).getResourceBundle();
-        const sActionName = this._getActionName(sActionType);
+        const oCurrentUser = await this._getCurrentUser();
+        const vIsHr = oCurrentUser.is_hr;
+        const bIsHr = vIsHr === "X" || vIsHr === "true" || vIsHr === "1";
+
+        const sActionName = this._getActionName(sActionType, bIsHr);
 
         // Filter valid requests using the dynamic rule
         const aEligibleItems = aSelectedItems.filter((oItem: any) => {
             const oContext = oItem.getBindingContext();
             if (!oContext) { return false; }
 
-            // Check dynamic action controls, falling back to Status === "SUBMITTED" / "PENDING"
-            const bApproveAc = oContext.getProperty("approveLeave_ac") ?? oContext.getProperty("approveResult_ac");
-            const bRejectAc = oContext.getProperty("rejectLeave_ac") ?? oContext.getProperty("rejectResult_ac");
+            // Check dynamic action controls first (backend-driven _ac flags)
+            // Fallback: match current pending status filter (SUBMITTED for MGR, MGR_APPROVED for HR)
+            const bApproveAc = bIsHr 
+                ? (oContext.getProperty("hrApproveResult_ac") ?? oContext.getProperty("hrApproveLeave_ac"))
+                : (oContext.getProperty("approveLeave_ac") ?? oContext.getProperty("approveResult_ac"));
+            const bRejectAc = bIsHr 
+                ? (oContext.getProperty("hrRejectResult_ac") ?? oContext.getProperty("hrRejectLeave_ac"))
+                : (oContext.getProperty("rejectLeave_ac") ?? oContext.getProperty("rejectResult_ac"));
             const sStatus = String(oContext.getProperty("Status") || "").toUpperCase();
-            const bStatusSubmitted = sStatus === "SUBMITTED" || sStatus === "PENDING";
+            // Use _sPendingStatusFilter: "SUBMITTED" for Manager, "MGR_APPROVED" for HR
+            const bStatusEligible = sStatus === this._sPendingStatusFilter.toUpperCase()
+                || sStatus === "SUBMITTED"
+                || sStatus === "PENDING"
+                || sStatus === "MGR_APPROVED";
 
             if (sActionType === "approve") {
-                return bApproveAc !== undefined ? bApproveAc === true : bStatusSubmitted;
+                return bApproveAc !== undefined ? bApproveAc === true : bStatusEligible;
             } else {
-                return bRejectAc !== undefined ? bRejectAc === true : bStatusSubmitted;
+                return bRejectAc !== undefined ? bRejectAc === true : bStatusEligible;
             }
         });
 
@@ -732,10 +772,12 @@ export default class Requests extends Controller {
 
         this._getCurrentUser()
             .then((oCurrentUser) => {
-                console.log("[DEBUG] [AdminViewCheck] Current user role:", oCurrentUser.role);
+                console.log("[DEBUG] [AdminViewCheck] Current user:", oCurrentUser);
 
-                const sPath = oCurrentUser.role === "HR Admin" ? "/LeaveRequestAdmin" : "/LeaveRequest";
-                console.log("[DEBUG] [AdminViewCheck] Binding table to " + sPath);
+                // Dùng LeaveRequestAdmin nếu is_admin = 'X' (abap_true), ngược lại dùng LeaveRequest
+                const bIsAdmin = oCurrentUser.is_admin === "X";
+                const sPath = bIsAdmin ? "/LeaveRequestAdmin" : "/LeaveRequest";
+                console.log("[DEBUG] [AdminViewCheck] is_admin:", oCurrentUser.is_admin, "-> Binding table to:", sPath);
 
                 const oBindingInfo = oTable.getBindingInfo("items") as any;
                 if (oBindingInfo && oBindingInfo.path !== sPath) {
