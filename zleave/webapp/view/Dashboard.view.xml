@@ -4,18 +4,6 @@
     xmlns:l="sap.ui.layout"
     xmlns:core="sap.ui.core">
     <Page id="dashboardPage" title="Leave Management Dashboard" showHeader="true">
-        <headerContent>
-            <HBox alignItems="Center" class="sapUiSmallMarginEnd">
-                <core:Icon src="sap-icon://employee" size="1rem" class="sapUiSmallMarginEnd" color="#0064d9"/>
-                <Text id="txtCurrentUser" text="{ui>/currentUser/displayName}" class="sapUiSmallMarginEnd" design="Bold"/>
-                <Button
-                    id="btnLogout"
-                    icon="sap-icon://log"
-                    tooltip="Logout"
-                    type="Transparent"
-                    press=".onLogout"/>
-            </HBox>
-        </headerContent>
         <content>
             <l:Grid id="dashboardGrid" defaultSpan="XL12 L12 M12 S12" hSpacing="1" vSpacing="1" class="sapUiSmallMargin">
                 

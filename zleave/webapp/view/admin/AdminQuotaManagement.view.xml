@@ -1,0 +1,14 @@
+<mvc:View
+    controllerName="zleave.zleave.controller.admin.AdminQuotaManagement"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    height="100%">
+    <Page title="Quota Management">
+        <content>
+            <VBox class="sapUiResponsiveMargin">
+                <Title text="Quota Management Administration" level="H2" class="sapUiMediumMarginBottom"/>
+                <Text text="This is the placeholder for the Quota Management business module."/>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

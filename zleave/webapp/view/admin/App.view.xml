@@ -1,0 +1,49 @@
+<mvc:View
+    controllerName="zleave.zleave.controller.admin.App"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:tnt="sap.tnt"
+    height="100%">
+    <tnt:ToolPage id="adminToolPage" sideExpanded="{= !${nav>/collapsed} }">
+        <tnt:header>
+            <tnt:ToolHeader>
+                <Button
+                    id="toggleSideNavBtn"
+                    icon="sap-icon://menu"
+                    type="Transparent"
+                    press=".onToggleSidebar"
+                    tooltip="Toggle Menu"/>
+                <Title text="Leave Admin System" level="H1"/>
+                <ToolbarSpacer />
+                <Button
+                    id="userBtn"
+                    icon="sap-icon://customer"
+                    type="Transparent"
+                    press=".onUserMenuPress"
+                    tooltip="User Profile"/>
+                <Button
+                    id="logoutBtn"
+                    icon="sap-icon://log"
+                    type="Transparent"
+                    press=".onLogoutPress"
+                    tooltip="Log Out"/>
+            </tnt:ToolHeader>
+        </tnt:header>
+        <tnt:sideContent>
+            <tnt:SideNavigation
+                id="adminSideNav"
+                selectedKey="{nav>/selectedKey}"
+                itemSelect=".onNavItemPress">
+                <tnt:NavigationList items="{nav>/items}">
+                    <tnt:NavigationListItem
+                        text="{nav>text}"
+                        icon="{nav>icon}"
+                        key="{nav>id}"/>
+                </tnt:NavigationList>
+            </tnt:SideNavigation>
+        </tnt:sideContent>
+        <tnt:mainContents>
+            <NavContainer id="adminNavContainer"/>
+        </tnt:mainContents>
+    </tnt:ToolPage>
+</mvc:View>

@@ -1,0 +1,14 @@
+<mvc:View
+    controllerName="zleave.zleave.controller.admin.AdminEmployees"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    height="100%">
+    <Page title="Employees Management">
+        <content>
+            <VBox class="sapUiResponsiveMargin">
+                <Title text="Employees Administration" level="H2" class="sapUiMediumMarginBottom"/>
+                <Text text="This is the placeholder for the Employees management business module."/>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

@@ -1,0 +1,14 @@
+<mvc:View
+    controllerName="zleave.zleave.controller.admin.AdminDashboard"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    height="100%">
+    <Page title="Admin Dashboard">
+        <content>
+            <VBox class="sapUiResponsiveMargin">
+                <Title text="Admin Dashboard Overview" level="H2" class="sapUiMediumMarginBottom"/>
+                <Text text="This is the placeholder for the Admin Dashboard business module."/>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>

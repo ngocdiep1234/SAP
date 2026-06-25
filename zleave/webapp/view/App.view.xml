@@ -3,6 +3,30 @@
     xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
     xmlns="sap.m" xmlns:tnt="sap.tnt">
     <tnt:ToolPage id="toolPage" sideExpanded="true">
+        <tnt:header>
+            <tnt:ToolHeader id="appHeader">
+                <Button
+                    id="toggleSideNavBtn"
+                    icon="sap-icon://menu"
+                    type="Transparent"
+                    press=".onToggleSidebar"
+                    tooltip="Toggle Menu"/>
+                <Title text="Leave Management System" level="H1"/>
+                <ToolbarSpacer />
+                <Button
+                    id="userBtn"
+                    icon="sap-icon://customer"
+                    type="Transparent"
+                    press=".onUserMenuPress"
+                    tooltip="User Profile"/>
+                <Button
+                    id="logoutBtn"
+                    icon="sap-icon://log"
+                    type="Transparent"
+                    press=".onLogoutPress"
+                    tooltip="Log Out"/>
+            </tnt:ToolHeader>
+        </tnt:header>
         <tnt:sideContent>
             <tnt:SideNavigation id="sideNav" selectedKey="{ui>/selectedSection}" itemSelect=".onNavSelect">
                 <tnt:item>

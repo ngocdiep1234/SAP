@@ -5,6 +5,8 @@ import MessageBox from "sap/m/MessageBox";
 import Event from "sap/ui/base/Event";
 import ODataModel from "sap/ui/model/odata/v2/ODataModel";
 import ManagedObject from "sap/ui/base/ManagedObject";
+import Filter from "sap/ui/model/Filter";
+import FilterOperator from "sap/ui/model/FilterOperator";
 
 interface LeaveRequest {
     UUID: string;
@@ -214,7 +216,7 @@ export default class Dashboard extends Controller {
             return;
         }
         const oRequest = oBindingContext.getObject() as LeaveRequest;
-        
+
         MessageBox.information(
             `Request ID: ${oRequest.RequestId}\n` +
             `Type: ${oRequest.LeaveType}\n` +
@@ -231,7 +233,7 @@ export default class Dashboard extends Controller {
         }
         const oRequest = oBindingContext.getObject() as LeaveRequest;
         MessageToast.show(`Opening Draft request ${oRequest.RequestId} for editing...`);
-        
+
         // Programmatic navigation to Create page
         this.onNavToCreate();
     }
@@ -242,7 +244,7 @@ export default class Dashboard extends Controller {
             return;
         }
         const oRequest = oBindingContext.getObject() as LeaveRequest;
-        
+
         MessageBox.confirm(
             `Are you sure you want to cancel pending request ${oRequest.RequestId}?`,
             {
@@ -340,47 +342,93 @@ export default class Dashboard extends Controller {
      * and store the result in the "ui" model at /currentUser.
      */
     private async _loadCurrentUser(): Promise<void> {
-        const oUiModel = this.getView()?.getModel("ui") as any;
+        const oCurrentUser = await this._getCurrentUser();
+        if (oCurrentUser && oCurrentUser.is_admin === "X") {
+            const oRouter = (this as any).getOwnerComponent().getRouter();
+            oRouter.navTo("AdminDashboard");
+        }
+    }
+
+    private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string }> {
+        const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
         if (!oUiModel) {
-            return;
+            return { registered: true, employeeId: "1001", employeeName: "Nguyen Van A", role: "Employee", is_manager: "", is_hr: "", is_admin: "" };
         }
 
-        // Initialise with a fallback while loading
-        oUiModel.setProperty("/currentUser", { id: "", displayName: "Unknown User" });
+        const oCachedUser = oUiModel.getProperty("/currentUser") as any;
+        if (oCachedUser && oCachedUser.employeeId && oCachedUser.role) {
+            console.log("[DEBUG] Current user from cache:", oCachedUser);
+            return oCachedUser as { registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string };
+        }
 
-        try {
-            const oResponse = await fetch("/sap/bc/ui2/start_up", {
-                credentials: "same-origin"
-            });
+        let sSapUser = oCachedUser?.id as string | undefined;
 
-            if (!oResponse.ok) {
-                return; // keep fallback
+        // Try to fetch current SAP user id if not cached
+        if (!sSapUser) {
+            try {
+                const oResponse = await fetch("/sap/bc/ui2/start_up", {
+                    credentials: "same-origin"
+                });
+                if (oResponse.ok) {
+                    const oData = await oResponse.json() as Record<string, unknown>;
+                    sSapUser = (oData["id"] as string) ??
+                        (oData["userId"] as string) ??
+                        (oData["name"] as string) ??
+                        "";
+                }
+            } catch (oErr) {
+                console.error("[Dashboard] fetch /sap/bc/ui2/start_up failed:", oErr);
             }
-
-            const oData: Record<string, unknown> = await oResponse.json() as Record<string, unknown>;
-
-            // The start_up response may expose the user under different keys
-            // depending on the ABAP system version.
-            const sId: string =
-                (oData["id"] as string) ??
-                (oData["userId"] as string) ??
-                (oData["name"] as string) ??
-                "";
-
-            const sFullName: string =
-                (oData["fullName"] as string) ??
-                (oData["displayName"] as string) ??
-                sId;
-
-            const sDisplayName = sFullName || sId || "Unknown User";
-
-            oUiModel.setProperty("/currentUser", {
-                id: sId,
-                displayName: sDisplayName
-            });
-        } catch {
-            // Network error or JSON parse error – keep the fallback
         }
+
+        if (sSapUser) {
+            const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+            if (oModel) {
+                try {
+                    const oResult = await new Promise<any>((resolve, reject) => {
+                        oModel.read("/Employee", {
+                            filters: [
+                                new Filter("SapUserName", FilterOperator.EQ, sSapUser)
+                            ],
+                            success: (oDataSuccess: any) => resolve(oDataSuccess),
+                            error: (oError: any) => reject(oError)
+                        });
+                    });
+                    if (oResult && oResult.results && oResult.results.length > 0) {
+                        const oEmp = oResult.results[0];
+                        const oUserObj = {
+                            registered: true,
+                            employeeId: String(oEmp["EmployeeId"] ?? ""),
+                            employeeName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
+                            id: sSapUser,
+                            displayName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
+                            role: String(oEmp["PositionTitle"] ?? "Employee"),
+                            is_manager: String(oEmp["IsManager"] ?? ""),
+                            is_hr: String(oEmp["IsHR"] ?? ""),
+                            is_admin: String(oEmp["IsAdmin"] ?? "")
+                        };
+                        oUiModel.setProperty("/currentUser", oUserObj);
+                        console.log("[DEBUG] Current user loaded from Employee query:", oUserObj);
+                        return oUserObj;
+                    }
+                } catch (oErr) {
+                    console.error("[Dashboard] Querying Employee by SapUserName failed:", oErr);
+                }
+            }
+        }
+
+        const oMockUser = {
+            registered: true,
+            employeeId: "1001",
+            employeeName: "Nguyen Van A",
+            role: "Employee",
+            is_manager: "",
+            is_hr: "",
+            is_admin: ""
+        };
+        oUiModel.setProperty("/currentUser", oMockUser);
+        console.log("[DEBUG] Current user fallback (mock):", oMockUser);
+        return oMockUser;
     }
 
     /**

@@ -156,6 +156,46 @@
           "name": "Unauthorized",
           "pattern": "unauthorized",
           "target": "Unauthorized"
+        },
+        {
+          "name": "AdminShell",
+          "pattern": "admin",
+          "target": [
+            "adminShell",
+            "AdminDashboard"
+          ]
+        },
+        {
+          "name": "AdminDashboard",
+          "pattern": "admin/dashboard",
+          "target": [
+            "adminShell",
+            "AdminDashboard"
+          ]
+        },
+        {
+          "name": "AdminEmployees",
+          "pattern": "admin/employees",
+          "target": [
+            "adminShell",
+            "AdminEmployees"
+          ]
+        },
+        {
+          "name": "AdminLeaveRequests",
+          "pattern": "admin/leave-requests",
+          "target": [
+            "adminShell",
+            "AdminLeaveRequests"
+          ]
+        },
+        {
+          "name": "QuotaManagement",
+          "pattern": "admin/quota",
+          "target": [
+            "adminShell",
+            "QuotaManagement"
+          ]
         }
       ],
       "targets": {
@@ -194,6 +234,50 @@
           "viewId": "Unauthorized",
           "viewType": "XML",
           "transition": "show"
+        },
+        "adminShell": {
+          "viewName": "admin.App",
+          "viewId": "adminApp",
+          "viewType": "XML",
+          "transition": "slide",
+          "controlId": "app",
+          "controlAggregation": "pages"
+        },
+        "AdminDashboard": {
+          "viewName": "admin.AdminDashboard",
+          "viewId": "AdminDashboard",
+          "viewType": "XML",
+          "transition": "slide",
+          "parent": "adminShell",
+          "controlId": "adminNavContainer",
+          "controlAggregation": "pages"
+        },
+        "AdminEmployees": {
+          "viewName": "admin.AdminEmployees",
+          "viewId": "AdminEmployees",
+          "viewType": "XML",
+          "transition": "slide",
+          "parent": "adminShell",
+          "controlId": "adminNavContainer",
+          "controlAggregation": "pages"
+        },
+        "AdminLeaveRequests": {
+          "viewName": "admin.AdminLeaveRequests",
+          "viewId": "AdminLeaveRequests",
+          "viewType": "XML",
+          "transition": "slide",
+          "parent": "adminShell",
+          "controlId": "adminNavContainer",
+          "controlAggregation": "pages"
+        },
+        "QuotaManagement": {
+          "viewName": "admin.AdminQuotaManagement",
+          "viewId": "AdminQuotaManagement",
+          "viewType": "XML",
+          "transition": "slide",
+          "parent": "adminShell",
+          "controlId": "adminNavContainer",
+          "controlAggregation": "pages"
         }
       }
     },

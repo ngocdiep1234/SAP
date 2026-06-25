@@ -1,5 +1,7 @@
 import Controller from "sap/ui/core/mvc/Controller";
 import JSONModel from "sap/ui/model/json/JSONModel";
+import MessageBox from "sap/m/MessageBox";
+import MessageToast from "sap/m/MessageToast";
 
 /**
  * @namespace zleave.zleave.controller
@@ -52,18 +54,26 @@ export default class App extends Controller {
     private _onRouteMatched(oEvent: any): void {
         const sRouteName: string = oEvent.getParameter("name") as string;
         const bIsUnauthorized = sRouteName === "Unauthorized";
+        const bIsAdminRoute = sRouteName.startsWith("Admin") || sRouteName === "QuotaManagement" || sRouteName === "AdminShell";
+        const bHideSidebar = bIsUnauthorized || bIsAdminRoute;
 
         // Hide / show the side navigation list
         const oSideNav = this.getView().byId("sideNav") as any;
         if (oSideNav && typeof oSideNav.setVisible === "function") {
-            oSideNav.setVisible(!bIsUnauthorized);
+            oSideNav.setVisible(!bHideSidebar);
         }
 
         // Collapse / expand the ToolPage side panel itself so no empty
         // grey strip remains on the left when the nav list is hidden.
         const oToolPage = this.getView().byId("toolPage") as any;
         if (oToolPage && typeof oToolPage.setSideExpanded === "function") {
-            oToolPage.setSideExpanded(!bIsUnauthorized);
+            oToolPage.setSideExpanded(!bHideSidebar);
+        }
+
+        // Hide / show the main employee header on admin routes
+        const oHeader = this.getView().byId("appHeader") as any;
+        if (oHeader && typeof oHeader.setVisible === "function") {
+            oHeader.setVisible(!bIsAdminRoute);
         }
     }
 
@@ -104,5 +114,41 @@ export default class App extends Controller {
         } catch {
             // ignore
         }
+    }
+
+    /**
+     * Toggles the collapsible sidebar state
+     */
+    public onToggleSidebar(): void {
+        const oToolPage = this.getView().byId("toolPage") as any;
+        if (oToolPage && typeof oToolPage.getSideExpanded === "function") {
+            const bExpanded = oToolPage.getSideExpanded();
+            oToolPage.setSideExpanded(!bExpanded);
+        }
+    }
+
+    /**
+     * Handler for user profile click
+     */
+    public onUserMenuPress(): void {
+        MessageToast.show("User profile settings (mock)");
+    }
+
+    /**
+     * Handler for user log out
+     */
+    public onLogoutPress(): void {
+        MessageBox.confirm(
+            "Are you sure you want to logout?",
+            {
+                actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+                emphasizedAction: MessageBox.Action.YES,
+                onClose: (sAction: string): void => {
+                    if (sAction === MessageBox.Action.YES) {
+                        window.location.href = "/sap/public/bc/icf/logoff";
+                    }
+                }
+            }
+        );
     }
 }
