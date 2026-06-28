@@ -1,0 +1,84 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form">
+    <Dialog id="employeeDialog" title="{dialog>/title}" type="Message">
+        <content>
+            <f:SimpleForm
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4"
+                labelSpanL="4"
+                labelSpanM="4"
+                labelSpanS="12"
+                adjustLabelSpan="false"
+                emptySpanXL="0"
+                emptySpanL="0"
+                emptySpanM="0"
+                emptySpanS="0"
+                columnsXL="1"
+                columnsL="1"
+                columnsM="1"
+                singleContainerFullSize="false">
+                <f:content>
+                    <Label text="SAP User" required="true" />
+                    <Input
+                        id="inputSapUser"
+                        value="{dialog>/SapUser}"
+                        maxLength="12"
+                        placeholder="Enter SAP Username"
+                        editable="{dialog>/isCreate}"/>
+
+                    <Label text="Full Name" required="true" />
+                    <Input
+                        id="inputFullName"
+                        value="{dialog>/FullName}"
+                        maxLength="100"
+                        placeholder="Enter Full Name"/>
+
+                    <Label text="Email" />
+                    <Input
+                        id="inputEmail"
+                        value="{dialog>/Email}"
+                        type="Email"
+                        maxLength="100"
+                        placeholder="Enter Email Address"/>
+
+                    <Label text="Department" />
+                    <Input
+                        id="inputDepartment"
+                        value="{dialog>/Department}"
+                        maxLength="50"
+                        placeholder="Enter Department"/>
+
+                    <Label text="Position Title" />
+                    <Input
+                        id="inputPosition"
+                        value="{dialog>/PositionTitle}"
+                        maxLength="100"
+                        placeholder="Enter Position Title"/>
+
+                    <Label text="Manager SAP User" />
+                    <Input
+                        id="inputManager"
+                        value="{dialog>/ManagerUser}"
+                        maxLength="12"
+                        placeholder="Enter Manager's SAP Username"/>
+
+                    <Label text="Status" />
+                    <Switch
+                        id="switchActive"
+                        state="{dialog>/IsActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+                </f:content>
+            </f:SimpleForm>
+        </content>
+        <beginButton>
+            <Button text="Save" type="Emphasized" press=".onSaveDialog"/>
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" press=".onCloseDialog"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

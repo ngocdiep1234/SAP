@@ -2,13 +2,98 @@
     controllerName="zleave.zleave.controller.admin.AdminEmployees"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:core="sap.ui.core"
     height="100%">
-    <Page title="Employees Management">
+    <Page title="Employees Management" showHeader="true">
+        <headerContent>
+            <SearchField
+                id="searchField"
+                width="300px"
+                placeholder="Search by name, user, department..."
+                search=".onSearch"/>
+        </headerContent>
         <content>
-            <VBox class="sapUiResponsiveMargin">
-                <Title text="Employees Administration" level="H2" class="sapUiMediumMarginBottom"/>
-                <Text text="This is the placeholder for the Employees management business module."/>
-            </VBox>
+            <Table
+                id="tableEmployees"
+                width="auto"
+                items="{
+                    path: '/EmployeeAdmin',
+                    sorter: { path: 'FullName' }
+                }"
+                growing="true"
+                growingThreshold="20"
+                mode="None"
+                class="sapUiResponsiveMargin employeeTable">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="Employee List" level="H2"/>
+                        <ToolbarSpacer />
+                        <Button
+                            icon="sap-icon://add"
+                            text="Add Employee"
+                            type="Emphasized"
+                            press=".onAddEmployee"/>
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column width="5rem">
+                        <Text text="ID" />
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="Full Name" />
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="SAP User" />
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true">
+                        <Text text="Email" />
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true">
+                        <Text text="Department" />
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true">
+                        <Text text="Position" />
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true">
+                        <Text text="Manager" />
+                    </Column>
+                    <Column width="4rem" hAlign="Center">
+                        <Text text="Active" />
+                    </Column>
+                    <Column width="6rem" hAlign="End">
+                        <Text text="Actions" />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{EmployeeId}" />
+                            <Text text="{FullName}" />
+                            <Text text="{SapUser}" />
+                            <Text text="{Email}" />
+                            <Text text="{Department}" />
+                            <Text text="{PositionTitle}" />
+                            <Text text="{ManagerUser}" />
+                            <core:Icon
+                                src="{= ${IsActive} ? 'sap-icon://sys-enter-2' : 'sap-icon://sys-cancel-2' }"
+                                color="{= ${IsActive} ? 'Positive' : 'Negative' }"
+                                size="1.25rem"/>
+                            <HBox justifyContent="End" spacing="0.5rem">
+                                <Button
+                                    icon="sap-icon://edit"
+                                    type="Transparent"
+                                    press=".onEditEmployee"
+                                    tooltip="Edit Employee"/>
+                                <Button
+                                    icon="sap-icon://delete"
+                                    type="Transparent"
+                                    press=".onDeleteEmployee"
+                                    tooltip="Delete Employee"/>
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
         </content>
     </Page>
 </mvc:View>

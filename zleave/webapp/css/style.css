@@ -102,3 +102,21 @@ body {
 .sapTntSideNavigationFixedList {
 	border-radius: 1rem;
 }
+
+.employeeTable {
+	overflow-x: auto;
+}
+
+/* Giảm padding các ô trong bảng Employee */
+.employeeTable .sapMListTblCell,
+.employeeTable .sapMListTblHeaderCell {
+	padding-inline: 0.4rem;
+}
+
+.employeeTable .sapMListTblCell {
+	padding-block: 0.5rem;
+}
+
+.employeeTable .sapMListTblHeaderCell {
+	padding-block: 0.4rem;
+}

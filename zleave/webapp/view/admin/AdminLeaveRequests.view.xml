@@ -2,13 +2,100 @@
     controllerName="zleave.zleave.controller.admin.AdminLeaveRequests"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:core="sap.ui.core"
     height="100%">
-    <Page title="Leave Requests Management">
+    <Page title="Leave Requests Management" showHeader="true">
+        <headerContent>
+            <SearchField
+                id="searchField"
+                width="300px"
+                placeholder="Search by Request ID, Employee, Reason..."
+                search=".onSearch"/>
+        </headerContent>
         <content>
-            <VBox class="sapUiResponsiveMargin">
-                <Title text="Leave Requests Administration" level="H2" class="sapUiMediumMarginBottom"/>
-                <Text text="This is the placeholder for the Leave Requests management business module."/>
-            </VBox>
+            <Table
+                id="tableRequests"
+                width="auto"
+                items="{
+                    path: '/LeaveRequestAdmin',
+                    parameters: {
+                        expand: 'to_Employee'
+                    },
+                    sorter: { path: 'CreatedAt', descending: true }
+                }"
+                growing="true"
+                growingThreshold="20"
+                mode="None"
+                class="sapUiResponsiveMargin employeeTable">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="All Leave Requests" level="H2"/>
+                        <ToolbarSpacer />
+                        <Button
+                            icon="sap-icon://refresh"
+                            text="Refresh"
+                            press=".onRefresh"/>
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column width="8rem">
+                        <Text text="Request ID" />
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="Employee" />
+                    </Column>
+                    <Column width="6rem" minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="Type" />
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true">
+                        <Text text="Start Date" />
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true">
+                        <Text text="End Date" />
+                    </Column>
+                    <Column width="5rem" hAlign="Center">
+                        <Text text="Days" />
+                    </Column>
+                    <Column width="8rem" hAlign="Center">
+                        <Text text="Status" />
+                    </Column>
+                    <Column width="8rem" hAlign="End">
+                        <Text text="Actions" />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{RequestId}" />
+                            <Text text="{parts: [{path: 'to_Employee/FullName'}, {path: 'EmployeeId'}], formatter: '.formatEmployeeName'}" />
+                            <Text text="{LeaveType}" />
+                            <Text text="{path: 'StartDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                            <Text text="{path: 'EndDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}" />
+                            <Text text="{path: 'TotalDays', type: 'sap.ui.model.type.Float', formatOptions: {maxFractionDigits: 1}}" />
+                            <ObjectStatus 
+                                text="{Status}" 
+                                state="{= ${Status} === 'APPROVED' || ${Status} === 'Approved' ? 'Success' : (${Status} === 'REJECTED' || ${Status} === 'Rejected' || ${Status} === 'Cancelled' ? 'Error' : 'Warning') }"/>
+                            <HBox justifyContent="End" spacing="0.5rem">
+                                <Button
+                                    icon="sap-icon://show"
+                                    type="Transparent"
+                                    press=".onViewDetail"
+                                    tooltip="View Details"/>
+                                <Button
+                                    icon="sap-icon://edit"
+                                    type="Transparent"
+                                    press=".onEditRequest"
+                                    tooltip="Edit Request"/>
+                                <Button
+                                    icon="sap-icon://delete"
+                                    type="Transparent"
+                                    press=".onDeleteRequest"
+                                    tooltip="Delete Request"/>
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
         </content>
     </Page>
 </mvc:View>

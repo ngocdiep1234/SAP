@@ -1,0 +1,107 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form">
+    <Dialog id="leaveRequestDialog" title="{dialog>/title}" type="Message" width="500px">
+        <content>
+            <f:SimpleForm
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4"
+                labelSpanL="4"
+                labelSpanM="4"
+                labelSpanS="12"
+                adjustLabelSpan="false"
+                emptySpanXL="0"
+                emptySpanL="0"
+                emptySpanM="0"
+                emptySpanS="0"
+                columnsXL="1"
+                columnsL="1"
+                columnsM="1"
+                singleContainerFullSize="false">
+                <f:content>
+                    <Label text="Leave Type" required="true" />
+                    <ComboBox
+                        id="inputLeaveType"
+                        selectedKey="{dialog>/LeaveType}"
+                        items="{/LeaveType}">
+                        <core:Item key="{LeaveType}" text="{LeaveName} ({LeaveType})"/>
+                    </ComboBox>
+
+                    <Label text="Start Date" required="true" />
+                    <DatePicker
+                        id="inputStartDate"
+                        valueFormat="yyyy-MM-dd"
+                        displayFormat="yyyy-MM-dd"
+                        value="{path: 'dialog>/StartDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"
+                        change=".onDatesChange"/>
+
+                    <Label text="Start Session" />
+                    <Select
+                        id="inputStartSession"
+                        selectedKey="{dialog>/StartSession}"
+                        change=".onDatesChange">
+                        <core:Item key="" text="Full Day"/>
+                        <core:Item key="M" text="Morning"/>
+                        <core:Item key="A" text="Afternoon"/>
+                    </Select>
+
+                    <Label text="End Date" required="true" />
+                    <DatePicker
+                        id="inputEndDate"
+                        valueFormat="yyyy-MM-dd"
+                        displayFormat="yyyy-MM-dd"
+                        value="{path: 'dialog>/EndDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"
+                        change=".onDatesChange"/>
+
+                    <Label text="End Session" />
+                    <Select
+                        id="inputEndSession"
+                        selectedKey="{dialog>/EndSession}"
+                        change=".onDatesChange">
+                        <core:Item key="" text="Full Day"/>
+                        <core:Item key="M" text="Morning"/>
+                        <core:Item key="A" text="Afternoon"/>
+                    </Select>
+
+                    <Label text="Total Days" />
+                    <Text text="{dialog>/TotalDays}" />
+
+                    <Label text="Reason" required="true" />
+                    <TextArea
+                        id="inputReason"
+                        value="{dialog>/Reason}"
+                        rows="3"
+                        growing="true"
+                        placeholder="Enter leave reason"/>
+
+                    <Label text="Status" required="true" />
+                    <Select
+                        id="inputStatus"
+                        selectedKey="{dialog>/Status}">
+                        <core:Item key="SUBMITTED" text="Submitted"/>
+                        <core:Item key="MGR_APPROVED" text="Manager Approved"/>
+                        <core:Item key="APPROVED" text="Approved"/>
+                        <core:Item key="REJECTED" text="Rejected"/>
+                        <core:Item key="CANCELLED" text="Cancelled"/>
+                    </Select>
+
+                    <Label text="Approval Comment" />
+                    <TextArea
+                        id="inputApprovalComment"
+                        value="{dialog>/ApprovalComment}"
+                        rows="2"
+                        growing="true"
+                        placeholder="Enter approval/rejection comment"/>
+                </f:content>
+            </f:SimpleForm>
+        </content>
+        <beginButton>
+            <Button text="Save" type="Emphasized" press=".onSaveDialog"/>
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" press=".onCloseDialog"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
