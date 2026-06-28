@@ -2,13 +2,168 @@
     controllerName="zleave.zleave.controller.admin.AdminDashboard"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
     height="100%">
-    <Page title="Admin Dashboard">
+    <Page title="Admin Dashboard" showHeader="true">
         <content>
-            <VBox class="sapUiResponsiveMargin">
-                <Title text="Admin Dashboard Overview" level="H2" class="sapUiMediumMarginBottom"/>
-                <Text text="This is the placeholder for the Admin Dashboard business module."/>
-            </VBox>
+            <l:Grid defaultSpan="XL12 L12 M12 S12" hSpacing="1" vSpacing="1" class="sapUiSmallMargin">
+                
+                <!-- Metrics Section -->
+                <VBox>
+                    <layoutData>
+                        <l:GridData span="XL12 L12 M12 S12"/>
+                    </layoutData>
+                    <FlexBox wrap="Wrap" justify="Start" class="sapUiTinyMarginBottom">
+                        <GenericTile
+                            header="Total Employees"
+                            subheader="Active Management"
+                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                            press=".onNavToEmployees">
+                            <tileContent>
+                                <TileContent footer="Active: {mock>/metrics/activeEmployees}">
+                                    <content>
+                                        <NumericContent
+                                            value="{mock>/metrics/totalEmployees}"
+                                            icon="sap-icon://employee"
+                                            valueColor="Neutral"/>
+                                    </content>
+                                </TileContent>
+                            </tileContent>
+                        </GenericTile>
+
+                        <GenericTile
+                            header="Pending Requests"
+                            subheader="Requires Approval"
+                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                            press=".onNavToLeaveRequests">
+                            <tileContent>
+                                <TileContent footer="Needs verification">
+                                    <content>
+                                        <NumericContent
+                                            value="{mock>/metrics/pendingRequests}"
+                                            valueColor="Critical"
+                                            icon="sap-icon://clinical-triage-status"/>
+                                    </content>
+                                </TileContent>
+                            </tileContent>
+                        </GenericTile>
+
+                        <GenericTile
+                            header="Leaves Approved"
+                            subheader="Current Month"
+                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
+                            <tileContent>
+                                <TileContent footer="This month count">
+                                    <content>
+                                        <NumericContent
+                                            value="{mock>/metrics/approvedThisMonth}"
+                                            valueColor="Good"
+                                            icon="sap-icon://accept"/>
+                                    </content>
+                                </TileContent>
+                            </tileContent>
+                        </GenericTile>
+
+                        <GenericTile
+                            header="System Alerts"
+                            subheader="Config Reminders"
+                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+                            press=".onNavToQuota">
+                            <tileContent>
+                                <TileContent footer="Quota mismatch">
+                                    <content>
+                                        <NumericContent
+                                            value="{mock>/metrics/criticalReminders}"
+                                            valueColor="Error"
+                                            icon="sap-icon://alert"/>
+                                    </content>
+                                </TileContent>
+                            </tileContent>
+                        </GenericTile>
+                    </FlexBox>
+                </VBox>
+
+                <!-- Left Column (70%) -->
+                <VBox>
+                    <layoutData>
+                        <l:GridData span="XL8 L8 M12 S12"/>
+                    </layoutData>
+
+                    <!-- Quick Admin Controls -->
+                    <Panel headerText="Quick Admin Actions" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
+                        <HBox wrap="Wrap" class="sapUiTinyMarginTop">
+                            <Button text="Add New Employee" type="Emphasized" icon="sap-icon://add-employee" press=".onNavToEmployees" class="sapUiSmallMarginEnd sapUiTinyMarginBottom"/>
+                            <Button text="Process Leave Requests" icon="sap-icon://approvals" press=".onNavToLeaveRequests" class="sapUiSmallMarginEnd sapUiTinyMarginBottom"/>
+                            <Button text="Check Quota Allocation" icon="sap-icon://check-availability" press=".onNavToQuota" class="sapUiTinyMarginBottom"/>
+                        </HBox>
+                    </Panel>
+
+                    <!-- Pending Actions Table -->
+                    <Panel headerText="Pending Approvals Review" backgroundDesign="Translucent">
+                        <Table id="tablePendingApprovals" inset="false" items="{mock>/pendingApprovals}">
+                            <columns>
+                                <Column width="9rem"><Text text="Request ID" design="Bold"/></Column>
+                                <Column><Text text="Employee" design="Bold"/></Column>
+                                <Column width="6rem"><Text text="Type" design="Bold"/></Column>
+                                <Column minScreenWidth="Tablet" demandPopin="true"><Text text="Period" design="Bold"/></Column>
+                                <Column width="5rem" hAlign="End"><Text text="Days" design="Bold"/></Column>
+                                <Column width="8rem" hAlign="Center"><Text text="Status" design="Bold"/></Column>
+                            </columns>
+                            <items>
+                                <ColumnListItem>
+                                    <cells>
+                                        <Text text="{mock>RequestId}"/>
+                                        <Text text="{mock>EmployeeName}"/>
+                                        <Text text="{mock>LeaveType}"/>
+                                        <Text text="{path: 'mock>StartDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}} - {path: 'mock>EndDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"/>
+                                        <Text text="{path: 'mock>TotalDays', type: 'sap.ui.model.type.Float', formatOptions: {maxFractionDigits: 1}}"/>
+                                        <ObjectStatus text="{mock>Status}" state="{= ${mock>Status} === 'MGR_APPROVED' ? 'Success' : 'Warning' }"/>
+                                    </cells>
+                                </ColumnListItem>
+                            </items>
+                        </Table>
+                    </Panel>
+                </VBox>
+
+                <!-- Right Column (30%) -->
+                <VBox>
+                    <layoutData>
+                        <l:GridData span="XL4 L4 M12 S12"/>
+                    </layoutData>
+
+                    <!-- Who is out today -->
+                    <Panel headerText="Out of Office Today" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
+                        <List id="listWhoIsOut" 
+                            noDataText="All employees are working today"
+                            items="{mock>/whoIsOutToday}">
+                            <StandardListItem 
+                                title="{mock>EmployeeName}"
+                                description="{mock>LeaveType} ({mock>Period})"
+                                icon="sap-icon://presence"
+                                info="{mock>Status}"
+                                infoState="Warning"/>
+                        </List>
+                    </Panel>
+
+                    <!-- Recent Activity Stream -->
+                    <Panel headerText="Recent Activities" backgroundDesign="Translucent">
+                        <List id="listActivities" 
+                            items="{mock>/recentActivities}">
+                            <CustomListItem>
+                                <HBox class="sapUiSmallMargin" alignItems="Center">
+                                    <core:Icon src="{mock>icon}" color="{= ${mock>state} === 'Success' ? '#2b7c2b' : '#0066cc' }" class="sapUiSmallMarginEnd"/>
+                                    <VBox>
+                                        <Text text="{mock>text}" design="Bold"/>
+                                        <Text text="{mock>time}" class="sapUiTinyMarginTop" style="font-size: 0.8rem; color: #666;"/>
+                                    </VBox>
+                                </HBox>
+                            </CustomListItem>
+                        </List>
+                    </Panel>
+                </VBox>
+
+            </l:Grid>
         </content>
     </Page>
 </mvc:View>

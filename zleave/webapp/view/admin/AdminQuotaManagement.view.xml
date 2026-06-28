@@ -2,13 +2,84 @@
     controllerName="zleave.zleave.controller.admin.AdminQuotaManagement"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:core="sap.ui.core"
     height="100%">
-    <Page title="Quota Management">
+    <Page title="Quota Management" showHeader="true">
+        <headerContent>
+            <SearchField
+                id="searchField"
+                width="300px"
+                placeholder="Search by Employee, User, Type..."
+                search=".onSearch"/>
+        </headerContent>
         <content>
-            <VBox class="sapUiResponsiveMargin">
-                <Title text="Quota Management Administration" level="H2" class="sapUiMediumMarginBottom"/>
-                <Text text="This is the placeholder for the Quota Management business module."/>
-            </VBox>
+            <Table
+                id="tableQuota"
+                width="auto"
+                items="{
+                    path: '/LeaveQuota',
+                    sorter: [
+                        { path: 'QuotaYear', descending: true },
+                        { path: 'EmployeeName' }
+                    ]
+                }"
+                growing="true"
+                growingThreshold="20"
+                mode="None"
+                class="sapUiResponsiveMargin employeeTable">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="Employee Leave Quotas" level="H2"/>
+                        <ToolbarSpacer />
+                        <Button
+                            icon="sap-icon://refresh"
+                            text="Refresh"
+                            press=".onRefresh"/>
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="Employee" />
+                    </Column>
+                    <Column width="8rem">
+                        <Text text="SAP User" />
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="Leave Type" />
+                    </Column>
+                    <Column width="5rem" hAlign="Center">
+                        <Text text="Year" />
+                    </Column>
+                    <Column width="6rem" hAlign="End">
+                        <Text text="Total" />
+                    </Column>
+                    <Column width="6rem" hAlign="End">
+                        <Text text="Used" />
+                    </Column>
+                    <Column width="7rem" hAlign="End">
+                        <Text text="Remaining" />
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true" hAlign="Center">
+                        <Text text="Validity Period" />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{parts: [{path: 'EmployeeName'}, {path: 'EmployeeId'}], formatter: '.formatEmployeeName'}" />
+                            <Text text="{SapUserName}" />
+                            <Text text="{LeaveTypeName} ({LeaveTypeId})" />
+                            <Text text="{QuotaYear}" />
+                            <Text text="{path: 'TotalDays', type: 'sap.ui.model.type.Float', formatOptions: {maxFractionDigits: 1}}" />
+                            <Text text="{path: 'UsedDays', type: 'sap.ui.model.type.Float', formatOptions: {maxFractionDigits: 1}}" />
+                            <ObjectStatus
+                                text="{path: 'RemainingDays', type: 'sap.ui.model.type.Float', formatOptions: {maxFractionDigits: 1}}"
+                                state="{path: 'RemCriticality', formatter: '.formatCriticalityState'}"/>
+                            <Text text="{parts: [{path: 'ValidFrom'}, {path: 'ValidTo'}], formatter: '.formatDateRange'}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
         </content>
     </Page>
 </mvc:View>
