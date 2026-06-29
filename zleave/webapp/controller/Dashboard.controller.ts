@@ -48,32 +48,14 @@ export default class Dashboard extends Controller {
     }
 
     public loadLeaveQuota(): void {
-        const aMockQuota: LeaveQuota[] = [
-            {
-                LeaveTypeName: "Annual Leave",
-                RemainingDays: 12,
-                UsedDays: 4,
-                TotalDays: 16
-            },
-            {
-                LeaveTypeName: "Sick Leave",
-                RemainingDays: 8,
-                UsedDays: 2,
-                TotalDays: 10
-            },
-            {
-                LeaveTypeName: "Unpaid Leave",
-                RemainingDays: 5,
-                UsedDays: 5,
-                TotalDays: 10
-            }
-        ];
-
         const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
-        if (!oModel) {
-            // Thiết lập mock data ngay lập tức nếu oModel chưa sẵn sàng
-            const oQuotaModel = new JSONModel({ results: aMockQuota });
+        let oQuotaModel = this.getView().getModel("quota") as InstanceType<typeof JSONModel> | undefined;
+        if (!oQuotaModel) {
+            oQuotaModel = new JSONModel({ results: [] });
             this.getView().setModel(oQuotaModel, "quota");
+        }
+
+        if (!oModel) {
             return;
         }
 
@@ -82,22 +64,16 @@ export default class Dashboard extends Controller {
         oModel.read("/LeaveQuota", {
             success: (oData: LeaveQuotaResult): void => {
                 this.getView().setBusy(false);
-                if (!oData || !oData.results || oData.results.length === 0) {
-                    // Fallback to mock data when BE returns empty
-                    MessageToast.show("Không có dữ liệu leave quota từ BE, đang tải dữ liệu mock.");
-                    const oQuotaModel = new JSONModel({ results: aMockQuota });
-                    this.getView().setModel(oQuotaModel, "quota");
+                if (oData && oData.results) {
+                    oQuotaModel?.setData(oData);
                 } else {
-                    const oQuotaModel = new JSONModel(oData);
-                    this.getView().setModel(oQuotaModel, "quota");
+                    oQuotaModel?.setData({ results: [] });
                 }
             },
-            error: (): void => {
+            error: (oErr: unknown): void => {
                 this.getView().setBusy(false);
-                MessageToast.show("Lỗi tải dữ liệu leave quota, đang tải dữ liệu mock.");
-                // Set mock results so the Leave Balance section stays visible with mock data
-                const oQuotaModel = new JSONModel({ results: aMockQuota });
-                this.getView().setModel(oQuotaModel, "quota");
+                console.error("[Dashboard] Failed to load leave quota:", oErr);
+                oQuotaModel?.setData({ results: [] });
             }
         });
     }
