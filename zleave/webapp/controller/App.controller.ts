@@ -14,6 +14,11 @@ export default class App extends Controller {
         oView.setModel(
             new JSONModel({
                 selectedSection: "dashboard",
+                currentUser: {
+                    is_hr: "",
+                    is_manager: "",
+                    is_admin: ""
+                },
                 stats: {
                     totalRequests: 0,
                     pendingRequests: 0,
