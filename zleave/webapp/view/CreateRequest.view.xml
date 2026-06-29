@@ -31,7 +31,7 @@
                             </VBox>
                             <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
                                 <Label text="Manager" class="sapUiTinyMarginBottom"/>
-                                <Text text="{createForm>/employee/ManagerID}" design="Bold"/>
+                                <ObjectIdentifier title="{createForm>/employee/ManagerName}" text="{createForm>/employee/ManagerID}"/>
                             </VBox>
                         </HBox>
                     </Panel>
@@ -115,7 +115,7 @@
                                     rows="5" 
                                     growing="true"
                                     maxLength="500" 
-                                    placeholder="Hãy nhập lý do xin nghỉ chi tiết của bạn tại đây (tối thiểu 5 ký tự)..."
+                                    placeholder="Please enter your detailed leave reason here (minimum 5 characters)..."
                                     liveChange=".onDatesChange"/>
                             </f:content>
                         </f:SimpleForm>
@@ -143,34 +143,7 @@
                     </Panel>
                 </VBox>
 
-                <!-- Right Column: Request Summary Card (30%) -->
-                <Panel id="summaryPanel" headerText="{i18n>requestSummarySection}" backgroundDesign="Translucent" class="sapUiSmallMarginBottom">
-                    <layoutData>
-                        <l:GridData span="XL4 L4 M12 S12"/>
-                    </layoutData>
-                    <VBox class="sapUiContentPadding">
-                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom" alignItems="Center">
-                            <Label text="Leave Type:" design="Bold"/>
-                            <Text text="{createForm>/summary/LeaveType}"/>
-                        </HBox>
-                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom" alignItems="Center">
-                            <Label text="Duration:" design="Bold"/>
-                            <Text text="{createForm>/summary/Duration}"/>
-                        </HBox>
-                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom" alignItems="Center">
-                            <Label text="Remaining Balance:" design="Bold"/>
-                            <Text text="{createForm>/summary/RemainingBalance}"/>
-                        </HBox>
-                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom" alignItems="Center">
-                            <Label text="Approver:" design="Bold"/>
-                            <Text text="{createForm>/summary/Approver}"/>
-                        </HBox>
-                        <HBox justify="SpaceBetween" class="sapUiSmallMarginBottom" alignItems="Center">
-                            <Label text="Status:" design="Bold"/>
-                            <ObjectStatus text="{createForm>/summary/Status}" state="Warning"/>
-                        </HBox>
-                    </VBox>
-                </Panel>
+
 
                 <!-- Right Column: Leave Balance Card (30%) -->
                 <Panel headerText="Leave Balance" backgroundDesign="Translucent" class="sapUiSmallMarginBottom">

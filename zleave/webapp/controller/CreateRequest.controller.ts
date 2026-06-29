@@ -29,6 +29,7 @@ interface Employee {
     EmployeeName: string;
     DepartmentID: string;
     ManagerID: string;
+    ManagerName?: string;
 }
 
 interface Summary {
@@ -92,7 +93,8 @@ export default class CreateRequest extends Controller {
                 EmployeeID: "",
                 EmployeeName: "",
                 DepartmentID: "",
-                ManagerID: ""
+                ManagerID: "",
+                ManagerName: ""
             },
             summary: {
                 LeaveType: "-",
@@ -151,8 +153,8 @@ export default class CreateRequest extends Controller {
         if (!oModel) {
             console.error("[CreateRequest] OData model is not available.");
             MessageBox.error(
-                "Không thể kết nối với hệ thống. Vui lòng tải lại trang.",
-                { title: "Lỗi kết nối" }
+                "Could not connect to the system. Please reload the page.",
+                { title: "Connection Error" }
             );
             return;
         }
@@ -163,13 +165,13 @@ export default class CreateRequest extends Controller {
             sUserId = await this._getCurrentUserId();
         } catch (oErr) {
             console.error("[CreateRequest] Failed to resolve current user id:", oErr);
-            this._blockWithError("Không thể xác định người dùng hiện tại. Vui lòng tải lại trang.");
+            this._blockWithError("Could not determine current user. Please reload the page.");
             return;
         }
 
         if (!sUserId) {
             console.warn("[CreateRequest] Current user id is empty.");
-            this._blockWithError("Không thể xác định người dùng hiện tại. Vui lòng tải lại trang.");
+            this._blockWithError("Could not determine current user. Please reload the page.");
             return;
         }
 
@@ -192,12 +194,14 @@ export default class CreateRequest extends Controller {
                         EmployeeID:   String(oODataEmp["EmployeeId"]   ?? ""),
                         EmployeeName: String(oODataEmp["FullName"]      ?? ""),
                         DepartmentID: String(oODataEmp["Department"]    ?? ""),
-                        ManagerID:    String(oODataEmp["ManagerSapUser"] ?? "")
+                        ManagerID:    String(oODataEmp["ManagerSapUser"] ?? ""),
+                        ManagerName:  ""
                     };
 
                     oFormModel.setProperty("/employee", oEmp);
                     oFormModel.setProperty("/leaveRequest/ApproverId", oEmp.ManagerID);
                     this._updateSummaryApprover();
+                    this._updateEmployeeManagerName();
                     oFormModel.setProperty("/employeeRegistered", true);
 
                     console.info(
@@ -211,8 +215,8 @@ export default class CreateRequest extends Controller {
                         `[CreateRequest] No Employee record found for SapUserName="${sUserId}".`
                     );
                     this._blockWithError(
-                        "Bạn chưa được đăng ký trong hệ thống. " +
-                        "Vui lòng liên hệ quản trị viên."
+                        "You are not registered in the system. " +
+                        "Please contact the administrator."
                     );
                 }
             },
@@ -227,9 +231,9 @@ export default class CreateRequest extends Controller {
                     oError
                 );
                 this._blockWithError(
-                    "Đã xảy ra lỗi khi kiểm tra thông tin nhân viên. " +
-                    "Vui lòng thử lại hoặc liên hệ quản trị viên.\n\n" +
-                    `Chi tiết: ${sDetail}`
+                    "An error occurred while checking employee information. " +
+                    "Please try again or contact the administrator.\n\n" +
+                    `Details: ${sDetail}`
                 );
             }
         });
@@ -242,7 +246,7 @@ export default class CreateRequest extends Controller {
     private _blockWithError(sMessage: string): void {
         this._getFormModel().setProperty("/employeeRegistered", false);
         MessageBox.error(sMessage, {
-            title: "Không thể tạo yêu cầu nghỉ phép"
+            title: "Could not create leave request"
         });
     }
 
@@ -337,6 +341,7 @@ export default class CreateRequest extends Controller {
             const aManagers = await oService.readManagers();
             oFormModel.setProperty("/managers", aManagers);
             this._updateSummaryApprover();
+            this._updateEmployeeManagerName();
         } catch (sErr) {
             console.error("Failed to load managers:", sErr);
         }
@@ -351,6 +356,18 @@ export default class CreateRequest extends Controller {
             oFormModel.setProperty("/summary/Approver", `${oSelectedManager.ManagerName} (${oSelectedManager.ManagerUser})`);
         } else {
             oFormModel.setProperty("/summary/Approver", sApproverId || "");
+        }
+    }
+
+    private _updateEmployeeManagerName(): void {
+        const oFormModel = this._getFormModel();
+        const sManagerId = oFormModel.getProperty("/employee/ManagerID") as string;
+        const aManagers = oFormModel.getProperty("/managers") as ManagerEntry[] || [];
+        const oSelectedManager = aManagers.find(m => m.ManagerUser === sManagerId);
+        if (oSelectedManager) {
+            oFormModel.setProperty("/employee/ManagerName", oSelectedManager.ManagerName);
+        } else {
+            oFormModel.setProperty("/employee/ManagerName", sManagerId || "");
         }
     }
 
@@ -461,9 +478,9 @@ export default class CreateRequest extends Controller {
         const bRegistered = oFormModel.getProperty("/employeeRegistered") as boolean;
         if (!bRegistered) {
             MessageBox.error(
-                "Bạn chưa được đăng ký trong hệ thống. " +
-                "Vui lòng liên hệ quản trị viên.",
-                { title: "Không thể tạo yêu cầu nghỉ phép" }
+                "You are not registered in the system. " +
+                "Please contact the administrator.",
+                { title: "Could not create leave request" }
             );
             return false;
         }
@@ -568,9 +585,9 @@ export default class CreateRequest extends Controller {
                     // Request created but upload failed → warn and navigate away
                     this.getView().setBusy(false);
                     MessageBox.warning(
-                        "Yêu cầu đã được tạo nhưng file đính kèm upload thất bại: " +
+                        "Leave request created, but the attachment upload failed: " +
                         (typeof oUploadErr === "string" ? oUploadErr : "Unknown error") +
-                        ". Bạn có thể upload lại trong trang chi tiết.",
+                        ". You can retry uploading the attachment in the details page.",
                         { onClose: (): void => { this._navToRequests(); } }
                     );
                     try { this.getView().getModel()?.refresh(true); } catch { /* non-fatal */ }
@@ -700,9 +717,11 @@ export default class CreateRequest extends Controller {
             EmployeeID: "",
             EmployeeName: "",
             DepartmentID: "",
-            ManagerID: ""
+            ManagerID: "",
+            ManagerName: ""
         });
         this._updateSummaryApprover();
+        this._updateEmployeeManagerName();
     }
 
     private _navToRequests(): void {
