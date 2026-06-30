@@ -663,7 +663,7 @@ export default class AdminLeaveRequests extends Controller {
         const nTotalDays = Number(vTotalDays || 0);
 
         if (nDiffDays < 3) {
-            aReasons.push("Ngày nghỉ < 3 ngày so với ngày gửi đơn");
+            aReasons.push("Nộp < 3 ngày so với ngày nghỉ");
         }
         if (nTotalDays > 2) {
             aReasons.push("Nghỉ quá 2 ngày");

@@ -15,7 +15,7 @@
                         <SegmentedButtonItem key="my" text="My Requests" />
                     </items>
                 </SegmentedButton>
-                <Table id="tableRequests" mode="MultiSelect" selectionChange=".onSelectionChange" inset="false" items="{/LeaveRequest}" growing="true" growingScrollToLoad="true" class="leaveTable">
+                <Table id="tableRequests" mode="MultiSelect" selectionChange=".onSelectionChange" inset="false" items="{path: '/LeaveRequest', parameters: {operationMode: 'Client'}}" growing="true" growingScrollToLoad="true" class="leaveTable">
                     <headerToolbar>
                         <OverflowToolbar>
                             <Title text="{i18n>leaveRequests}" level="H2"/>
@@ -32,10 +32,11 @@
                         <Column><Text text="{i18n>startDate}"/></Column>
                         <Column><Text text="{i18n>endDate}"/></Column>
                         <Column><Text text="{i18n>totalDays}"/></Column>
+                        <Column visible="{= ${ui>/selectedRequestTab} === 'pending' }"><Text text="Cảnh báo"/></Column>
                         <Column><Text text="{i18n>status}"/></Column>
                     </columns>
                     <items>
-                        <ColumnListItem type="Active" press=".onItemPress">
+                        <ColumnListItem type="Active" press=".onItemPress" highlight="{parts: [{path: 'StartDate'}, {path: 'CreatedAt'}, {path: 'TotalDays'}, {path: 'ui>/selectedRequestTab'}], formatter: '.formatRowHighlight'}">
                             <cells>
                                 <Text text="{RequestId}"/>
                                 <Text text="{parts: [{path: 'EmployeeId'}, {path: 'ui>/employeesMap'}], formatter: '.formatEmployeeName'}"/>
@@ -43,6 +44,11 @@
                                 <Text text="{path: 'StartDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"/>
                                 <Text text="{path: 'EndDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"/>
                                 <Text text="{path: 'TotalDays', type: 'sap.ui.model.type.Float', formatOptions: {minFractionDigits: 0, maxFractionDigits: 1}}"/>
+                                <ObjectStatus
+                                    text="{parts: [{path: 'StartDate'}, {path: 'CreatedAt'}, {path: 'TotalDays'}], formatter: '.formatAbnormalReason'}"
+                                    state="Error"
+                                    icon="sap-icon://message-warning"
+                                    visible="{parts: [{path: 'StartDate'}, {path: 'CreatedAt'}, {path: 'TotalDays'}, {path: 'ui>/selectedRequestTab'}], formatter: '.formatAbnormalVisible'}"/>
                                 <ObjectStatus text="{Status}" state="{= ${Status} === 'Approved' ? 'Success' : ${Status} === 'Rejected' ? 'Error' : 'Warning' }"/>
                             </cells>
                         </ColumnListItem>

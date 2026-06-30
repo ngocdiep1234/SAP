@@ -18,6 +18,7 @@ import ListItemBase from "sap/m/ListItemBase";
 import ODataModel from "sap/ui/model/odata/v2/ODataModel";
 import Event from "sap/ui/base/Event";
 import JSONModel from "sap/ui/model/json/JSONModel";
+import Sorter from "sap/ui/model/Sorter";
 
 export default class Requests extends Controller {
 
@@ -34,6 +35,7 @@ export default class Requests extends Controller {
         const oUiModel = this.getView().getModel("ui") as any;
         if (oUiModel) {
             oUiModel.setProperty("/selectedSection", "requests");
+            oUiModel.setProperty("/selectedRequestTab", "pending");
         }
         const oSegmentedButton =
             this.getView().byId("filterStatusButton");
@@ -133,6 +135,10 @@ export default class Requests extends Controller {
     public onFilterTabChange(oEvent: InstanceType<typeof Event>): void {
         const oSegmentedButton = oEvent.getSource() as InstanceType<typeof SegmentedButton>;
         const key = oSegmentedButton.getSelectedKey();
+        const oUiModel = this.getView().getModel("ui") as any;
+        if (oUiModel) {
+            oUiModel.setProperty("/selectedRequestTab", key);
+        }
         const oTable = this.getView().byId("tableRequests") as InstanceType<typeof Table> | undefined;
         if (oTable) {
             if (key === "my") {
@@ -306,6 +312,35 @@ export default class Requests extends Controller {
         console.log("[DEBUG][_applyFilters] CurrentEmployeeId:", sCurrentEmployeeId, "| SelectedKey:", sSelectedKey);
         console.log("[DEBUG][_applyFilters] Applied filters:", aFilters.map((f: any) => f.sPath + " " + f.sOperator + " " + f.oValue1));
         oBinding.filter(aFilters);
+
+        // Apply sorters dynamically on client
+        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
+        if (sSelectedKey === "pending") {
+            const oSorter = new Sorter("UUID", false, false, (uuidA: string, uuidB: string) => {
+                if (!oModel) return 0;
+                const sEntityPath = oBinding.getPath();
+                const oDataA = oModel.getProperty(`${sEntityPath}(guid'${uuidA}')`) as any;
+                const oDataB = oModel.getProperty(`${sEntityPath}(guid'${uuidB}')`) as any;
+
+                const oAbnormalA = this._checkAbnormality(oDataA?.StartDate, oDataA?.CreatedAt, oDataA?.TotalDays).isAbnormal;
+                const oAbnormalB = this._checkAbnormality(oDataB?.StartDate, oDataB?.CreatedAt, oDataB?.TotalDays).isAbnormal;
+
+                if (oAbnormalA && !oAbnormalB) {
+                    return -1;
+                }
+                if (!oAbnormalA && oAbnormalB) {
+                    return 1;
+                }
+
+                const dCreatedA = oDataA?.CreatedAt ? new Date(oDataA.CreatedAt).getTime() : 0;
+                const dCreatedB = oDataB?.CreatedAt ? new Date(oDataB.CreatedAt).getTime() : 0;
+                return dCreatedB - dCreatedA;
+            });
+            oBinding.sort([oSorter]);
+        } else {
+            const oSorter = new Sorter("CreatedAt", true);
+            oBinding.sort([oSorter]);
+        }
     }
 
     private updateToolbarVisibility(sKey: string): void {
@@ -434,7 +469,7 @@ export default class Requests extends Controller {
                         for (const oContainer of aContainers) {
                             if (oContainer.functionImport) {
                                 const aFuncs = Array.isArray(oContainer.functionImport) ? oContainer.functionImport : [oContainer.functionImport];
-                                const sTargetName = bIsHr 
+                                const sTargetName = bIsHr
                                     ? (sActionType === "approve" ? "hrApproveResult" : "hrRejectResult")
                                     : (sActionType === "approve" ? "approveResult" : "rejectResult");
                                 const sAltName = bIsHr
@@ -514,10 +549,10 @@ export default class Requests extends Controller {
 
             // Check dynamic action controls first (backend-driven _ac flags)
             // Fallback: match current pending status filter (SUBMITTED for MGR, MGR_APPROVED for HR)
-            const bApproveAc = bIsHr 
+            const bApproveAc = bIsHr
                 ? (oContext.getProperty("hrApproveResult_ac") ?? oContext.getProperty("hrApproveLeave_ac"))
                 : (oContext.getProperty("approveLeave_ac") ?? oContext.getProperty("approveResult_ac"));
-            const bRejectAc = bIsHr 
+            const bRejectAc = bIsHr
                 ? (oContext.getProperty("hrRejectResult_ac") ?? oContext.getProperty("hrRejectLeave_ac"))
                 : (oContext.getProperty("rejectLeave_ac") ?? oContext.getProperty("rejectResult_ac"));
             const sStatus = String(oContext.getProperty("Status") || "").toUpperCase();
@@ -782,6 +817,10 @@ export default class Requests extends Controller {
                 const oBindingInfo = oTable.getBindingInfo("items") as any;
                 if (oBindingInfo && oBindingInfo.path !== sPath) {
                     oBindingInfo.path = sPath;
+                    if (!oBindingInfo.parameters) {
+                        oBindingInfo.parameters = {};
+                    }
+                    oBindingInfo.parameters.operationMode = "Client";
                     oTable.bindItems(oBindingInfo);
 
                     const oSegmentedButton = this.getView().byId("filterStatusButton") as InstanceType<typeof SegmentedButton> | undefined;
@@ -793,6 +832,59 @@ export default class Requests extends Controller {
                 console.error("[DEBUG] [AdminViewCheck] Failed to get current user:", oErr);
                 // Fallback: giữ nguyên binding mặc định từ XML view
             });
+    }
+
+    private _checkAbnormality(oStartDate: any, oCreatedAt: any, vTotalDays: any): { isAbnormal: boolean; reasons: string[] } {
+        const aReasons: string[] = [];
+
+        if (!oStartDate || !oCreatedAt) {
+            return { isAbnormal: false, reasons: [] };
+        }
+
+        const dStart = new Date(oStartDate);
+        const dCreated = new Date(oCreatedAt);
+
+        // Zero out times for date-only comparison
+        const dStartZero = new Date(dStart.getFullYear(), dStart.getMonth(), dStart.getDate());
+        const dCreatedZero = new Date(dCreated.getFullYear(), dCreated.getMonth(), dCreated.getDate());
+
+        const nDiffTime = dStartZero.getTime() - dCreatedZero.getTime();
+        const nDiffDays = Math.ceil(nDiffTime / (1000 * 60 * 60 * 24)); // Days difference
+
+        const nTotalDays = Number(vTotalDays || 0);
+
+        if (nDiffDays < 3) {
+            aReasons.push("Nộp < 3 ngày so với ngày nghỉ");
+        }
+        if (nTotalDays > 2) {
+            aReasons.push("Nghỉ quá 2 ngày");
+        }
+
+        return {
+            isAbnormal: aReasons.length > 0,
+            reasons: aReasons
+        };
+    }
+
+    public formatRowHighlight(oStartDate: any, oCreatedAt: any, vTotalDays: any, sSelectedTab: string): string {
+        if (sSelectedTab !== "pending") {
+            return "None";
+        }
+        const oResult = this._checkAbnormality(oStartDate, oCreatedAt, vTotalDays);
+        return oResult.isAbnormal ? "Error" : "None";
+    }
+
+    public formatAbnormalReason(oStartDate: any, oCreatedAt: any, vTotalDays: any): string {
+        const oResult = this._checkAbnormality(oStartDate, oCreatedAt, vTotalDays);
+        return oResult.reasons.join(", ");
+    }
+
+    public formatAbnormalVisible(oStartDate: any, oCreatedAt: any, vTotalDays: any, sSelectedTab: string): boolean {
+        if (sSelectedTab !== "pending") {
+            return false;
+        }
+        const oResult = this._checkAbnormality(oStartDate, oCreatedAt, vTotalDays);
+        return oResult.isAbnormal;
     }
 }
 
