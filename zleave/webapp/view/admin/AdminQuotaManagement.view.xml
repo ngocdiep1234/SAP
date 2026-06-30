@@ -17,10 +17,10 @@
                 id="tableQuota"
                 width="auto"
                 items="{
-                    path: '/LeaveQuota',
+                    path: '/QuotaOverview',
                     sorter: [
                         { path: 'QuotaYear', descending: true },
-                        { path: 'EmployeeName' }
+                        { path: 'FullName' }
                     ]
                 }"
                 growing="true"
@@ -41,8 +41,8 @@
                     <Column minScreenWidth="Tablet" demandPopin="true">
                         <Text text="Employee" />
                     </Column>
-                    <Column width="8rem">
-                        <Text text="SAP User" />
+                    <Column width="10rem">
+                        <Text text="Department" />
                     </Column>
                     <Column minScreenWidth="Tablet" demandPopin="true">
                         <Text text="Leave Type" />
@@ -66,8 +66,8 @@
                 <items>
                     <ColumnListItem>
                         <cells>
-                            <Text text="{parts: [{path: 'EmployeeName'}, {path: 'EmployeeId'}], formatter: '.formatEmployeeName'}" />
-                            <Text text="{SapUserName}" />
+                            <Text text="{parts: [{path: 'FullName'}, {path: 'EmployeeId'}], formatter: '.formatEmployeeName'}" />
+                            <Text text="{Department}" />
                             <Text text="{LeaveTypeName} ({LeaveTypeId})" />
                             <Text text="{QuotaYear}" />
                             <Text text="{path: 'TotalDays', type: 'sap.ui.model.type.Float', formatOptions: {maxFractionDigits: 1}}" />

@@ -25,7 +25,8 @@ export default class AdminEmployees extends Controller {
             Department: "",
             PositionTitle: "",
             ManagerUser: "",
-            IsActive: true
+            IsActive: true,
+            IsManager: false
         });
         this.getView().setModel(oDialogModel, "dialog");
     }
@@ -62,7 +63,8 @@ export default class AdminEmployees extends Controller {
             Department: "",
             PositionTitle: "",
             ManagerUser: "",
-            IsActive: true
+            IsActive: true,
+            IsManager: false
         });
 
         this._openDialog();
@@ -87,7 +89,8 @@ export default class AdminEmployees extends Controller {
             Department: oData.Department,
             PositionTitle: oData.PositionTitle,
             ManagerUser: oData.ManagerUser,
-            IsActive: !!oData.IsActive
+            IsActive: !!oData.IsActive,
+            IsManager: !!oData.IsManager
         });
 
         this._openDialog();
@@ -144,6 +147,12 @@ export default class AdminEmployees extends Controller {
             return;
         }
 
+        // Read boolean controls directly from the UI to capture latest state
+        const oCbIsManager = this.getView().byId("checkIsManager") as any;
+        const oSwActive = this.getView().byId("switchActive") as any;
+        const bIsManager = oCbIsManager ? oCbIsManager.getSelected() : !!oData.IsManager;
+        const bIsActive = oSwActive ? oSwActive.getState() : !!oData.IsActive;
+
         const oPayload = {
             SapUser: oData.SapUser.trim(),
             FullName: oData.FullName.trim(),
@@ -151,7 +160,8 @@ export default class AdminEmployees extends Controller {
             Department: oData.Department ? oData.Department.trim() : "",
             PositionTitle: oData.PositionTitle ? oData.PositionTitle.trim() : "",
             ManagerUser: oData.ManagerUser ? oData.ManagerUser.trim() : "",
-            IsActive: !!oData.IsActive
+            IsActive: bIsActive,
+            IsManager: bIsManager
         };
 
         const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
@@ -163,6 +173,7 @@ export default class AdminEmployees extends Controller {
                 success: () => {
                     this.getView().setBusy(false);
                     MessageToast.show("Employee created successfully.");
+                    oModel.refresh(true);
                     this.onCloseDialog();
                 },
                 error: (oErr: any) => {
@@ -185,6 +196,7 @@ export default class AdminEmployees extends Controller {
                 success: () => {
                     this.getView().setBusy(false);
                     MessageToast.show("Employee updated successfully.");
+                    oModel.refresh(true);
                     this.onCloseDialog();
                 },
                 error: (oErr: any) => {

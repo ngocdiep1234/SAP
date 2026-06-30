@@ -65,6 +65,11 @@
                         maxLength="12"
                         placeholder="Enter Manager's SAP Username"/>
 
+                    <Label text="Is Manager" />
+                    <CheckBox
+                        id="checkIsManager"
+                        selected="{dialog>/IsManager}"/>
+
                     <Label text="Status" />
                     <Switch
                         id="switchActive"

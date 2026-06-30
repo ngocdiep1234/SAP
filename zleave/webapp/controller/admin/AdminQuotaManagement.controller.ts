@@ -55,8 +55,8 @@ export default class AdminQuotaManagement extends Controller {
             aFilters.push(new Filter({
                 filters: [
                     new Filter("EmployeeId", FilterOperator.Contains, sQuery),
-                    new Filter("EmployeeName", FilterOperator.Contains, sQuery),
-                    new Filter("SapUserName", FilterOperator.Contains, sQuery),
+                    new Filter("FullName", FilterOperator.Contains, sQuery),
+                    new Filter("Department", FilterOperator.Contains, sQuery),
                     new Filter("LeaveTypeName", FilterOperator.Contains, sQuery),
                     new Filter("LeaveTypeId", FilterOperator.Contains, sQuery),
                     new Filter("QuotaYear", FilterOperator.Contains, sQuery)

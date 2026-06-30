@@ -319,9 +319,11 @@ export default class Dashboard extends Controller {
      */
     private async _loadCurrentUser(): Promise<void> {
         const oCurrentUser = await this._getCurrentUser();
+        const oRouter = (this as any).getOwnerComponent().getRouter();
         if (oCurrentUser && oCurrentUser.is_admin === "X") {
-            const oRouter = (this as any).getOwnerComponent().getRouter();
             oRouter.navTo("AdminDashboard");
+        } else if (oCurrentUser && oCurrentUser.is_hr === "X") {
+            oRouter.navTo("AdminShell");
         }
     }
 

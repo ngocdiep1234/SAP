@@ -36,7 +36,7 @@
                     </OverflowToolbar>
                 </headerToolbar>
                 <columns>
-                    <Column width="5rem">
+                    <Column width="8rem">
                         <Text text="ID" />
                     </Column>
                     <Column minScreenWidth="Tablet" demandPopin="true">
@@ -57,6 +57,9 @@
                     <Column minScreenWidth="Desktop" demandPopin="true">
                         <Text text="Manager" />
                     </Column>
+                    <Column width="6rem" hAlign="Center">
+                        <Text text="Is Manager" />
+                    </Column>
                     <Column width="4rem" hAlign="Center">
                         <Text text="Active" />
                     </Column>
@@ -74,6 +77,10 @@
                             <Text text="{Department}" />
                             <Text text="{PositionTitle}" />
                             <Text text="{ManagerUser}" />
+                            <core:Icon
+                                src="{= ${IsManager} ? 'sap-icon://sys-enter-2' : 'sap-icon://sys-cancel-2' }"
+                                color="{= ${IsManager} ? 'Positive' : 'Negative' }"
+                                size="1.25rem"/>
                             <core:Icon
                                 src="{= ${IsActive} ? 'sap-icon://sys-enter-2' : 'sap-icon://sys-cancel-2' }"
                                 color="{= ${IsActive} ? 'Positive' : 'Negative' }"
