@@ -41,44 +41,45 @@
 <edmx:Include Namespace="com.sap.vocabularies.PDF.v1" Alias="SAP__PDF"/>
 </edmx:Reference>
 <edmx:DataServices m:DataServiceVersion="2.0">
-<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="cds_zui_leave_mgmt" xml:lang="en" sap:schema-version="1">
+<Schema xmlns="http://schemas.microsoft.com/ado/2008/09/edm" Namespace="cds_zui_leave_mgmt" xml:lang="vi" sap:schema-version="1">
 <Annotation xmlns="http://docs.oasis-open.org/odata/ns/edm" Term="Core.SchemaVersion" String="1.0.0"/>
-<EntityType Name="EmployeeAdminType" sap:label="Employee Admin Projection" sap:content-version="1">
+<EntityType Name="EmployeeAdminType" sap:content-version="1">
 <Key>
 <PropertyRef Name="EmployeeId"/>
 </Key>
-<Property Name="Delete_mc" Type="Edm.Boolean" sap:label="Dyn. Method Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-<Property Name="Update_mc" Type="Edm.Boolean" sap:label="Dyn. Method Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="activate_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="deactivate_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Update_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 <Property Name="EmployeeId" Type="Edm.String" Nullable="false" MaxLength="10" sap:creatable="false" sap:updatable="false"/>
-<Property Name="SapUser" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name"/>
+<Property Name="SapUser" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
 <Property Name="FullName" Type="Edm.String" Nullable="false" MaxLength="100"/>
 <Property Name="Department" Type="Edm.String" MaxLength="50"/>
 <Property Name="PositionTitle" Type="Edm.String" MaxLength="100"/>
 <Property Name="Email" Type="Edm.String" MaxLength="100"/>
-<Property Name="ManagerUser" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name" sap:value-list="standard"/>
-<Property Name="IsActive" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Truth Value" sap:quickinfo="Truth Value: True/False"/>
-<Property Name="IsManager" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Truth Value" sap:quickinfo="Truth Value: True/False"/>
-<Property Name="IsHr" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Truth Value" sap:quickinfo="Truth Value: True/False"/>
-<Property Name="IsAdmin" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Truth Value" sap:quickinfo="Truth Value: True/False"/>
-<Property Name="CreatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name" sap:creatable="false" sap:updatable="false"/>
-<Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Time Stamp" sap:quickinfo="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
+<Property Name="ManagerUser" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="IsActive" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch" sap:updatable="false"/>
+<Property Name="IsManager" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
+<Property Name="IsHr" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
+<Property Name="IsAdmin" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
+<Property Name="CreatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:creatable="false" sap:updatable="false"/>
+<Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
 </EntityType>
-<EntityType Name="AuditLogType" sap:label="Leave Audit Log" sap:content-version="1">
+<EntityType Name="AuditLogType" sap:content-version="1">
 <Key>
 <PropertyRef Name="LogId"/>
 </Key>
-<Property Name="LogId" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:quickinfo="16 Byte UUID in 16 Bytes (Raw Format)"/>
+<Property Name="LogId" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:quickinfo="16 byte UUID in 16 bytes (raw format)"/>
 <Property Name="RequestId" Type="Edm.String" MaxLength="20"/>
 <Property Name="EmployeeId" Type="Edm.String" MaxLength="10"/>
 <Property Name="Action" Type="Edm.String" MaxLength="20"/>
 <Property Name="ActionCriticality" Type="Edm.Byte"/>
-<Property Name="ActionBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name"/>
-<Property Name="ActionAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Time Stamp" sap:quickinfo="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
+<Property Name="ActionBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="ActionAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)"/>
 <Property Name="OldStatus" Type="Edm.String" MaxLength="10"/>
 <Property Name="NewStatus" Type="Edm.String" MaxLength="10"/>
 <Property Name="Comments" Type="Edm.String" MaxLength="255"/>
 </EntityType>
-<EntityType Name="QuotaOverviewType" sap:label="Leave Quota Overview" sap:content-version="1">
+<EntityType Name="QuotaOverviewType" sap:content-version="1">
 <Key>
 <PropertyRef Name="EmployeeId"/>
 <PropertyRef Name="LeaveTypeId"/>
@@ -96,24 +97,24 @@
 <Property Name="RemCriticality" Type="Edm.Byte"/>
 <Property Name="ValidFrom" Type="Edm.DateTime" Precision="0" sap:display-format="Date"/>
 <Property Name="ValidTo" Type="Edm.DateTime" Precision="0" sap:display-format="Date"/>
-<Property Name="LastUpdatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name"/>
-<Property Name="LastUpdatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Time Stamp" sap:quickinfo="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
+<Property Name="LastUpdatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="LastUpdatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)"/>
 </EntityType>
-<EntityType Name="LeaveRequestType" m:HasStream="true" sap:label="Leave Request" sap:content-version="1">
+<EntityType Name="LeaveRequestType" m:HasStream="true" sap:content-version="1">
 <Key>
 <PropertyRef Name="UUID"/>
 </Key>
-<Property Name="approveResult_ac" Type="Edm.Boolean" sap:label="Dyn. Action Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-<Property Name="hrApproveResult_ac" Type="Edm.Boolean" sap:label="Dyn. Action Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-<Property Name="hrRejectResult_ac" Type="Edm.Boolean" sap:label="Dyn. Action Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-<Property Name="rejectResult_ac" Type="Edm.Boolean" sap:label="Dyn. Action Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-<Property Name="Delete_mc" Type="Edm.Boolean" sap:label="Dyn. Method Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-<Property Name="Update_mc" Type="Edm.Boolean" sap:label="Dyn. Method Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-<Property Name="UUID" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:quickinfo="16 Byte UUID in 16 Bytes (Raw Format)" sap:creatable="false" sap:updatable="false"/>
+<Property Name="approveResult_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="hrApproveResult_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="hrRejectResult_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="rejectResult_ac" Type="Edm.Boolean" sap:label="Dyn. Aktions-Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Delete_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Update_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="UUID" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:quickinfo="16 byte UUID in 16 bytes (raw format)" sap:creatable="false" sap:updatable="false"/>
 <Property Name="RequestId" Type="Edm.String" MaxLength="20" sap:creatable="false" sap:updatable="false"/>
 <Property Name="EmployeeId" Type="Edm.String" MaxLength="8" sap:display-format="NonNegative" sap:creatable="false" sap:updatable="false"/>
-<Property Name="ApproverId" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name" sap:value-list="standard"/>
-<Property Name="HrApproverId" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name" sap:creatable="false" sap:updatable="false"/>
+<Property Name="ApproverId" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:value-list="standard"/>
+<Property Name="HrApproverId" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:creatable="false" sap:updatable="false"/>
 <Property Name="LeaveType" Type="Edm.String" Nullable="false" MaxLength="5" sap:value-list="standard"/>
 <Property Name="StartDate" Type="Edm.DateTime" Nullable="false" Precision="0" sap:display-format="Date"/>
 <Property Name="StartSession" Type="Edm.String" MaxLength="1"/>
@@ -125,42 +126,42 @@
 <Property Name="Reason" Type="Edm.String"/>
 <Property Name="MimeType" Type="Edm.String" MaxLength="128"/>
 <Property Name="FileName" Type="Edm.String" MaxLength="128"/>
-<Property Name="CreatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name" sap:creatable="false" sap:updatable="false"/>
+<Property Name="CreatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:creatable="false" sap:updatable="false"/>
 <Property Name="ApprovalComment" Type="Edm.String" MaxLength="255"/>
 <Property Name="HrComment" Type="Edm.String" MaxLength="255"/>
-<Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Time Stamp" sap:quickinfo="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
-<Property Name="LastChangedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name" sap:creatable="false" sap:updatable="false"/>
-<Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Time Stamp" sap:quickinfo="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
+<Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
+<Property Name="LastChangedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:creatable="false" sap:updatable="false"/>
+<Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
 </EntityType>
-<EntityType Name="LeaveTypeAdminType" sap:label="Leave Type Management" sap:content-version="1">
+<EntityType Name="LeaveTypeAdminType" sap:content-version="1">
 <Key>
 <PropertyRef Name="LeaveTypeId"/>
 </Key>
-<Property Name="Delete_mc" Type="Edm.Boolean" sap:label="Dyn. Method Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-<Property Name="Update_mc" Type="Edm.Boolean" sap:label="Dyn. Method Control" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Delete_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="Update_mc" Type="Edm.Boolean" sap:label="Dyn. Methodensteuerg" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 <Property Name="LeaveTypeId" Type="Edm.String" Nullable="false" MaxLength="5" sap:updatable="false"/>
 <Property Name="LeaveTypeName" Type="Edm.String" Nullable="false" MaxLength="50"/>
 <Property Name="MaxDaysPerYear" Type="Edm.Decimal" Precision="5" Scale="2"/>
-<Property Name="RequiresApproval" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Truth Value" sap:quickinfo="Truth Value: True/False"/>
-<Property Name="IsActive" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Truth Value" sap:quickinfo="Truth Value: True/False"/>
+<Property Name="RequiresApproval" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
+<Property Name="IsActive" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
 </EntityType>
-<EntityType Name="EmployeeType" sap:label="Employee Interface View (Custom)" sap:content-version="1">
+<EntityType Name="EmployeeType" sap:content-version="1">
 <Key>
 <PropertyRef Name="EmployeeId"/>
 </Key>
 <Property Name="EmployeeId" Type="Edm.String" Nullable="false" MaxLength="10"/>
-<Property Name="SapUserName" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name"/>
+<Property Name="SapUserName" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
 <Property Name="FullName" Type="Edm.String" MaxLength="100"/>
 <Property Name="Email" Type="Edm.String" MaxLength="100"/>
 <Property Name="Department" Type="Edm.String" MaxLength="50"/>
 <Property Name="PositionTitle" Type="Edm.String" MaxLength="100"/>
-<Property Name="ManagerSapUser" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name"/>
-<Property Name="IsActive" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Truth Value" sap:quickinfo="Truth Value: True/False"/>
+<Property Name="ManagerSapUser" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="IsActive" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
 <Property Name="IsManager" Type="Edm.String" MaxLength="1"/>
 <Property Name="IsHR" Type="Edm.String" MaxLength="1"/>
 <Property Name="IsAdmin" Type="Edm.String" MaxLength="1"/>
 </EntityType>
-<EntityType Name="LeaveQuotaType" sap:label="Leave Quota View" sap:content-version="1">
+<EntityType Name="LeaveQuotaType" sap:content-version="1">
 <Key>
 <PropertyRef Name="EmployeeId"/>
 <PropertyRef Name="LeaveTypeId"/>
@@ -170,7 +171,7 @@
 <Property Name="LeaveTypeId" Type="Edm.String" Nullable="false" MaxLength="5"/>
 <Property Name="QuotaYear" Type="Edm.String" Nullable="false" MaxLength="4" sap:display-format="NonNegative"/>
 <Property Name="LeaveTypeName" Type="Edm.String" MaxLength="50"/>
-<Property Name="SapUserName" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name"/>
+<Property Name="SapUserName" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
 <Property Name="EmployeeName" Type="Edm.String" MaxLength="100"/>
 <Property Name="TotalDays" Type="Edm.Decimal" Precision="5" Scale="2"/>
 <Property Name="UsedDays" Type="Edm.Decimal" Precision="5" Scale="2"/>
@@ -179,15 +180,15 @@
 <Property Name="ValidTo" Type="Edm.DateTime" Precision="0" sap:display-format="Date"/>
 <Property Name="RemCriticality" Type="Edm.Byte"/>
 </EntityType>
-<EntityType Name="LeaveRequestAdminType" m:HasStream="true" sap:label="Leave Request Admin View (All Requests)" sap:content-version="1">
+<EntityType Name="LeaveRequestAdminType" m:HasStream="true" sap:content-version="1">
 <Key>
 <PropertyRef Name="UUID"/>
 </Key>
-<Property Name="UUID" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:quickinfo="16 Byte UUID in 16 Bytes (Raw Format)"/>
+<Property Name="UUID" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:quickinfo="16 byte UUID in 16 bytes (raw format)"/>
 <Property Name="RequestId" Type="Edm.String" MaxLength="20"/>
 <Property Name="EmployeeId" Type="Edm.String" MaxLength="8" sap:display-format="NonNegative"/>
-<Property Name="CreatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name"/>
-<Property Name="ApproverId" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name"/>
+<Property Name="CreatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="ApproverId" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
 <Property Name="LeaveType" Type="Edm.String" MaxLength="5"/>
 <Property Name="StartDate" Type="Edm.DateTime" Precision="0" sap:display-format="Date"/>
 <Property Name="EndDate" Type="Edm.DateTime" Precision="0" sap:display-format="Date"/>
@@ -198,45 +199,45 @@
 <Property Name="ApprovalComment" Type="Edm.String" MaxLength="255"/>
 <Property Name="MimeType" Type="Edm.String" MaxLength="128"/>
 <Property Name="FileName" Type="Edm.String" MaxLength="128"/>
-<Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Time Stamp" sap:quickinfo="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
-<Property Name="LastChangedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name"/>
-<Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Time Stamp" sap:quickinfo="UTC Time Stamp in Long Form (YYYYMMDDhhmmssmmmuuun)"/>
+<Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)"/>
+<Property Name="LastChangedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
+<Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)"/>
 <NavigationProperty Name="to_Employee" Relationship="cds_zui_leave_mgmt.assoc_B73E8D2FFB90D7B9AB76E055300BFB54" FromRole="FromRole_assoc_B73E8D2FFB90D7B9AB76E055300BFB54" ToRole="ToRole_assoc_B73E8D2FFB90D7B9AB76E055300BFB54"/>
 </EntityType>
-<EntityType Name="LeaveTypeType" sap:label="Leave Type Interdace View" sap:value-list="true" sap:content-version="1">
+<EntityType Name="LeaveTypeType" sap:value-list="true" sap:content-version="1">
 <Key>
 <PropertyRef Name="LeaveType"/>
 </Key>
 <Property Name="LeaveType" Type="Edm.String" Nullable="false" MaxLength="5"/>
 <Property Name="LeaveName" Type="Edm.String" MaxLength="50"/>
-<Property Name="IsPaid" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Truth Value" sap:quickinfo="Truth Value: True/False"/>
+<Property Name="IsPaid" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
 <Property Name="MaxDays" Type="Edm.Decimal" Precision="5" Scale="2"/>
 </EntityType>
-<EntityType Name="ZI_MANAGER_VHType" sap:label="Manager Value Help" sap:value-list="true" sap:content-version="1">
+<EntityType Name="ZI_MANAGER_VHType" sap:value-list="true" sap:content-version="1">
 <Key>
 <PropertyRef Name="ManagerUser"/>
 </Key>
-<Property Name="ManagerUser" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="User Name"/>
+<Property Name="ManagerUser" Type="Edm.String" Nullable="false" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
 <Property Name="ManagerName" Type="Edm.String" MaxLength="100"/>
 </EntityType>
 <EntityType Name="SAP__Currency" sap:content-version="1">
 <Key>
 <PropertyRef Name="CurrencyCode"/>
 </Key>
-<Property Name="CurrencyCode" Type="Edm.String" Nullable="false" MaxLength="5" sap:label="Currency" sap:semantics="currency-code"/>
-<Property Name="ISOCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="ISO code"/>
-<Property Name="Text" Type="Edm.String" Nullable="false" MaxLength="15" sap:label="Short text"/>
-<Property Name="DecimalPlaces" Type="Edm.Byte" Nullable="false" sap:label="Decimals"/>
+<Property Name="CurrencyCode" Type="Edm.String" Nullable="false" MaxLength="5" sap:label="Währung" sap:semantics="currency-code"/>
+<Property Name="ISOCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="Iso-Code"/>
+<Property Name="Text" Type="Edm.String" Nullable="false" MaxLength="15" sap:label="Kurztext"/>
+<Property Name="DecimalPlaces" Type="Edm.Byte" Nullable="false" sap:label="Dezimalen"/>
 </EntityType>
 <EntityType Name="SAP__UnitOfMeasure" sap:content-version="1">
 <Key>
 <PropertyRef Name="UnitCode"/>
 </Key>
-<Property Name="UnitCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="Internal UoM" sap:semantics="unit-of-measure"/>
-<Property Name="ISOCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="ISO Code"/>
-<Property Name="ExternalCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="Commercial"/>
-<Property Name="Text" Type="Edm.String" Nullable="false" MaxLength="30" sap:label="Measurement Unit Txt"/>
-<Property Name="DecimalPlaces" Type="Edm.Int16" sap:label="Decimal Places"/>
+<Property Name="UnitCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="Interne Maßeinheit" sap:semantics="unit-of-measure"/>
+<Property Name="ISOCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="ISO-Code"/>
+<Property Name="ExternalCode" Type="Edm.String" Nullable="false" MaxLength="3" sap:label="Kaufmännisch"/>
+<Property Name="Text" Type="Edm.String" Nullable="false" MaxLength="30" sap:label="Maßeinheitentext"/>
+<Property Name="DecimalPlaces" Type="Edm.Int16" sap:label="Dezimalstellen"/>
 </EntityType>
 <EntityType Name="SAP__DocumentDescription" sap:content-version="1">
 <Key>
@@ -244,7 +245,7 @@
 </Key>
 <Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID"/>
 <Property Name="CreatedBy" Type="Edm.String" Nullable="false" MaxLength="12"/>
-<Property Name="CreatedAt" Type="Edm.DateTime" Nullable="false" Precision="0" sap:label="Time Stamp"/>
+<Property Name="CreatedAt" Type="Edm.DateTime" Nullable="false" Precision="0" sap:label="Zeitstempel"/>
 <Property Name="FileName" Type="Edm.String" Nullable="false" MaxLength="256"/>
 <Property Name="Title" Type="Edm.String" Nullable="false" MaxLength="256"/>
 <NavigationProperty Name="Format" Relationship="cds_zui_leave_mgmt.to_format" FromRole="FromRole_to_format" ToRole="ToRole_to_format"/>
@@ -264,7 +265,7 @@
 <Property Name="PaperSize" Type="Edm.String" Nullable="false" MaxLength="10" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 <Property Name="BorderSize" Type="Edm.Int32" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 <Property Name="MarginSize" Type="Edm.Int32" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-<Property Name="FontName" Type="Edm.String" Nullable="false" MaxLength="255" sap:label="Font Name" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="FontName" Type="Edm.String" Nullable="false" MaxLength="255" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 </EntityType>
 <EntityType Name="SAP__PDFStandard" sap:content-version="1">
 <Key>
@@ -272,7 +273,7 @@
 </Key>
 <Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 <Property Name="UsePDFAConformance" Type="Edm.Boolean" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-<Property Name="DoEnableAccessibility" Type="Edm.Boolean" Nullable="false" sap:label="Indicator" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="DoEnableAccessibility" Type="Edm.Boolean" Nullable="false" sap:label="Flag" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 </EntityType>
 <EntityType Name="SAP__TableColumns" sap:content-version="1">
 <Key>
@@ -301,7 +302,7 @@
 <PropertyRef Name="Id"/>
 </Key>
 <Property Name="Id" Type="Edm.Guid" Nullable="false" sap:label="UUID" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
-<Property Name="DoSign" Type="Edm.Boolean" Nullable="false" sap:label="Indicator" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="DoSign" Type="Edm.Boolean" Nullable="false" sap:label="Flag" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 <Property Name="Reason" Type="Edm.String" Nullable="false" MaxLength="256" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 </EntityType>
 <EntityType Name="SAP__ValueHelp" sap:content-version="1">
@@ -313,7 +314,7 @@
 <Property Name="DESCRIPTION" Type="Edm.String"/>
 </EntityType>
 <ComplexType Name="SAP__FitToPage">
-<Property Name="ErrorRecoveryBehavior" Type="Edm.String" Nullable="false" MaxLength="8" sap:label="Error behavior" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
+<Property Name="ErrorRecoveryBehavior" Type="Edm.String" Nullable="false" MaxLength="8" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 <Property Name="IsEnabled" Type="Edm.Boolean" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 <Property Name="MinimumFontSize" Type="Edm.Int32" Nullable="false" sap:creatable="false" sap:updatable="false" sap:sortable="false" sap:filterable="false"/>
 </ComplexType>
@@ -391,7 +392,7 @@
 <EntitySet Name="SAP__CoverPageSet" EntityType="cds_zui_leave_mgmt.SAP__CoverPage" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
 <EntitySet Name="SAP__SignatureSet" EntityType="cds_zui_leave_mgmt.SAP__Signature" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:pageable="false" sap:addressable="false" sap:content-version="1"/>
 <EntitySet Name="SAP__ValueHelpSet" EntityType="cds_zui_leave_mgmt.SAP__ValueHelp" sap:content-version="1"/>
-<EntitySet Name="EmployeeAdmin" EntityType="cds_zui_leave_mgmt.EmployeeAdminType" sap:content-version="1" sap:deletable-path="Delete_mc" sap:updatable-path="Update_mc"/>
+<EntitySet Name="EmployeeAdmin" EntityType="cds_zui_leave_mgmt.EmployeeAdminType" sap:deletable="false" sap:content-version="1" sap:updatable-path="Update_mc"/>
 <EntitySet Name="AuditLog" EntityType="cds_zui_leave_mgmt.AuditLogType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
 <EntitySet Name="QuotaOverview" EntityType="cds_zui_leave_mgmt.QuotaOverviewType" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:content-version="1"/>
 <EntitySet Name="LeaveRequest" EntityType="cds_zui_leave_mgmt.LeaveRequestType" sap:content-version="1" sap:deletable-path="Delete_mc" sap:updatable-path="Update_mc"/>
@@ -425,6 +426,12 @@
 <End EntitySet="SAP__MyDocumentDescriptions" Role="FromRole_to_coverpage"/>
 <End EntitySet="SAP__CoverPageSet" Role="ToRole_to_coverpage"/>
 </AssociationSet>
+<FunctionImport Name="activate" ReturnType="cds_zui_leave_mgmt.EmployeeAdminType" EntitySet="EmployeeAdmin" m:HttpMethod="POST" sap:action-for="cds_zui_leave_mgmt.EmployeeAdminType" sap:applicable-path="activate_ac">
+<Parameter Name="EmployeeId" Type="Edm.String" Mode="In" MaxLength="10"/>
+</FunctionImport>
+<FunctionImport Name="deactivate" ReturnType="cds_zui_leave_mgmt.EmployeeAdminType" EntitySet="EmployeeAdmin" m:HttpMethod="POST" sap:action-for="cds_zui_leave_mgmt.EmployeeAdminType" sap:applicable-path="deactivate_ac">
+<Parameter Name="EmployeeId" Type="Edm.String" Mode="In" MaxLength="10"/>
+</FunctionImport>
 <FunctionImport Name="approveResult" ReturnType="cds_zui_leave_mgmt.LeaveRequestType" EntitySet="LeaveRequest" m:HttpMethod="POST" sap:action-for="cds_zui_leave_mgmt.LeaveRequestType" sap:applicable-path="approveResult_ac">
 <Parameter Name="UUID" Type="Edm.Guid" Mode="In" sap:label="UUID"/>
 </FunctionImport>
@@ -438,26 +445,6 @@
 <Parameter Name="UUID" Type="Edm.Guid" Mode="In" sap:label="UUID"/>
 </FunctionImport>
 </EntityContainer>
-<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.EmployeeAdminType/ManagerUser">
-<Annotation Term="Common.ValueList">
-<Record>
-<PropertyValue Property="Label" String=""/>
-<PropertyValue Property="CollectionPath" String="ZI_MANAGER_VH"/>
-<PropertyValue Property="SearchSupported" Bool="false"/>
-<PropertyValue Property="Parameters">
-<Collection>
-<Record Type="Common.ValueListParameterInOut">
-<PropertyValue Property="LocalDataProperty" PropertyPath="ManagerUser"/>
-<PropertyValue Property="ValueListProperty" String="ManagerUser"/>
-</Record>
-<Record Type="Common.ValueListParameterDisplayOnly">
-<PropertyValue Property="ValueListProperty" String="ManagerName"/>
-</Record>
-</Collection>
-</PropertyValue>
-</Record>
-</Annotation>
-</Annotations>
 <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.LeaveRequestType/ApproverId">
 <Annotation Term="Common.ValueList">
 <Record>
@@ -546,7 +533,8 @@
 <Record>
 <PropertyValue Property="NonFilterableProperties">
 <Collection>
-<PropertyPath>Delete_mc</PropertyPath>
+<PropertyPath>activate_ac</PropertyPath>
+<PropertyPath>deactivate_ac</PropertyPath>
 <PropertyPath>Update_mc</PropertyPath>
 </Collection>
 </PropertyValue>
@@ -569,7 +557,8 @@
 <Record>
 <PropertyValue Property="NonSortableProperties">
 <Collection>
-<PropertyPath>Delete_mc</PropertyPath>
+<PropertyPath>activate_ac</PropertyPath>
+<PropertyPath>deactivate_ac</PropertyPath>
 <PropertyPath>Update_mc</PropertyPath>
 </Collection>
 </PropertyValue>
@@ -703,6 +692,9 @@
 </PropertyValue>
 </Record>
 </Annotation>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.EmployeeAdminType/IsActive">
+<Annotation Term="SAP__core.Immutable"/>
 </Annotations>
 <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.LeaveTypeAdminType/LeaveTypeId">
 <Annotation Term="SAP__core.Immutable"/>

@@ -1,0 +1,90 @@
+<mvc:View
+    controllerName="zleave.zleave.controller.admin.AdminLeaveTypes"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    height="100%">
+    <Page title="Leave Types Management" showHeader="true">
+        <headerContent>
+            <SearchField
+                id="searchField"
+                width="300px"
+                placeholder="Search by ID, name..."
+                search=".onSearch"/>
+        </headerContent>
+        <content>
+            <Table
+                id="tableLeaveTypes"
+                width="auto"
+                items="{
+                    path: '/LeaveTypeAdmin',
+                    sorter: { path: 'LeaveTypeId' }
+                }"
+                growing="true"
+                growingThreshold="20"
+                mode="None"
+                class="sapUiResponsiveMargin employeeTable">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title text="Leave Types List" level="H2"/>
+                        <ToolbarSpacer />
+                        <Button
+                            icon="sap-icon://add"
+                            text="Add Leave Type"
+                            type="Emphasized"
+                            press=".onAddLeaveType"/>
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column width="8rem">
+                        <Text text="Leave Type ID" />
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="Leave Type Name" />
+                    </Column>
+                    <Column width="10rem" hAlign="End">
+                        <Text text="Max Days Per Year" />
+                    </Column>
+                    <Column width="10rem" hAlign="Center">
+                        <Text text="Requires Approval" />
+                    </Column>
+                    <Column width="8rem" hAlign="Center">
+                        <Text text="Active" />
+                    </Column>
+                    <Column width="8rem" hAlign="End">
+                        <Text text="Actions" />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Text text="{LeaveTypeId}" />
+                            <Text text="{LeaveTypeName}" />
+                            <Text text="{path: 'MaxDaysPerYear', type: 'sap.ui.model.type.Float', formatOptions: {maxFractionDigits: 2}}" />
+                            <core:Icon
+                                src="{= ${RequiresApproval} ? 'sap-icon://sys-enter-2' : 'sap-icon://sys-cancel-2' }"
+                                color="{= ${RequiresApproval} ? 'Positive' : 'Negative' }"
+                                size="1.25rem"/>
+                            <core:Icon
+                                src="{= ${IsActive} ? 'sap-icon://sys-enter-2' : 'sap-icon://sys-cancel-2' }"
+                                color="{= ${IsActive} ? 'Positive' : 'Negative' }"
+                                size="1.25rem"/>
+                            <HBox justifyContent="End" spacing="0.5rem">
+                                <Button
+                                    icon="sap-icon://edit"
+                                    type="Transparent"
+                                    press=".onEditLeaveType"
+                                    tooltip="Edit Leave Type"/>
+                                <Button
+                                    icon="sap-icon://delete"
+                                    type="Transparent"
+                                    press=".onDeleteLeaveType"
+                                    tooltip="Delete Leave Type"/>
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+    </Page>
+</mvc:View>

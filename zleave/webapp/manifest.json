@@ -196,6 +196,14 @@
             "adminShell",
             "QuotaManagement"
           ]
+        },
+        {
+          "name": "AdminLeaveTypes",
+          "pattern": "admin/leave-types",
+          "target": [
+            "adminShell",
+            "AdminLeaveTypes"
+          ]
         }
       ],
       "targets": {
@@ -273,6 +281,15 @@
         "QuotaManagement": {
           "viewName": "admin.AdminQuotaManagement",
           "viewId": "AdminQuotaManagement",
+          "viewType": "XML",
+          "transition": "slide",
+          "parent": "adminShell",
+          "controlId": "adminNavContainer",
+          "controlAggregation": "pages"
+        },
+        "AdminLeaveTypes": {
+          "viewName": "admin.AdminLeaveTypes",
+          "viewId": "AdminLeaveTypes",
           "viewType": "XML",
           "transition": "slide",
           "parent": "adminShell",

@@ -33,6 +33,12 @@ export function createNavModel(): InstanceType<typeof JSONModel> {
                 text: "Quota Management",
                 icon: "sap-icon://key-user-settings",
                 route: "QuotaManagement"
+            },
+            {
+                id: "leaveType",
+                text: "Leave Types",
+                icon: "sap-icon://list",
+                route: "AdminLeaveTypes"
             }
         ]
     };

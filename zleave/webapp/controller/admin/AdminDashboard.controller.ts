@@ -97,4 +97,9 @@ export default class AdminDashboard extends Controller {
         const oRouter = (this.getOwnerComponent() as any).getRouter();
         oRouter.navTo("QuotaManagement");
     }
+
+    public onNavToLeaveTypes(): void {
+        const oRouter = (this.getOwnerComponent() as any).getRouter();
+        oRouter.navTo("AdminLeaveTypes");
+    }
 }

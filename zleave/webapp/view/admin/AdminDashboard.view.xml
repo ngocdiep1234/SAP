@@ -95,7 +95,8 @@
                         <HBox wrap="Wrap" class="sapUiTinyMarginTop">
                             <Button text="Add New Employee" type="Emphasized" icon="sap-icon://add-employee" press=".onNavToEmployees" class="sapUiSmallMarginEnd sapUiTinyMarginBottom"/>
                             <Button text="Process Leave Requests" icon="sap-icon://approvals" press=".onNavToLeaveRequests" class="sapUiSmallMarginEnd sapUiTinyMarginBottom"/>
-                            <Button text="Check Quota Allocation" icon="sap-icon://check-availability" press=".onNavToQuota" class="sapUiTinyMarginBottom"/>
+                            <Button text="Check Quota Allocation" icon="sap-icon://check-availability" press=".onNavToQuota" class="sapUiSmallMarginEnd sapUiTinyMarginBottom"/>
+                            <Button text="Manage Leave Types" icon="sap-icon://list" press=".onNavToLeaveTypes" class="sapUiTinyMarginBottom"/>
                         </HBox>
                     </Panel>
 

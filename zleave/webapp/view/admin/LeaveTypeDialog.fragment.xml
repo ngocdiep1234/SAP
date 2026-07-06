@@ -1,0 +1,67 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form">
+    <Dialog id="leaveTypeDialog" title="{dialog>/title}" type="Message">
+        <content>
+            <f:SimpleForm
+                editable="true"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4"
+                labelSpanL="4"
+                labelSpanM="4"
+                labelSpanS="12"
+                adjustLabelSpan="false"
+                emptySpanXL="0"
+                emptySpanL="0"
+                emptySpanM="0"
+                emptySpanS="0"
+                columnsXL="1"
+                columnsL="1"
+                columnsM="1"
+                singleContainerFullSize="false">
+                <f:content>
+                    <Label text="Leave Type ID" required="true" />
+                    <Input
+                        id="inputLeaveTypeId"
+                        value="{dialog>/LeaveTypeId}"
+                        maxLength="5"
+                        placeholder="Enter Leave Type ID (e.g. AL)"
+                        editable="{dialog>/isCreate}"/>
+
+                    <Label text="Leave Type Name" required="true" />
+                    <Input
+                        id="inputLeaveTypeName"
+                        value="{dialog>/LeaveTypeName}"
+                        maxLength="50"
+                        placeholder="Enter Leave Type Name (e.g. Annual Leave)"/>
+
+                    <Label text="Max Days Per Year" />
+                    <Input
+                        id="inputMaxDays"
+                        value="{dialog>/MaxDaysPerYear}"
+                        type="Number"
+                        placeholder="Enter Max Days Per Year (e.g. 12.00)"/>
+
+                    <Label text="Requires Approval" />
+                    <CheckBox
+                        id="checkRequiresApproval"
+                        selected="{dialog>/RequiresApproval}"/>
+
+                    <Label text="Status/Active" />
+                    <Switch
+                        id="switchActive"
+                        state="{dialog>/IsActive}"
+                        customTextOn="Yes"
+                        customTextOff="No"/>
+                </f:content>
+            </f:SimpleForm>
+        </content>
+        <beginButton>
+            <Button text="Save" type="Emphasized" press=".onSaveDialog"/>
+        </beginButton>
+        <endButton>
+            <Button text="Cancel" press=".onCloseDialog"/>
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
