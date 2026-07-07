@@ -21,6 +21,12 @@
                         <SegmentedButtonItem key="completed" text="Completed" />
                     </items>
                 </SegmentedButton>
+                <SegmentedButton id="pendingRequestsSubFilterButton" select=".onPendingSubFilterTabChange" selectedKey="{ui>/selectedPendingSubTab}" visible="{= ${ui>/selectedRequestTab} === 'pending' }" class="sapUiSmallMarginBottom">
+                    <items>
+                        <SegmentedButtonItem key="normal" text="Normal" />
+                        <SegmentedButtonItem key="warning" text="Warnings" />
+                    </items>
+                </SegmentedButton>
                 <Table id="tableRequests" mode="MultiSelect" selectionChange=".onSelectionChange" inset="false" items="{path: '/LeaveRequest', parameters: {operationMode: 'Client'}}" growing="true" growingScrollToLoad="true" class="leaveTable">
                     <headerToolbar>
                         <OverflowToolbar>

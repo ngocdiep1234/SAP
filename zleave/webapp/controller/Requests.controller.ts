@@ -50,6 +50,7 @@ export default class Requests extends Controller {
         if (oUiModel) {
             oUiModel.setProperty("/selectedRequestTab", sInitialTab);
             oUiModel.setProperty("/selectedMySubTab", "waiting");
+            oUiModel.setProperty("/selectedPendingSubTab", "normal");
         }
         const oSegmentedButton =
             this.getView().byId("filterStatusButton") as InstanceType<typeof SegmentedButton> | undefined;
@@ -192,6 +193,16 @@ export default class Requests extends Controller {
         void this._applyFilters("my");
     }
 
+    public onPendingSubFilterTabChange(oEvent: InstanceType<typeof Event>): void {
+        const oSegmentedButton = oEvent.getSource() as InstanceType<typeof SegmentedButton>;
+        const key = oSegmentedButton.getSelectedKey();
+        const oUiModel = this.getView().getModel("ui") as any;
+        if (oUiModel) {
+            oUiModel.setProperty("/selectedPendingSubTab", key);
+        }
+        void this._applyFilters("pending");
+    }
+
     private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string }> {
         const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
         if (!oUiModel) {
@@ -307,6 +318,19 @@ export default class Requests extends Controller {
             if (sCurrentEmployeeId) {
                 aFilters.push(new Filter("EmployeeId", FilterOperator.NE, sCurrentEmployeeId));
             }
+
+            const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
+            const sSubTab = oUiModel?.getProperty("/selectedPendingSubTab") as string || "normal";
+            const fnTestAbnormal = (oValue: any, oContext: any) => {
+                const oData = oContext ? oContext.getObject() : oValue;
+                if (!oData) return false;
+                const bAbnormal = this._checkAbnormality(oData.StartDate, oData.CreatedAt, oData.TotalDays).isAbnormal;
+                return sSubTab === "warning" ? bAbnormal : !bAbnormal;
+            };
+            aFilters.push(new Filter({
+                path: "",
+                test: fnTestAbnormal
+            } as any));
         } else if (sSelectedKey === "my") {
             if (sCurrentEmployeeId) {
                 aFilters.push(new Filter("EmployeeId", FilterOperator.EQ, sCurrentEmployeeId));
