@@ -46,27 +46,10 @@
             <l:Grid defaultSpan="XL12 L12 M12 S12" hSpacing="1" vSpacing="1" class="sapUiSmallMargin">
                 
 
-                <!-- Left Column (70%) -->
+                <!-- Left Column (70%) - Audit Log (Recent Activities) -->
                 <VBox>
                     <layoutData>
                         <l:GridData span="XL8 L8 M12 S12"/>
-                    </layoutData>
-
-                    <!-- Quick Admin Controls -->
-                    <Panel headerText="Quick Admin Actions" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
-                        <HBox wrap="Wrap" class="sapUiTinyMarginTop">
-                            <Button text="Add New Employee" type="Emphasized" icon="sap-icon://add-employee" press=".onNavToEmployees" class="sapUiSmallMarginEnd sapUiTinyMarginBottom"/>
-                            <Button text="Process Leave Requests" icon="sap-icon://approvals" press=".onNavToLeaveRequests" class="sapUiSmallMarginEnd sapUiTinyMarginBottom"/>
-                            <Button text="Check Quota Allocation" icon="sap-icon://check-availability" press=".onNavToQuota" class="sapUiSmallMarginEnd sapUiTinyMarginBottom"/>
-                            <Button text="Manage Leave Types" icon="sap-icon://list" press=".onNavToLeaveTypes" class="sapUiTinyMarginBottom"/>
-                        </HBox>
-                    </Panel>
-                </VBox>
-
-                <!-- Right Column (30%) -->
-                <VBox>
-                    <layoutData>
-                        <l:GridData span="XL4 L4 M12 S12"/>
                     </layoutData>
 
                     <!-- Recent Activity Stream -->
@@ -83,6 +66,23 @@
                                 </HBox>
                             </CustomListItem>
                         </List>
+                    </Panel>
+                </VBox>
+
+                <!-- Right Column (30%) - Quick Admin Actions -->
+                <VBox>
+                    <layoutData>
+                        <l:GridData span="XL4 L4 M12 S12"/>
+                    </layoutData>
+
+                    <!-- Quick Admin Controls -->
+                    <Panel headerText="Quick Admin Actions" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
+                        <VBox class="sapUiTinyMarginTop">
+                            <Button text="Add New Employee" type="Emphasized" icon="sap-icon://add-employee" press=".onNavToEmployees" class="sapUiTinyMarginBottom" width="100%"/>
+                            <Button text="Process Leave Requests" icon="sap-icon://approvals" press=".onNavToLeaveRequests" class="sapUiTinyMarginBottom" width="100%"/>
+                            <Button text="Check Quota Allocation" icon="sap-icon://check-availability" press=".onNavToQuota" class="sapUiTinyMarginBottom" width="100%"/>
+                            <Button text="Manage Leave Types" icon="sap-icon://list" press=".onNavToLeaveTypes" width="100%"/>
+                        </VBox>
                     </Panel>
                 </VBox>
 

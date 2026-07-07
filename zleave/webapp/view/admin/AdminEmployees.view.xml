@@ -95,13 +95,13 @@
                                     icon="sap-icon://accept"
                                     type="Transparent"
                                     press=".onActivateEmployee"
-                                    visible="{= !${IsActive} }"
+                                    visible="{= !${IsActive} &amp;&amp; ${ui>/currentUser/is_hr} !== 'X' }"
                                     tooltip="Activate Employee"/>
                                 <Button
                                     icon="sap-icon://decline"
                                     type="Transparent"
                                     press=".onDeactivateEmployee"
-                                    visible="{= ${IsActive} === true || ${IsActive} === 'true' || ${IsActive} === 'X' }"
+                                    visible="{= (${IsActive} === true || ${IsActive} === 'true' || ${IsActive} === 'X') &amp;&amp; ${ui>/currentUser/is_hr} !== 'X' }"
                                     tooltip="Deactivate Employee"/>
                             </HBox>
                         </cells>
