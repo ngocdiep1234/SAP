@@ -55,13 +55,13 @@
                     <!-- Recent Activity Stream -->
                     <Panel headerText="Recent Activities" backgroundDesign="Translucent">
                         <List id="listActivities" 
-                            items="{mock>/recentActivities}">
+                            items="{dashboard>/recentActivities}">
                             <CustomListItem>
                                 <HBox class="sapUiSmallMargin" alignItems="Center">
-                                    <core:Icon src="{mock>icon}" color="{= ${mock>state} === 'Success' ? '#2b7c2b' : '#0066cc' }" class="sapUiSmallMarginEnd"/>
+                                    <core:Icon src="{dashboard>icon}" color="{= ${dashboard>state} === 'Success' ? '#2b7c2b' : '#0066cc' }" class="sapUiSmallMarginEnd"/>
                                     <VBox>
-                                        <Text text="{mock>text}" design="Bold"/>
-                                        <Text text="{mock>time}" class="sapUiTinyMarginTop" style="font-size: 0.8rem; color: #666;"/>
+                                        <Text text="{dashboard>text}" design="Bold"/>
+                                        <Text text="{dashboard>time}" class="sapUiTinyMarginTop" style="font-size: 0.8rem; color: #666;"/>
                                     </VBox>
                                 </HBox>
                             </CustomListItem>

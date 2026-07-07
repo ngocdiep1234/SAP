@@ -10,65 +10,14 @@ import FilterOperator from "sap/ui/model/FilterOperator";
  */
 export default class AdminDashboard extends Controller {
     public onInit(): void {
-        const oMockData = {
-            metrics: {
-                totalEmployees: 48,
-                activeEmployees: 45,
-                pendingRequests: 7,
-                approvedThisMonth: 12,
-                criticalReminders: 3
-            },
-            pendingApprovals: [
-                {
-                    RequestId: "REQ-2026-0045",
-                    EmployeeName: "Nguyen Van A",
-                    LeaveType: "AL",
-                    StartDate: new Date("2026-07-01"),
-                    EndDate: new Date("2026-07-03"),
-                    TotalDays: 3,
-                    Status: "SUBMITTED"
-                },
-                {
-                    RequestId: "REQ-2026-0046",
-                    EmployeeName: "Tran Thi B",
-                    LeaveType: "SL",
-                    StartDate: new Date("2026-07-05"),
-                    EndDate: new Date("2026-07-05"),
-                    TotalDays: 1,
-                    Status: "SUBMITTED"
-                },
-                {
-                    RequestId: "REQ-2026-0047",
-                    EmployeeName: "Luong Ngoc Diep",
-                    LeaveType: "UL",
-                    StartDate: new Date("2026-07-10"),
-                    EndDate: new Date("2026-07-14"),
-                    TotalDays: 5,
-                    Status: "MGR_APPROVED"
-                }
-            ],
-            whoIsOutToday: [
-                {
-                    EmployeeName: "Le Van C",
-                    LeaveType: "Annual Leave",
-                    Period: "Jun 25 - Jun 30",
-                    Status: "Out of Office"
-                },
-                {
-                    EmployeeName: "Pham Thi D",
-                    LeaveType: "Sick Leave",
-                    Period: "Jun 28 (Afternoon)",
-                    Status: "Out of Office"
-                }
-            ],
+        const oDashboardModel = new JSONModel({
             recentActivities: []
-        };
-
-        const oMockModel = new JSONModel(oMockData);
-        this.getView().setModel(oMockModel, "mock");
+        });
+        this.getView().setModel(oDashboardModel, "dashboard");
 
         const oRouter = (this as any).getOwnerComponent().getRouter();
         oRouter.getRoute("AdminDashboard").attachPatternMatched(this._onPatternMatched, this);
+        oRouter.getRoute("AdminShell").attachPatternMatched(this._onPatternMatched, this);
     }
 
     private _onPatternMatched(): void {
@@ -136,9 +85,9 @@ export default class AdminDashboard extends Controller {
                     };
                 });
 
-                const oMockModel = this.getView().getModel("mock") as InstanceType<typeof JSONModel>;
-                if (oMockModel) {
-                    oMockModel.setProperty("/recentActivities", aActivities);
+                const oDashboardModel = this.getView().getModel("dashboard") as InstanceType<typeof JSONModel>;
+                if (oDashboardModel) {
+                    oDashboardModel.setProperty("/recentActivities", aActivities);
                 }
             },
             error: (oErr: any) => {
