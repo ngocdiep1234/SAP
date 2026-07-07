@@ -44,11 +44,16 @@ export default class Dashboard extends Controller {
     public onInit(): void {
         const oRouter = (this as any).getOwnerComponent().getRouter();
         oRouter.getRoute("dashboard").attachPatternMatched(this._onPatternMatched, this);
+        // Load data immediately in case route was already matched
+        // before this controller initialised (first page load).
         this.loadLeaveQuota();
+        this._loadDashboardData();
+        // NOTE: _loadCurrentUser is called in _onPatternMatched only,
+        // to avoid redirecting to admin before the view is stable.
     }
 
     public loadLeaveQuota(): void {
-        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+        const oModel = (this as any).getOwnerComponent().getModel() as InstanceType<typeof ODataModel> | undefined;
         let oQuotaModel = this.getView().getModel("quota") as InstanceType<typeof JSONModel> | undefined;
         if (!oQuotaModel) {
             oQuotaModel = new JSONModel({ results: [] });
@@ -79,7 +84,7 @@ export default class Dashboard extends Controller {
     }
 
     private _onPatternMatched(): void {
-        const oUiModel = this.getView().getModel("ui") as any;
+        const oUiModel = (this as any).getOwnerComponent().getModel("ui") as any;
         if (oUiModel) {
             oUiModel.setProperty("/selectedSection", "dashboard");
         }
@@ -89,8 +94,11 @@ export default class Dashboard extends Controller {
     }
 
     private _loadDashboardData(): void {
-        const oModel = this.getView().getModel();
-        const oUiModel = this.getView().getModel("ui") as any;
+        const oModel = (this as any).getOwnerComponent().getModel();
+        // Retrieve "ui" model from the Component (set by App.controller.ts).
+        // This is reliable even before the Dashboard view is inserted into
+        // the App NavContainer (i.e. during onInit on first page load).
+        const oUiModel = (this as any).getOwnerComponent().getModel("ui") as any;
 
         if (!oModel || !oUiModel) {
             return;
@@ -235,7 +243,7 @@ export default class Dashboard extends Controller {
     }
 
     private _cancelODataRequest(oRequest: LeaveRequest): void {
-        const oModel = this.getView().getModel();
+        const oModel = (this as any).getOwnerComponent().getModel();
         if (!oModel) {
             return;
         }
@@ -287,7 +295,7 @@ export default class Dashboard extends Controller {
     }
 
     private _deleteODataRequest(oRequest: LeaveRequest): void {
-        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+        const oModel = (this as any).getOwnerComponent().getModel() as InstanceType<typeof ODataModel> | undefined;
         if (!oModel) {
             return;
         }
@@ -328,7 +336,7 @@ export default class Dashboard extends Controller {
     }
 
     private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string }> {
-        const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
+        const oUiModel = (this as any).getOwnerComponent().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
         if (!oUiModel) {
             return { registered: true, employeeId: "1001", employeeName: "Nguyen Van A", role: "Employee", is_manager: "", is_hr: "", is_admin: "" };
         }
@@ -360,7 +368,7 @@ export default class Dashboard extends Controller {
         }
 
         if (sSapUser) {
-            const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+            const oModel = (this as any).getOwnerComponent().getModel() as InstanceType<typeof ODataModel> | undefined;
             if (oModel) {
                 try {
                     const oResult = await new Promise<any>((resolve, reject) => {

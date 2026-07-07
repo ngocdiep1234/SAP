@@ -1,6 +1,7 @@
 import BaseComponent from "sap/ui/core/UIComponent";
 import { createDeviceModel } from "./model/models";
 import ODataModel from "sap/ui/model/odata/v2/ODataModel";
+import JSONModel from "sap/ui/model/json/JSONModel";
 import ErrorHandler from "./service/ErrorHandler";
 
 /**
@@ -36,6 +37,40 @@ export default class Component extends BaseComponent {
 
         // Initialise the authorization flag
         this._bAuthorizationFailed = false;
+
+        // -----------------------------------------------------------------
+        // Create the shared "ui" model on the Component BEFORE the router
+        // initialises and views are created. This guarantees that all child
+        // controllers can access it via getOwnerComponent().getModel("ui")
+        // even when async view creation makes App.controller.onInit() run
+        // after a child controller's onInit().
+        // -----------------------------------------------------------------
+        this.setModel(
+            new JSONModel({
+                selectedSection: "dashboard",
+                currentUser: {
+                    is_hr: "",
+                    is_manager: "",
+                    is_admin: ""
+                },
+                stats: {
+                    totalRequests: 0,
+                    pendingRequests: 0,
+                    approvedRequests: 0,
+                    rejectedRequests: 0,
+                    totalDays: 0
+                },
+                dashboard: {
+                    annualLeaveRemaining: 0,
+                    sickLeaveRemaining: 0,
+                    unpaidLeaveUsed: 0,
+                    myRequests: [],
+                    upcomingLeaves: [],
+                    notifications: []
+                }
+            }),
+            "ui"
+        );
 
         // enable routing
         this.getRouter().initialize();

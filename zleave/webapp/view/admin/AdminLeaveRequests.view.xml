@@ -19,8 +19,8 @@
                         <OverflowToolbar>
                             <Title text="{i18n>leaveRequests}" level="H2"/>
                             <ToolbarSpacer/>
-                            <Button id="btnApproveSelected" text="{i18n>approveSelected}" icon="sap-icon://accept" type="Accept" press=".onApproveSelected" enabled="false"/>
-                            <Button id="btnRejectSelected" text="{i18n>rejectSelected}" icon="sap-icon://decline" type="Reject" press=".onRejectSelected" enabled="false"/>
+                            <Button id="btnApproveSelected" text="{i18n>approveSelected}" icon="sap-icon://accept" type="Accept" press=".onApproveSelected" enabled="false" visible="{= ${ui>/currentUser/is_admin} !== 'X' }"/>
+                            <Button id="btnRejectSelected" text="{i18n>rejectSelected}" icon="sap-icon://decline" type="Reject" press=".onRejectSelected" enabled="false" visible="{= ${ui>/currentUser/is_admin} !== 'X' }"/>
                             <Button id="btnDeleteSelected" text="Delete Selected" icon="sap-icon://delete" type="Negative" press=".onDeleteSelected" enabled="false" visible="true"/>
                         </OverflowToolbar>
                     </headerToolbar>

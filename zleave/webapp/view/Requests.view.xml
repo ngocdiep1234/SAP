@@ -8,11 +8,17 @@
         <content>
             <VBox>
                 <SearchField id="filterEmployeeRequests" placeholder="{i18n>employee}" search=".onFilter" width="18rem" class="tableFilter"/>
-                <SegmentedButton id="filterStatusButton" select=".onFilterTabChange" selectedKey="pending" class="sapUiSmallMarginBottom">
+                <SegmentedButton id="filterStatusButton" select=".onFilterTabChange" selectedKey="{ui>/selectedRequestTab}" class="sapUiSmallMarginBottom">
                     <items>
-                        <SegmentedButtonItem key="all" text="All Requests" />
-                        <SegmentedButtonItem key="pending" text="Pending Approval" />
+                        <SegmentedButtonItem key="all" text="All Requests" visible="{= ${ui>/currentUser/is_hr} !== '' || ${ui>/currentUser/is_manager} !== '' || ${ui>/currentUser/is_admin} !== '' }" />
+                        <SegmentedButtonItem key="pending" text="Pending Approval" visible="{= ${ui>/currentUser/is_hr} !== '' || ${ui>/currentUser/is_manager} !== '' || ${ui>/currentUser/is_admin} !== '' }" />
                         <SegmentedButtonItem key="my" text="My Requests" />
+                    </items>
+                </SegmentedButton>
+                <SegmentedButton id="myRequestsSubFilterButton" select=".onMySubFilterTabChange" selectedKey="{ui>/selectedMySubTab}" visible="{= ${ui>/selectedRequestTab} === 'my' }" class="sapUiSmallMarginBottom">
+                    <items>
+                        <SegmentedButtonItem key="waiting" text="Đang đợi duyệt" />
+                        <SegmentedButtonItem key="completed" text="Đã hoàn thành" />
                     </items>
                 </SegmentedButton>
                 <Table id="tableRequests" mode="MultiSelect" selectionChange=".onSelectionChange" inset="false" items="{path: '/LeaveRequest', parameters: {operationMode: 'Client'}}" growing="true" growingScrollToLoad="true" class="leaveTable">

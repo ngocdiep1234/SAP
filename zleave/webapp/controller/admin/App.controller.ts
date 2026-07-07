@@ -2,6 +2,7 @@ import Controller from "sap/ui/core/mvc/Controller";
 import Event from "sap/ui/base/Event";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import MessageToast from "sap/m/MessageToast";
+import MessageBox from "sap/m/MessageBox";
 import { createNavModel } from "../../model/nav.model";
 
 /**
@@ -68,10 +69,21 @@ export default class App extends Controller {
     }
 
     /**
-     * Mock handler for logout press
+     * Handler for logout press
      */
     public onLogoutPress(): void {
-        MessageToast.show("Logging out... (mock)");
+        MessageBox.confirm(
+            "Are you sure you want to logout?",
+            {
+                actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+                emphasizedAction: MessageBox.Action.YES,
+                onClose: (sAction: string): void => {
+                    if (sAction === MessageBox.Action.YES) {
+                        window.location.href = "/sap/public/bc/icf/logoff";
+                    }
+                }
+            }
+        );
     }
 
     /**

@@ -30,18 +30,11 @@ export default class Requests extends Controller {
         oRouter.getRoute("requests").attachPatternMatched(this._onPatternMatched, this);
     }
 
-    private _onPatternMatched(): void {
+    private async _onPatternMatched(): Promise<void> {
         console.log("[DEBUG] Requests page loaded. Initializing pattern match...");
         const oUiModel = this.getView().getModel("ui") as any;
         if (oUiModel) {
             oUiModel.setProperty("/selectedSection", "requests");
-            oUiModel.setProperty("/selectedRequestTab", "pending");
-        }
-        const oSegmentedButton =
-            this.getView().byId("filterStatusButton");
-        if (oSegmentedButton) {
-            // Khởi động tại tab "pending" để _applyFilters kiểm tra role ngay lập tức
-            oSegmentedButton.setSelectedKey("pending");
         }
         const oTable = this.getView().byId("tableRequests") as InstanceType<typeof Table> | undefined;
         if (oTable) {
@@ -49,8 +42,29 @@ export default class Requests extends Controller {
             oTable.setMode("MultiSelect");
         }
         this._loadEmployees();
-        void this._applyFilters("pending").then(() => {
-            this.updateToolbarVisibility("pending");
+
+        const oCurrentUser = await this._getCurrentUser();
+        const bIsEmployeeOnly = !(oCurrentUser.is_manager || oCurrentUser.is_hr || oCurrentUser.is_admin);
+        const sInitialTab = bIsEmployeeOnly ? "my" : "pending";
+
+        if (oUiModel) {
+            oUiModel.setProperty("/selectedRequestTab", sInitialTab);
+            oUiModel.setProperty("/selectedMySubTab", "waiting");
+        }
+        const oSegmentedButton =
+            this.getView().byId("filterStatusButton") as InstanceType<typeof SegmentedButton> | undefined;
+        if (oSegmentedButton) {
+            oSegmentedButton.setSelectedKey(sInitialTab);
+        }
+        if (oTable) {
+            if (sInitialTab === "my") {
+                oTable.setMode("SingleSelectLeft");
+            } else {
+                oTable.setMode("MultiSelect");
+            }
+        }
+        void this._applyFilters(sInitialTab).then(() => {
+            this.updateToolbarVisibility(sInitialTab);
             if (oTable) {
                 oTable.setBusy(false);
             }
@@ -138,6 +152,9 @@ export default class Requests extends Controller {
         const oUiModel = this.getView().getModel("ui") as any;
         if (oUiModel) {
             oUiModel.setProperty("/selectedRequestTab", key);
+            if (key === "my" && !oUiModel.getProperty("/selectedMySubTab")) {
+                oUiModel.setProperty("/selectedMySubTab", "waiting");
+            }
         }
         const oTable = this.getView().byId("tableRequests") as InstanceType<typeof Table> | undefined;
         if (oTable) {
@@ -163,6 +180,16 @@ export default class Requests extends Controller {
             default:
                 break;
         }
+    }
+
+    public onMySubFilterTabChange(oEvent: InstanceType<typeof Event>): void {
+        const oSegmentedButton = oEvent.getSource() as InstanceType<typeof SegmentedButton>;
+        const key = oSegmentedButton.getSelectedKey();
+        const oUiModel = this.getView().getModel("ui") as any;
+        if (oUiModel) {
+            oUiModel.setProperty("/selectedMySubTab", key);
+        }
+        void this._applyFilters("my");
     }
 
     private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string }> {
@@ -285,6 +312,30 @@ export default class Requests extends Controller {
                 aFilters.push(new Filter("EmployeeId", FilterOperator.EQ, sCurrentEmployeeId));
             } else {
                 aFilters.push(new Filter("EmployeeId", FilterOperator.EQ, ""));
+            }
+
+            const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
+            const sSubTab = oUiModel?.getProperty("/selectedMySubTab") as string || "waiting";
+            if (sSubTab === "completed") {
+                aFilters.push(new Filter({
+                    filters: [
+                        new Filter("Status", FilterOperator.EQ, "Approved"),
+                        new Filter("Status", FilterOperator.EQ, "APPROVED"),
+                        new Filter("Status", FilterOperator.EQ, "Rejected"),
+                        new Filter("Status", FilterOperator.EQ, "REJECTED")
+                    ],
+                    and: false
+                }));
+            } else {
+                aFilters.push(new Filter({
+                    filters: [
+                        new Filter("Status", FilterOperator.NE, "Approved"),
+                        new Filter("Status", FilterOperator.NE, "APPROVED"),
+                        new Filter("Status", FilterOperator.NE, "Rejected"),
+                        new Filter("Status", FilterOperator.NE, "REJECTED")
+                    ],
+                    and: true
+                }));
             }
         }
         // 2. Search-based Filters

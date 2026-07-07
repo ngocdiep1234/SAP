@@ -1,5 +1,4 @@
 import Controller from "sap/ui/core/mvc/Controller";
-import JSONModel from "sap/ui/model/json/JSONModel";
 import MessageBox from "sap/m/MessageBox";
 import MessageToast from "sap/m/MessageToast";
 
@@ -11,24 +10,12 @@ export default class App extends Controller {
     public onInit(): void {
         const oView = this.getView();
 
-        oView.setModel(
-            new JSONModel({
-                selectedSection: "dashboard",
-                currentUser: {
-                    is_hr: "",
-                    is_manager: "",
-                    is_admin: ""
-                },
-                stats: {
-                    totalRequests: 0,
-                    pendingRequests: 0,
-                    approvedRequests: 0,
-                    rejectedRequests: 0,
-                    totalDays: 0
-                }
-            }),
-            "ui"
-        );
+        // The "ui" model is created in Component.init() before any view is loaded.
+        // Bind it to this view so XML bindings like {ui>/selectedSection} work.
+        const oUiModel = (this.getOwnerComponent() as any).getModel("ui");
+        if (oUiModel) {
+            oView.setModel(oUiModel, "ui");
+        }
 
         // ---------------------------------------------------------------
         // Sidebar visibility guard

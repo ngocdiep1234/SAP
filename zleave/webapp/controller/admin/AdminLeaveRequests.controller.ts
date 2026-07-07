@@ -315,12 +315,19 @@ export default class AdminLeaveRequests extends Controller {
         const oBtnApprove = this.getView().byId("btnApproveSelected") as InstanceType<typeof Button> | undefined;
         const oBtnReject = this.getView().byId("btnRejectSelected") as InstanceType<typeof Button> | undefined;
         const oBtnDelete = this.getView().byId("btnDeleteSelected") as InstanceType<typeof Button> | undefined;
+
+        const oUiModel = (this as any).getOwnerComponent().getModel("ui") as any;
+        const oCurrentUser = oUiModel?.getProperty("/currentUser");
+        const bIsAdmin = oCurrentUser && (oCurrentUser.is_admin === "X" || oCurrentUser.is_admin === "true" || oCurrentUser.is_admin === "1");
+
         const bIsSubmitted = sKey === "pending" || sKey === "SUBMITTED" || sKey === "MGR_APPROVED";
+        const bShowApproveReject = bIsSubmitted && !bIsAdmin;
+
         if (oBtnApprove) {
-            oBtnApprove.setVisible(bIsSubmitted);
+            oBtnApprove.setVisible(bShowApproveReject);
         }
         if (oBtnReject) {
-            oBtnReject.setVisible(bIsSubmitted);
+            oBtnReject.setVisible(bShowApproveReject);
         }
         if (oBtnDelete) {
             oBtnDelete.setVisible(true);
