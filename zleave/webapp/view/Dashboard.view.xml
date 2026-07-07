@@ -1,93 +1,136 @@
 <mvc:View controllerName="zleave.zleave.controller.Dashboard"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:f="sap.f"
     xmlns:l="sap.ui.layout"
     xmlns:core="sap.ui.core">
-    <Page id="dashboardPage" title="Leave Management Dashboard" showHeader="true">
-        <content>
-            <l:Grid id="dashboardGrid" defaultSpan="XL12 L12 M12 S12" hSpacing="1" vSpacing="1" class="sapUiSmallMargin">
-                
-                <!-- Left Column (70%) -->
-                <VBox id="leftContainer">
-                    <layoutData>
-                        <l:GridData span="XL8 L8 M12 S12"/>
-                    </layoutData>
 
-                    <!-- Leave Balance Section -->
-                    <Panel headerText="Leave Balance" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
-                        <FlexBox wrap="Wrap" justify="SpaceBetween" class="sapUiTinyMarginTop"
-                            items="{quota>/results}">
+    <f:DynamicPage id="dashboardPage" headerExpanded="true" preserveHeaderStateOnScroll="false" fitContent="true">
+
+        <!-- ─── TITLE ────────────────────────────────────────── -->
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="Leave Management" level="H3" />
+                </f:heading>
+                <f:snappedHeading>
+                    <Title text="Leave Management" level="H3" />
+                </f:snappedHeading>
+                <f:expandedContent>
+                    <Text text="{= 'Welcome, ' + ${ui>/currentUser/employeeName}}" />
+                </f:expandedContent>
+                <f:snappedContent>
+                    <Text text="{ui>/currentUser/employeeName}" />
+                </f:snappedContent>
+                <f:actions>
+                    <Button id="btnTitleCreate"
+                        text="New Request"
+                        type="Emphasized"
+                        icon="sap-icon://create"
+                        press=".onNavToCreate" />
+                    <Button id="btnTitleMyReq"
+                        text="My Requests"
+                        icon="sap-icon://employee"
+                        press=".onNavToRequests" />
+                </f:actions>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <!-- ─── HEADER (Employee Details from Backend) ────────── -->
+        <f:header>
+            <f:DynamicPageHeader pinnable="true">
+                <HBox wrap="Wrap" class="sapUiSmallMarginTop sapUiSmallMarginBottom" justifyContent="Start">
+                    <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
+                        <Label text="Department" class="sapUiTinyMarginBottom" design="Bold"/>
+                        <Text text="{ui>/currentUser/department}"/>
+                    </VBox>
+                    <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
+                        <Label text="Position Title" class="sapUiTinyMarginBottom" design="Bold"/>
+                        <Text text="{ui>/currentUser/role}"/>
+                    </VBox>
+                    <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
+                        <Label text="Email Address" class="sapUiTinyMarginBottom" design="Bold"/>
+                        <Link text="{ui>/currentUser/email}" href="{= 'mailto:' + ${ui>/currentUser/email} }"/>
+                    </VBox>
+                    <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
+                        <Label text="Employee ID" class="sapUiTinyMarginBottom" design="Bold"/>
+                        <Text text="{ui>/currentUser/employeeId}"/>
+                    </VBox>
+                    <VBox class="sapUiTinyMarginBottom">
+                        <Label text="Roles &amp; Permissions" class="sapUiTinyMarginBottom" design="Bold"/>
+                        <ObjectStatus text="{ui>/currentUser/accessRolesText}" state="Success"/>
+                    </VBox>
+                </HBox>
+            </f:DynamicPageHeader>
+        </f:header>
+
+        <!-- ─── CONTENT ──────────────────────────────────────── -->
+        <f:content>
+            <l:Grid
+                defaultSpan="XL12 L12 M12 S12"
+                hSpacing="1" vSpacing="1"
+                class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop">
+
+                <!-- Leave Balance (8 columns) -->
+                <VBox>
+                    <layoutData><l:GridData span="XL8 L8 M12 S12" /></layoutData>
+                    <Panel id="panelLeaveBalance"
+                        headerText="Leave Balance"
+                        class="sapUiSmallMarginBottom"
+                        expandable="false"
+                        backgroundDesign="Translucent">
+                        <FlexBox wrap="Wrap" class="sapUiTinyMarginTop" items="{quota>/results}">
                             <GenericTile
                                 header="{quota>LeaveTypeName}"
                                 subheader="Remaining"
                                 class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
                                 press=".onTilePress">
                                 <tileContent>
-                                    <TileContent
-                                        footer="{= 'Used: ' + ${quota>UsedDays} + ' / ' + ${quota>TotalDays} + ' Days'}">
+                                    <TileContent footer="{= 'Used: ' + ${quota>UsedDays} + ' / ' + ${quota>TotalDays} + ' days'}">
                                         <content>
                                             <NumericContent
                                                 value="{quota>RemainingDays}"
                                                 valueColor="{= ${quota>RemainingDays} > 5 ? 'Good' : ${quota>RemainingDays} > 0 ? 'Critical' : 'Error'}"
-                                                indicator="None"/>
+                                                indicator="None" />
                                         </content>
                                     </TileContent>
                                 </tileContent>
                             </GenericTile>
                         </FlexBox>
-                        <Text text="No leave balance data available"
+                        <Text
+                            text="No leave balance data available."
                             visible="{= !${quota>/results} || ${quota>/results}.length === 0 }"
-                            class="sapUiSmallMargin"/>
+                            class="sapUiSmallMargin" />
                     </Panel>
-
-                    <!-- Quick Actions Section -->
-                    <Panel headerText="Quick Actions" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
-                        <HBox wrap="Wrap" class="sapUiTinyMarginTop">
-                            <Button text="Create Leave Request" type="Emphasized" icon="sap-icon://create" press=".onNavToCreate" class="sapUiSmallMarginEnd sapUiTinyMarginBottom"/>
-                            <Button text="My Requests" icon="sap-icon://employee" press=".onNavToRequests" class="sapUiSmallMarginEnd sapUiTinyMarginBottom"/>
-                            <Button text="Leave Calendar" icon="sap-icon://appointment-2" press=".onNavToCalendar" class="sapUiTinyMarginBottom"/>
-                        </HBox>
-                    </Panel>
-
                 </VBox>
-                
-                <!-- Right Column (30%) -->
-                <VBox id="rightContainer">
-                    <layoutData>
-                        <l:GridData span="XL4 L4 M12 S12"/>
-                    </layoutData>
 
-                    <!-- Upcoming Leaves Section -->
-                    <Panel headerText="Upcoming Leaves" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
-                        <List id="listUpcomingLeaves" 
-                            noDataText="No upcoming leaves approved"
-                            items="{ui>/dashboard/upcomingLeaves}">
-                            <StandardListItem 
-                                title="{ui>LeaveType} Leave"
-                                description="{path: 'ui>StartDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}} ({ui>TotalDays} Days)"
-                                icon="sap-icon://calendar"
-                                info="{ui>Status}"
-                                infoState="Success"/>
-                        </List>
-                    </Panel>
-
-                    <!-- System Notifications Section -->
-                    <Panel headerText="Notifications" backgroundDesign="Translucent">
-                        <List id="listNotifications" 
-                            items="{ui>/dashboard/notifications}">
-                            <CustomListItem>
-                                <HBox class="sapUiSmallMargin" alignItems="Center">
-                                    <core:Icon src="{ui>icon}" color="{= ${ui>state} === 'Success' ? '#2b7c2b' : ${ui>state} === 'Error' ? '#bb0000' : '#0066cc' }" class="sapUiSmallMarginEnd"/>
-                                    <VBox>
-                                        <Text text="{ui>message}" design="Bold"/>
-                                        <Text text="{ui>time}" class="sapUiTinyMarginTop" style="font-size: 0.8rem; color: #666;"/>
-                                    </VBox>
-                                </HBox>
-                            </CustomListItem>
+                <!-- Quick Actions (4 columns) -->
+                <VBox>
+                    <layoutData><l:GridData span="XL4 L4 M12 S12" /></layoutData>
+                    <Panel id="panelQuickActions"
+                        headerText="Quick Actions"
+                        class="sapUiSmallMarginBottom"
+                        expandable="false"
+                        backgroundDesign="Translucent">
+                        <List id="listQuickActions" showSeparators="Inner">
+                            <StandardListItem
+                                id="qaCreate"
+                                title="Create Leave Request"
+                                icon="sap-icon://create"
+                                type="Navigation"
+                                press=".onNavToCreate" />
+                            <StandardListItem
+                                id="qaMyRequests"
+                                title="View My Requests"
+                                icon="sap-icon://employee"
+                                type="Navigation"
+                                press=".onNavToRequests" />
                         </List>
                     </Panel>
                 </VBox>
+
             </l:Grid>
-        </content>
-    </Page>
+        </f:content>
+
+    </f:DynamicPage>
 </mvc:View>

@@ -17,8 +17,8 @@
                 </SegmentedButton>
                 <SegmentedButton id="myRequestsSubFilterButton" select=".onMySubFilterTabChange" selectedKey="{ui>/selectedMySubTab}" visible="{= ${ui>/selectedRequestTab} === 'my' }" class="sapUiSmallMarginBottom">
                     <items>
-                        <SegmentedButtonItem key="waiting" text="Đang đợi duyệt" />
-                        <SegmentedButtonItem key="completed" text="Đã hoàn thành" />
+                        <SegmentedButtonItem key="waiting" text="Awaiting approval" />
+                        <SegmentedButtonItem key="completed" text="Completed" />
                     </items>
                 </SegmentedButton>
                 <Table id="tableRequests" mode="MultiSelect" selectionChange=".onSelectionChange" inset="false" items="{path: '/LeaveRequest', parameters: {operationMode: 'Client'}}" growing="true" growingScrollToLoad="true" class="leaveTable">
@@ -38,7 +38,7 @@
                         <Column><Text text="{i18n>startDate}"/></Column>
                         <Column><Text text="{i18n>endDate}"/></Column>
                         <Column><Text text="{i18n>totalDays}"/></Column>
-                        <Column visible="{= ${ui>/selectedRequestTab} === 'pending' }"><Text text="Cảnh báo"/></Column>
+                        <Column visible="{= ${ui>/selectedRequestTab} === 'pending' }"><Text text="Warning"/></Column>
                         <Column><Text text="{i18n>status}"/></Column>
                     </columns>
                     <items>

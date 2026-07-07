@@ -75,8 +75,8 @@
 <Property Name="ActionCriticality" Type="Edm.Byte"/>
 <Property Name="ActionBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername"/>
 <Property Name="ActionAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)"/>
-<Property Name="OldStatus" Type="Edm.String" MaxLength="10"/>
-<Property Name="NewStatus" Type="Edm.String" MaxLength="10"/>
+<Property Name="OldStatus" Type="Edm.String" MaxLength="15"/>
+<Property Name="NewStatus" Type="Edm.String" MaxLength="15"/>
 <Property Name="Comments" Type="Edm.String" MaxLength="255"/>
 </EntityType>
 <EntityType Name="QuotaOverviewType" sap:content-version="1">

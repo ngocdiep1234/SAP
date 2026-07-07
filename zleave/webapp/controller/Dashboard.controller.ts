@@ -189,11 +189,6 @@ export default class Dashboard extends Controller {
         oRouter.navTo("requests");
     }
 
-    public onNavToCalendar(): void {
-        const oRouter = (this as any).getOwnerComponent().getRouter();
-        oRouter.navTo("analytics");
-    }
-
     public onViewRequest(oEvent: any): void {
         const oBindingContext = oEvent.getSource().getParent().getBindingContext("ui");
         if (!oBindingContext) {
@@ -343,8 +338,16 @@ export default class Dashboard extends Controller {
 
         const oCachedUser = oUiModel.getProperty("/currentUser") as any;
         if (oCachedUser && oCachedUser.employeeId && oCachedUser.role) {
+            if (!oCachedUser.accessRolesText) {
+                oCachedUser.accessRolesText = [
+                    (oCachedUser.is_admin === "X" || oCachedUser.is_admin === "true" || oCachedUser.is_admin === "1") ? "Admin" : "",
+                    (oCachedUser.is_hr === "X" || oCachedUser.is_hr === "true" || oCachedUser.is_hr === "1") ? "HR" : "",
+                    (oCachedUser.is_manager === "X" || oCachedUser.is_manager === "true" || oCachedUser.is_manager === "1") ? "Manager" : ""
+                ].filter(Boolean).join(", ") || "Employee";
+                oUiModel.setProperty("/currentUser", oCachedUser);
+            }
             console.log("[DEBUG] Current user from cache:", oCachedUser);
-            return oCachedUser as { registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string };
+            return oCachedUser;
         }
 
         let sSapUser = oCachedUser?.id as string | undefined;
@@ -382,6 +385,11 @@ export default class Dashboard extends Controller {
                     });
                     if (oResult && oResult.results && oResult.results.length > 0) {
                         const oEmp = oResult.results[0];
+                        const sAccessRolesText = [
+                            (oEmp["IsAdmin"] === "X" || oEmp["IsAdmin"] === "true" || oEmp["IsAdmin"] === "1") ? "Admin" : "",
+                            (oEmp["IsHR"] === "X" || oEmp["IsHR"] === "true" || oEmp["IsHR"] === "1") ? "HR" : "",
+                            (oEmp["IsManager"] === "X" || oEmp["IsManager"] === "true" || oEmp["IsManager"] === "1") ? "Manager" : ""
+                        ].filter(Boolean).join(", ") || "Employee";
                         const oUserObj = {
                             registered: true,
                             employeeId: String(oEmp["EmployeeId"] ?? ""),
@@ -391,7 +399,10 @@ export default class Dashboard extends Controller {
                             role: String(oEmp["PositionTitle"] ?? "Employee"),
                             is_manager: String(oEmp["IsManager"] ?? ""),
                             is_hr: String(oEmp["IsHR"] ?? ""),
-                            is_admin: String(oEmp["IsAdmin"] ?? "")
+                            is_admin: String(oEmp["IsAdmin"] ?? ""),
+                            accessRolesText: sAccessRolesText,
+                            email: String(oEmp["Email"] ?? ""),
+                            department: String(oEmp["Department"] ?? "")
                         };
                         oUiModel.setProperty("/currentUser", oUserObj);
                         console.log("[DEBUG] Current user loaded from Employee query:", oUserObj);
@@ -407,10 +418,13 @@ export default class Dashboard extends Controller {
             registered: true,
             employeeId: "1001",
             employeeName: "Nguyen Van A",
-            role: "Employee",
+            role: "Senior SAP UI5 Developer",
             is_manager: "",
             is_hr: "",
-            is_admin: ""
+            is_admin: "",
+            accessRolesText: "Employee",
+            email: "nguyen.van.a@company.com",
+            department: "IT Enterprise Solutions"
         };
         oUiModel.setProperty("/currentUser", oMockUser);
         console.log("[DEBUG] Current user fallback (mock):", oMockUser);

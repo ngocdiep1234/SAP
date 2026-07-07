@@ -87,8 +87,10 @@
       "minUI5Version": "1.108.33",
       "libs": {
         "sap.m": {},
+        "sap.f": {},
         "sap.tnt": {},
         "sap.uxap": {},
+        "sap.ui.layout": {},
         "sap.ui.core": {}
       }
     },
@@ -141,11 +143,6 @@
           "name": "requestDetail",
           "pattern": "requests/detail/{uuid}",
           "target": "requestDetail"
-        },
-        {
-          "name": "analytics",
-          "pattern": "analytics",
-          "target": "analytics"
         },
         {
           "name": "createRequest",
@@ -222,12 +219,6 @@
         "requestDetail": {
           "viewName": "RequestDetail",
           "viewId": "RequestDetail",
-          "viewType": "XML",
-          "transition": "slide"
-        },
-        "analytics": {
-          "viewName": "Analytics",
-          "viewId": "Analytics",
           "viewType": "XML",
           "transition": "slide"
         },

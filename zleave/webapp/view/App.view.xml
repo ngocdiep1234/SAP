@@ -34,7 +34,6 @@
                         <tnt:NavigationListItem text="{i18n>dashboard}" key="dashboard" icon="sap-icon://home"/>
                         <tnt:NavigationListItem text="{i18n>requests}" key="requests" icon="sap-icon://employee"/>
                         <tnt:NavigationListItem text="{i18n>createLeaveRequestTitle}" key="createRequest" icon="sap-icon://create"/>
-                        <tnt:NavigationListItem text="{i18n>analytics}" key="analytics" icon="sap-icon://lead"/>
                     </tnt:NavigationList>
                 </tnt:item>
             </tnt:SideNavigation>

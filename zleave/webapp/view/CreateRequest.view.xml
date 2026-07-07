@@ -26,10 +26,6 @@
                                 <ObjectIdentifier title="{createForm>/employee/EmployeeName}" text="{= 'ID: ' + ${createForm>/employee/EmployeeID} }"/>
                             </VBox>
                             <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
-                                <Label text="Department" class="sapUiTinyMarginBottom"/>
-                                <Text text="{createForm>/employee/DepartmentID}" design="Bold"/>
-                            </VBox>
-                            <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
                                 <Label text="Manager" class="sapUiTinyMarginBottom"/>
                                 <ObjectIdentifier title="{createForm>/employee/ManagerName}" text="{createForm>/employee/ManagerID}"/>
                             </VBox>
@@ -133,12 +129,6 @@
                                 typeMissmatch=".onTypeMismatch"
                                 change=".onFileChange"
                                 width="100%"/>
-                            <MessageStrip
-                                text="File will be uploaded automatically when you click Submit. Allowed: PDF, DOC, DOCX, XLSX, JPG, JPEG, PNG (max 10 MB)."
-                                type="Information"
-                                showIcon="true"
-                                showCloseButton="false"
-                                class="sapUiTinyMarginTop"/>
                         </VBox>
                     </Panel>
                 </VBox>
