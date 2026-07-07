@@ -36,22 +36,10 @@
             </f:DynamicPageTitle>
         </f:title>
 
-        <!-- ─── HEADER (Employee Details from Backend) ────────── -->
+        <!-- ─── HEADER (Employee Details) ────────── -->
         <f:header>
             <f:DynamicPageHeader pinnable="true">
                 <HBox wrap="Wrap" class="sapUiSmallMarginTop sapUiSmallMarginBottom" justifyContent="Start">
-                    <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
-                        <Label text="Department" class="sapUiTinyMarginBottom" design="Bold"/>
-                        <Text text="{ui>/currentUser/department}"/>
-                    </VBox>
-                    <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
-                        <Label text="Position Title" class="sapUiTinyMarginBottom" design="Bold"/>
-                        <Text text="{ui>/currentUser/role}"/>
-                    </VBox>
-                    <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
-                        <Label text="Email Address" class="sapUiTinyMarginBottom" design="Bold"/>
-                        <Link text="{ui>/currentUser/email}" href="{= 'mailto:' + ${ui>/currentUser/email} }"/>
-                    </VBox>
                     <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
                         <Label text="Employee ID" class="sapUiTinyMarginBottom" design="Bold"/>
                         <Text text="{ui>/currentUser/employeeId}"/>

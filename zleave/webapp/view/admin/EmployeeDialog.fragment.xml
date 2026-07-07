@@ -69,13 +69,6 @@
                     <CheckBox
                         id="checkIsManager"
                         selected="{dialog>/IsManager}"/>
-
-                    <Label text="Status" />
-                    <Switch
-                        id="switchActive"
-                        state="{dialog>/IsActive}"
-                        customTextOn="Yes"
-                        customTextOff="No"/>
                 </f:content>
             </f:SimpleForm>
         </content>

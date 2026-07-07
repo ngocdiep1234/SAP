@@ -39,6 +39,12 @@ export function createNavModel(): InstanceType<typeof JSONModel> {
                 text: "Leave Types",
                 icon: "sap-icon://list",
                 route: "AdminLeaveTypes"
+            },
+            {
+                id: "audit",
+                text: "Audit Log",
+                icon: "sap-icon://survey",
+                route: "AdminAuditLog"
             }
         ]
     };

@@ -2,87 +2,49 @@
     controllerName="zleave.zleave.controller.admin.AdminDashboard"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:f="sap.f"
     xmlns:l="sap.ui.layout"
     xmlns:core="sap.ui.core"
     height="100%">
-    <Page title="Admin Dashboard" showHeader="true">
-        <content>
+    <f:DynamicPage id="adminDashboardPage" headerExpanded="true" preserveHeaderStateOnScroll="false" fitContent="true">
+        <!-- ─── TITLE ────────────────────────────────────────── -->
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="Leave Management" level="H3" />
+                </f:heading>
+                <f:snappedHeading>
+                    <Title text="Leave Management" level="H3" />
+                </f:snappedHeading>
+                <f:expandedContent>
+                    <Text text="{= 'Welcome, ' + ${ui>/currentUser/employeeName}}" />
+                </f:expandedContent>
+                <f:snappedContent>
+                    <Text text="{ui>/currentUser/employeeName}" />
+                </f:snappedContent>
+            </f:DynamicPageTitle>
+        </f:title>
+
+        <!-- ─── HEADER (Employee Details) ────────── -->
+        <f:header>
+            <f:DynamicPageHeader pinnable="true">
+                <HBox wrap="Wrap" class="sapUiSmallMarginTop sapUiSmallMarginBottom" justifyContent="Start">
+                    <VBox class="sapUiLargeMarginEnd sapUiTinyMarginBottom">
+                        <Label text="Employee ID" class="sapUiTinyMarginBottom" design="Bold"/>
+                        <Text text="{ui>/currentUser/employeeId}"/>
+                    </VBox>
+                    <VBox class="sapUiTinyMarginBottom">
+                        <Label text="Roles &amp; Permissions" class="sapUiTinyMarginBottom" design="Bold"/>
+                        <ObjectStatus text="{ui>/currentUser/accessRolesText}" state="Success"/>
+                    </VBox>
+                </HBox>
+            </f:DynamicPageHeader>
+        </f:header>
+
+        <!-- ─── CONTENT ──────────────────────────────────────── -->
+        <f:content>
             <l:Grid defaultSpan="XL12 L12 M12 S12" hSpacing="1" vSpacing="1" class="sapUiSmallMargin">
                 
-                <!-- Metrics Section -->
-                <VBox>
-                    <layoutData>
-                        <l:GridData span="XL12 L12 M12 S12"/>
-                    </layoutData>
-                    <FlexBox wrap="Wrap" justify="Start" class="sapUiTinyMarginBottom">
-                        <GenericTile
-                            header="Total Employees"
-                            subheader="Active Management"
-                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
-                            press=".onNavToEmployees">
-                            <tileContent>
-                                <TileContent footer="Active: {mock>/metrics/activeEmployees}">
-                                    <content>
-                                        <NumericContent
-                                            value="{mock>/metrics/totalEmployees}"
-                                            icon="sap-icon://employee"
-                                            valueColor="Neutral"/>
-                                    </content>
-                                </TileContent>
-                            </tileContent>
-                        </GenericTile>
-
-                        <GenericTile
-                            header="Pending Requests"
-                            subheader="Requires Approval"
-                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
-                            press=".onNavToLeaveRequests">
-                            <tileContent>
-                                <TileContent footer="Needs verification">
-                                    <content>
-                                        <NumericContent
-                                            value="{mock>/metrics/pendingRequests}"
-                                            valueColor="Critical"
-                                            icon="sap-icon://clinical-triage-status"/>
-                                    </content>
-                                </TileContent>
-                            </tileContent>
-                        </GenericTile>
-
-                        <GenericTile
-                            header="Leaves Approved"
-                            subheader="Current Month"
-                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom">
-                            <tileContent>
-                                <TileContent footer="This month count">
-                                    <content>
-                                        <NumericContent
-                                            value="{mock>/metrics/approvedThisMonth}"
-                                            valueColor="Good"
-                                            icon="sap-icon://accept"/>
-                                    </content>
-                                </TileContent>
-                            </tileContent>
-                        </GenericTile>
-
-                        <GenericTile
-                            header="System Alerts"
-                            subheader="Config Reminders"
-                            class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
-                            press=".onNavToQuota">
-                            <tileContent>
-                                <TileContent footer="Quota mismatch">
-                                    <content>
-                                        <NumericContent
-                                            value="{mock>/metrics/criticalReminders}"
-                                            valueColor="Error"
-                                            icon="sap-icon://alert"/>
-                                    </content>
-                                </TileContent>
-                            </tileContent>
-                        </GenericTile>
-                    </FlexBox>
-                </VBox>
 
                 <!-- Left Column (70%) -->
                 <VBox>
@@ -99,32 +61,6 @@
                             <Button text="Manage Leave Types" icon="sap-icon://list" press=".onNavToLeaveTypes" class="sapUiTinyMarginBottom"/>
                         </HBox>
                     </Panel>
-
-                    <!-- Pending Actions Table -->
-                    <Panel headerText="Pending Approvals Review" backgroundDesign="Translucent">
-                        <Table id="tablePendingApprovals" inset="false" items="{mock>/pendingApprovals}">
-                            <columns>
-                                <Column width="9rem"><Text text="Request ID" design="Bold"/></Column>
-                                <Column><Text text="Employee" design="Bold"/></Column>
-                                <Column width="6rem"><Text text="Type" design="Bold"/></Column>
-                                <Column minScreenWidth="Tablet" demandPopin="true"><Text text="Period" design="Bold"/></Column>
-                                <Column width="5rem" hAlign="End"><Text text="Days" design="Bold"/></Column>
-                                <Column width="8rem" hAlign="Center"><Text text="Status" design="Bold"/></Column>
-                            </columns>
-                            <items>
-                                <ColumnListItem>
-                                    <cells>
-                                        <Text text="{mock>RequestId}"/>
-                                        <Text text="{mock>EmployeeName}"/>
-                                        <Text text="{mock>LeaveType}"/>
-                                        <Text text="{path: 'mock>StartDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}} - {path: 'mock>EndDate', type: 'sap.ui.model.type.Date', formatOptions: {pattern: 'yyyy-MM-dd'}}"/>
-                                        <Text text="{path: 'mock>TotalDays', type: 'sap.ui.model.type.Float', formatOptions: {maxFractionDigits: 1}}"/>
-                                        <ObjectStatus text="{mock>Status}" state="{= ${mock>Status} === 'MGR_APPROVED' ? 'Success' : 'Warning' }"/>
-                                    </cells>
-                                </ColumnListItem>
-                            </items>
-                        </Table>
-                    </Panel>
                 </VBox>
 
                 <!-- Right Column (30%) -->
@@ -132,20 +68,6 @@
                     <layoutData>
                         <l:GridData span="XL4 L4 M12 S12"/>
                     </layoutData>
-
-                    <!-- Who is out today -->
-                    <Panel headerText="Out of Office Today" class="sapUiSmallMarginBottom" backgroundDesign="Translucent">
-                        <List id="listWhoIsOut" 
-                            noDataText="All employees are working today"
-                            items="{mock>/whoIsOutToday}">
-                            <StandardListItem 
-                                title="{mock>EmployeeName}"
-                                description="{mock>LeaveType} ({mock>Period})"
-                                icon="sap-icon://presence"
-                                info="{mock>Status}"
-                                infoState="Warning"/>
-                        </List>
-                    </Panel>
 
                     <!-- Recent Activity Stream -->
                     <Panel headerText="Recent Activities" backgroundDesign="Translucent">
@@ -165,6 +87,6 @@
                 </VBox>
 
             </l:Grid>
-        </content>
-    </Page>
+        </f:content>
+    </f:DynamicPage>
 </mvc:View>

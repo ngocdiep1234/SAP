@@ -92,10 +92,17 @@
                                     press=".onEditEmployee"
                                     tooltip="Edit Employee"/>
                                 <Button
-                                    icon="sap-icon://delete"
+                                    icon="sap-icon://accept"
                                     type="Transparent"
-                                    press=".onDeleteEmployee"
-                                    tooltip="Delete Employee"/>
+                                    press=".onActivateEmployee"
+                                    visible="{= !${IsActive} }"
+                                    tooltip="Activate Employee"/>
+                                <Button
+                                    icon="sap-icon://decline"
+                                    type="Transparent"
+                                    press=".onDeactivateEmployee"
+                                    visible="{= ${IsActive} === true || ${IsActive} === 'true' || ${IsActive} === 'X' }"
+                                    tooltip="Deactivate Employee"/>
                             </HBox>
                         </cells>
                     </ColumnListItem>

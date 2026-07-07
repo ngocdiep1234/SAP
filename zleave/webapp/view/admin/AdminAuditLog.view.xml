@@ -1,0 +1,94 @@
+<mvc:View
+    controllerName="zleave.zleave.controller.admin.AdminAuditLog"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
+    xmlns:layout="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    height="100%">
+    <f:DynamicPage id="dynamicPage" headerExpanded="true" preserveHeaderStateOnScroll="true" showFooter="false" fitContent="true">
+        <!-- Dynamic Page Title -->
+        <f:title>
+            <f:DynamicPageTitle>
+                <f:heading>
+                    <Title text="Audit Log"/>
+                </f:heading>
+                <f:expandedContent>
+                    <Text text="View all employee and leave management activities."/>
+                </f:expandedContent>
+                <f:snappedContent>
+                    <Text text="View all employee and leave management activities."/>
+                </f:snappedContent>
+            </f:DynamicPageTitle>
+        </f:title>
+
+
+
+        <!-- Dynamic Page Content -->
+        <f:content>
+            <Table
+                id="tableAuditLogs"
+                width="auto"
+                items="{
+                    path: '/AuditLog',
+                    sorter: {
+                        path: 'ActionAt',
+                        descending: true
+                    }
+                }"
+                growing="true"
+                growingThreshold="20"
+                growingScrollToLoad="true"
+                class="sapUiResponsiveMargin"
+                noDataText="No audit logs found.">
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title id="tableTitle" text="Logs"/>
+                    </OverflowToolbar>
+                </headerToolbar>
+                <columns>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="Action Time"/>
+                    </Column>
+                    <Column>
+                        <Text text="Employee ID"/>
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="Request ID"/>
+                    </Column>
+                    <Column>
+                        <Text text="Action"/>
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="Performed By"/>
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true">
+                        <Text text="Old Status"/>
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true">
+                        <Text text="New Status"/>
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true">
+                        <Text text="Comments"/>
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem type="Navigation" press=".onItemPress">
+                        <cells>
+                            <Text text="{path: 'ActionAt', type: 'sap.ui.model.type.DateTime', formatOptions: {pattern: 'yyyy-MM-dd HH:mm:ss'}}" />
+                            <Text text="{EmployeeId}" />
+                            <Text text="{RequestId}" />
+                            <ObjectStatus
+                                text="{Action}"
+                                state="{parts: [{path: 'Action'}, {path: 'ActionCriticality'}], formatter: '.formatActionState'}" />
+                            <Text text="{ActionBy}" />
+                            <ObjectStatus text="{OldStatus}" state="{path: 'OldStatus', formatter: '.formatStatusState'}"/>
+                            <ObjectStatus text="{NewStatus}" state="{path: 'NewStatus', formatter: '.formatStatusState'}"/>
+                            <Text text="{Comments}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </f:content>
+    </f:DynamicPage>
+</mvc:View>

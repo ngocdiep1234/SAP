@@ -23,7 +23,7 @@
                 </SegmentedButton>
                 <SegmentedButton id="pendingRequestsSubFilterButton" select=".onPendingSubFilterTabChange" selectedKey="{ui>/selectedPendingSubTab}" visible="{= ${ui>/selectedRequestTab} === 'pending' }" class="sapUiSmallMarginBottom">
                     <items>
-                        <SegmentedButtonItem key="normal" text="Normal" />
+                        <SegmentedButtonItem key="normal" text="Normal Request" />
                         <SegmentedButtonItem key="warning" text="Warnings" />
                     </items>
                 </SegmentedButton>

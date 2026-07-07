@@ -37,9 +37,11 @@ export default class AdminLeaveRequests extends Controller {
         const oUiModel = this.getView().getModel("ui") as any;
         if (oUiModel) {
             oUiModel.setProperty("/selectedSection", "requests");
+            oUiModel.setProperty("/selectedAdminRequestTab", "pending");
+            oUiModel.setProperty("/selectedAdminPendingSubTab", "normal");
         }
         const oSegmentedButton =
-            this.getView().byId("filterStatusButton");
+            this.getView().byId("filterStatusButton") as InstanceType<typeof SegmentedButton> | undefined;
         if (oSegmentedButton) {
             oSegmentedButton.setSelectedKey("pending");
         }
@@ -64,7 +66,6 @@ export default class AdminLeaveRequests extends Controller {
         const aSelectedItems = oTable.getSelectedItems() || [];
         const oBtnApprove = this.getView().byId("btnApproveSelected") as InstanceType<typeof Button> | undefined;
         const oBtnReject = this.getView().byId("btnRejectSelected") as InstanceType<typeof Button> | undefined;
-        const oBtnDelete = this.getView().byId("btnDeleteSelected") as InstanceType<typeof Button> | undefined;
 
         const oUiModel = this.getView().getModel("ui") as any;
         const oCurrentUser = oUiModel?.getProperty("/currentUser");
@@ -83,9 +84,6 @@ export default class AdminLeaveRequests extends Controller {
 
         if (oBtnApprove) { oBtnApprove.setEnabled(bEnabled); }
         if (oBtnReject) { oBtnReject.setEnabled(bEnabled); }
-        if (oBtnDelete) {
-            oBtnDelete.setEnabled(aSelectedItems.length > 0);
-        }
     }
 
     private _loadEmployees(): void {
@@ -141,9 +139,17 @@ export default class AdminLeaveRequests extends Controller {
     public onFilterTabChange(oEvent: InstanceType<typeof Event>): void {
         const oSegmentedButton = oEvent.getSource() as InstanceType<typeof SegmentedButton>;
         const key = oSegmentedButton.getSelectedKey();
+        const oUiModel = this.getView().getModel("ui") as any;
+        if (oUiModel) {
+            oUiModel.setProperty("/selectedAdminRequestTab", key);
+        }
         const oTable = this.getView().byId("tableRequests") as InstanceType<typeof Table> | undefined;
         if (oTable) {
-            oTable.setMode("MultiSelect");
+            if (key === "all") {
+                oTable.setMode("None");
+            } else {
+                oTable.setMode("MultiSelect");
+            }
         }
         switch (key) {
             case "pending":
@@ -157,6 +163,16 @@ export default class AdminLeaveRequests extends Controller {
             default:
                 break;
         }
+    }
+
+    public onPendingSubFilterTabChange(oEvent: InstanceType<typeof Event>): void {
+        const oSegmentedButton = oEvent.getSource() as InstanceType<typeof SegmentedButton>;
+        const key = oSegmentedButton.getSelectedKey();
+        const oUiModel = this.getView().getModel("ui") as any;
+        if (oUiModel) {
+            oUiModel.setProperty("/selectedAdminPendingSubTab", key);
+        }
+        void this._applyFilters("pending");
     }
 
     private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string }> {
@@ -284,6 +300,19 @@ export default class AdminLeaveRequests extends Controller {
             if (sCurrentEmployeeId) {
                 aFilters.push(new Filter("EmployeeId", FilterOperator.NE, sCurrentEmployeeId));
             }
+
+            const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
+            const sSubTab = oUiModel?.getProperty("/selectedAdminPendingSubTab") as string || "normal";
+            const fnTestAbnormal = (oValue: any, oContext: any) => {
+                const oData = oContext ? oContext.getObject() : oValue;
+                if (!oData) return false;
+                const bAbnormal = this._checkAbnormality(oData.StartDate, oData.CreatedAt, oData.TotalDays).isAbnormal;
+                return sSubTab === "warning" ? bAbnormal : !bAbnormal;
+            };
+            aFilters.push(new Filter({
+                path: "",
+                test: fnTestAbnormal
+            } as any));
         }
         // 2. Search-based Filters
         if (sQuery) {
@@ -314,7 +343,6 @@ export default class AdminLeaveRequests extends Controller {
     private updateToolbarVisibility(sKey: string): void {
         const oBtnApprove = this.getView().byId("btnApproveSelected") as InstanceType<typeof Button> | undefined;
         const oBtnReject = this.getView().byId("btnRejectSelected") as InstanceType<typeof Button> | undefined;
-        const oBtnDelete = this.getView().byId("btnDeleteSelected") as InstanceType<typeof Button> | undefined;
 
         const oUiModel = (this as any).getOwnerComponent().getModel("ui") as any;
         const oCurrentUser = oUiModel?.getProperty("/currentUser");
@@ -328,9 +356,6 @@ export default class AdminLeaveRequests extends Controller {
         }
         if (oBtnReject) {
             oBtnReject.setVisible(bShowApproveReject);
-        }
-        if (oBtnDelete) {
-            oBtnDelete.setVisible(true);
         }
     }
 
@@ -682,7 +707,11 @@ export default class AdminLeaveRequests extends Controller {
         };
     }
 
-    public formatRowHighlight(oStartDate: any, oCreatedAt: any, vTotalDays: any): string {
+    public formatRowHighlight(oStartDate: any, oCreatedAt: any, vTotalDays: any, sSelectedTab?: string): string {
+        const sTab = sSelectedTab || "pending";
+        if (sTab !== "pending") {
+            return "None";
+        }
         const oResult = this._checkAbnormality(oStartDate, oCreatedAt, vTotalDays);
         return oResult.isAbnormal ? "Error" : "None";
     }
@@ -692,7 +721,11 @@ export default class AdminLeaveRequests extends Controller {
         return oResult.reasons.join(", ");
     }
 
-    public formatAbnormalVisible(oStartDate: any, oCreatedAt: any, vTotalDays: any): boolean {
+    public formatAbnormalVisible(oStartDate: any, oCreatedAt: any, vTotalDays: any, sSelectedTab?: string): boolean {
+        const sTab = sSelectedTab || "pending";
+        if (sTab !== "pending") {
+            return false;
+        }
         const oResult = this._checkAbnormality(oStartDate, oCreatedAt, vTotalDays);
         return oResult.isAbnormal;
     }

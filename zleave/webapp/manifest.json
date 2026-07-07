@@ -201,6 +201,22 @@
             "adminShell",
             "AdminLeaveTypes"
           ]
+        },
+        {
+          "name": "AdminAuditLog",
+          "pattern": "admin/audit-log",
+          "target": [
+            "adminShell",
+            "AdminAuditLog"
+          ]
+        },
+        {
+          "name": "AdminAuditLogDetail",
+          "pattern": "admin/audit-log/{logId}",
+          "target": [
+            "adminShell",
+            "AdminAuditLogDetail"
+          ]
         }
       ],
       "targets": {
@@ -281,6 +297,24 @@
         "AdminLeaveTypes": {
           "viewName": "admin.AdminLeaveTypes",
           "viewId": "AdminLeaveTypes",
+          "viewType": "XML",
+          "transition": "slide",
+          "parent": "adminShell",
+          "controlId": "adminNavContainer",
+          "controlAggregation": "pages"
+        },
+        "AdminAuditLog": {
+          "viewName": "admin.AdminAuditLog",
+          "viewId": "AdminAuditLog",
+          "viewType": "XML",
+          "transition": "slide",
+          "parent": "adminShell",
+          "controlId": "adminNavContainer",
+          "controlAggregation": "pages"
+        },
+        "AdminAuditLogDetail": {
+          "viewName": "admin.AdminAuditLogDetail",
+          "viewId": "AdminAuditLogDetail",
           "viewType": "XML",
           "transition": "slide",
           "parent": "adminShell",

@@ -90,13 +90,15 @@ export default class AdminEmployees extends Controller {
             PositionTitle: oData.PositionTitle,
             ManagerUser: oData.ManagerUser,
             IsActive: !!oData.IsActive,
-            IsManager: !!oData.IsManager
+            IsManager: !!oData.IsManager,
+            IsHr: !!oData.IsHr,
+            IsAdmin: !!oData.IsAdmin
         });
 
         this._openDialog();
     }
 
-    public onDeleteEmployee(oEvent: any): void {
+    public onActivateEmployee(oEvent: any): void {
         const oButton = oEvent.getSource();
         const oBindingContext = oButton.getBindingContext();
         if (!oBindingContext) {
@@ -108,7 +110,7 @@ export default class AdminEmployees extends Controller {
         const sFullName = oData.FullName;
 
         MessageBox.confirm(
-            `Are you sure you want to delete employee "${sFullName}" (ID: ${sEmployeeId})?`,
+            `Are you sure you want to activate employee "${sFullName}" (ID: ${sEmployeeId})?`,
             {
                 actions: [MessageBox.Action.YES, MessageBox.Action.NO],
                 emphasizedAction: MessageBox.Action.YES,
@@ -117,14 +119,61 @@ export default class AdminEmployees extends Controller {
                         const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
                         this.getView().setBusy(true);
 
-                        oModel.remove(`/EmployeeAdmin(EmployeeId='${sEmployeeId}')`, {
+                        oModel.callFunction("/activate", {
+                            method: "POST",
+                            urlParameters: {
+                                EmployeeId: sEmployeeId
+                            },
                             success: () => {
                                 this.getView().setBusy(false);
-                                MessageToast.show("Employee deleted successfully.");
+                                MessageToast.show("Employee activated successfully.");
+                                oModel.refresh(true);
                             },
                             error: (oErr: any) => {
                                 this.getView().setBusy(false);
-                                MessageBox.error("Failed to delete employee. Please try again.");
+                                MessageBox.error("Failed to activate employee. Please try again.");
+                            }
+                        });
+                    }
+                }
+            }
+        );
+    }
+
+    public onDeactivateEmployee(oEvent: any): void {
+        const oButton = oEvent.getSource();
+        const oBindingContext = oButton.getBindingContext();
+        if (!oBindingContext) {
+            return;
+        }
+
+        const oData = oBindingContext.getObject();
+        const sEmployeeId = oData.EmployeeId;
+        const sFullName = oData.FullName;
+
+        MessageBox.confirm(
+            `Are you sure you want to deactivate employee "${sFullName}" (ID: ${sEmployeeId})?`,
+            {
+                actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+                emphasizedAction: MessageBox.Action.YES,
+                onClose: (sAction: string) => {
+                    if (sAction === MessageBox.Action.YES) {
+                        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
+                        this.getView().setBusy(true);
+
+                        oModel.callFunction("/deactivate", {
+                            method: "POST",
+                            urlParameters: {
+                                EmployeeId: sEmployeeId
+                            },
+                            success: () => {
+                                this.getView().setBusy(false);
+                                MessageToast.show("Employee deactivated successfully.");
+                                oModel.refresh(true);
+                            },
+                            error: (oErr: any) => {
+                                this.getView().setBusy(false);
+                                MessageBox.error("Failed to deactivate employee. Please try again.");
                             }
                         });
                     }
@@ -149,9 +198,8 @@ export default class AdminEmployees extends Controller {
 
         // Read boolean controls directly from the UI to capture latest state
         const oCbIsManager = this.getView().byId("checkIsManager") as any;
-        const oSwActive = this.getView().byId("switchActive") as any;
         const bIsManager = oCbIsManager ? oCbIsManager.getSelected() : !!oData.IsManager;
-        const bIsActive = oSwActive ? oSwActive.getState() : !!oData.IsActive;
+        const bIsActive = !!oData.IsActive;
 
         const oPayload = {
             SapUser: oData.SapUser.trim(),
@@ -161,7 +209,9 @@ export default class AdminEmployees extends Controller {
             PositionTitle: oData.PositionTitle ? oData.PositionTitle.trim() : "",
             ManagerUser: oData.ManagerUser ? oData.ManagerUser.trim() : "",
             IsActive: bIsActive,
-            IsManager: bIsManager
+            IsManager: bIsManager,
+            IsHr: oData.isCreate ? false : !!oData.IsHr,
+            IsAdmin: oData.isCreate ? false : !!oData.IsAdmin
         };
 
         const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;

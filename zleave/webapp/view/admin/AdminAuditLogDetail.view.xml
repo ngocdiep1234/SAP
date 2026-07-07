@@ -1,0 +1,108 @@
+<mvc:View
+    controllerName="zleave.zleave.controller.admin.AdminAuditLogDetail"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:uxap="sap.uxap"
+    xmlns:layout="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    height="100%">
+    <uxap:ObjectPageLayout id="objectPageLayout" showTitleInHeaderContent="false" showHeaderContent="true" alwaysShowContentHeader="false" preserveHeaderStateOnScroll="false" headerContentPinnable="true" isChildPage="true">
+        <uxap:headerTitle>
+            <uxap:ObjectPageHeader
+                objectImageURI="sap-icon://survey"
+                objectImageShape="Circle"
+                objectTitle="Audit Log Detail"
+                objectSubtitle="{path: 'ActionAt', type: 'sap.ui.model.type.DateTime', formatOptions: {pattern: 'yyyy-MM-dd HH:mm:ss'}}"
+                isObjectTitleAlwaysVisible="true"
+                isObjectSubtitleAlwaysVisible="true">
+                <uxap:actions>
+                    <uxap:ObjectPageHeaderActionButton icon="sap-icon://nav-back" text="Back" press=".onNavBack" type="Transparent"/>
+                </uxap:actions>
+            </uxap:ObjectPageHeader>
+        </uxap:headerTitle>
+
+        <uxap:headerContent>
+            <layout:HorizontalLayout allowWrapping="true">
+                <ObjectAttribute title="Log ID" text="{LogId}"/>
+            </layout:HorizontalLayout>
+        </uxap:headerContent>
+
+        <uxap:sections>
+            <!-- General Information Section -->
+            <uxap:ObjectPageSection title="General Information">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection title="">
+                        <uxap:blocks>
+                            <layout:Grid defaultSpan="XL3 L4 M6 S12" hSpacing="1" vSpacing="1">
+                                <VBox>
+                                    <Label text="Employee ID" design="Bold"/>
+                                    <Text text="{EmployeeId}"/>
+                                </VBox>
+                                <VBox>
+                                    <Label text="Request ID" design="Bold"/>
+                                    <Text text="{RequestId}"/>
+                                </VBox>
+                                <VBox>
+                                    <Label text="Action" design="Bold"/>
+                                    <ObjectStatus
+                                        text="{Action}"
+                                        state="{parts: [{path: 'Action'}, {path: 'ActionCriticality'}], formatter: '.formatActionState'}" />
+                                </VBox>
+                                <VBox>
+                                    <Label text="Performed By" design="Bold"/>
+                                    <Text text="{ActionBy}"/>
+                                </VBox>
+                                <VBox>
+                                    <Label text="Action Time" design="Bold"/>
+                                    <Text text="{path: 'ActionAt', type: 'sap.ui.model.type.DateTime', formatOptions: {pattern: 'yyyy-MM-dd HH:mm:ss'}}"/>
+                                </VBox>
+                                <VBox>
+                                    <Label text="Comments" design="Bold"/>
+                                    <Text text="{Comments}"/>
+                                </VBox>
+                            </layout:Grid>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Status Change Section -->
+            <uxap:ObjectPageSection title="Status Change">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection title="">
+                        <uxap:blocks>
+                            <HBox alignItems="Center" class="sapUiMediumMargin">
+                                <VBox class="sapUiMediumMarginEnd">
+                                    <Label text="Old Status" design="Bold"/>
+                                    <ObjectStatus text="{OldStatus}" state="{path: 'OldStatus', formatter: '.formatStatusState'}"/>
+                                </VBox>
+                                <core:Icon src="sap-icon://arrow-right" size="1.5rem" class="sapUiMediumMarginEnd"/>
+                                <VBox>
+                                    <Label text="New Status" design="Bold"/>
+                                    <ObjectStatus text="{NewStatus}" state="{path: 'NewStatus', formatter: '.formatStatusState'}"/>
+                                </VBox>
+                            </HBox>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+
+            <!-- Timeline Section -->
+            <uxap:ObjectPageSection title="Timeline">
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection title="">
+                        <uxap:blocks>
+                            <List id="timelineList" noDataText="No timeline entries." items="{timeline>/results}">
+                                <FeedListItem
+                                    sender="{timeline>ActionBy}"
+                                    text="{= ${timeline>Action} + (${timeline>Comments} ? ': ' + ${timeline>Comments} : '') }"
+                                    timestamp="{path: 'timeline>ActionAt', type: 'sap.ui.model.type.DateTime', formatOptions: {pattern: 'yyyy-MM-dd HH:mm:ss'}}"
+                                    info="{= 'Status: ' + ${timeline>OldStatus} + ' → ' + ${timeline>NewStatus} }" />
+                            </List>
+                        </uxap:blocks>
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+        </uxap:sections>
+    </uxap:ObjectPageLayout>
+</mvc:View>
