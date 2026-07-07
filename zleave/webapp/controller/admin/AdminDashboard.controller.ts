@@ -18,6 +18,9 @@ export default class AdminDashboard extends Controller {
         const oRouter = (this as any).getOwnerComponent().getRouter();
         oRouter.getRoute("AdminDashboard").attachPatternMatched(this._onPatternMatched, this);
         oRouter.getRoute("AdminShell").attachPatternMatched(this._onPatternMatched, this);
+
+        // Load data immediately for the initial route entry
+        this._loadRecentActivities();
     }
 
     private _onPatternMatched(): void {
@@ -28,6 +31,10 @@ export default class AdminDashboard extends Controller {
     private _loadRecentActivities(): void {
         const oModel = (this as any).getOwnerComponent().getModel() as InstanceType<typeof ODataModel> | undefined;
         if (!oModel) {
+            // Context/model might not be loaded yet during first onInit lifecycle step
+            this.getView().attachEventOnce("modelContextChange", () => {
+                this._loadRecentActivities();
+            });
             return;
         }
 
