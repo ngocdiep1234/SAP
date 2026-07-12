@@ -72,11 +72,29 @@ export default class RequestDetail extends Controller {
                     dataRequested: (): void => {
                         oUiModel.setProperty("/busy", true);
                     },
-                    dataReceived: (): void => {
+                    dataReceived: (oEvent: any): void => {
                         oUiModel.setProperty("/busy", false);
+                        const oData = oEvent.getParameter("data");
+                        if (!oData) {
+                            MessageBox.error("Request details not found or could not be loaded.", {
+                                onClose: () => {
+                                    const oRouter = (this.getOwnerComponent() as any).getRouter();
+                                    oRouter.navTo("requests", {}, true);
+                                }
+                            });
+                        }
                         void this._updateApproveRejectVisibility();
                     },
                     change: (): void => {
+                        const oContext = this.getView().getBindingContext();
+                        if (!oContext && !oUiModel.getProperty("/busy")) {
+                            MessageBox.error("Request details not found.", {
+                                onClose: () => {
+                                    const oRouter = (this.getOwnerComponent() as any).getRouter();
+                                    oRouter.navTo("requests", {}, true);
+                                }
+                            });
+                        }
                         void this._updateApproveRejectVisibility();
                     }
                 }
@@ -104,11 +122,15 @@ export default class RequestDetail extends Controller {
             oModel.read("/LeaveType", {
                 success: (oData: any): void => {
                     const aTypes = (oData.results || []) as LeaveTypeEntry[];
+                    if (aTypes.length === 0) {
+                        MessageBox.warning("No leave types found on backend.");
+                    }
                     this._getUiModel().setProperty("/leaveTypes", aTypes);
                     resolve();
                 },
                 error: (oErr: any): void => {
                     console.error("[RequestDetail] Failed to load leave types:", oErr);
+                    MessageBox.error("Failed to load leave types from backend.");
                     resolve();
                 }
             });

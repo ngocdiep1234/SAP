@@ -49,6 +49,7 @@ interface CreateFormModel {
     managers: ManagerEntry[];
     /** true = user found in Employee master; false/undefined = blocked */
     employeeRegistered: boolean;
+    quotas: any[];
 }
 
 // ---------------------------------------------------------------------------
@@ -106,7 +107,8 @@ export default class CreateRequest extends Controller {
             busy: false,
             leaveTypes: [],
             managers: [],
-            employeeRegistered: false   // <-- blocked by default until check passes
+            employeeRegistered: false,
+            quotas: []
         } satisfies CreateFormModel);
 
         this.getView().setModel(oFormModel, "createForm");
@@ -203,6 +205,7 @@ export default class CreateRequest extends Controller {
                     this._updateSummaryApprover();
                     this._updateEmployeeManagerName();
                     oFormModel.setProperty("/employeeRegistered", true);
+                    void this._loadEmployeeQuotas(oEmp.EmployeeID);
 
                     console.info(
                         `[CreateRequest] Employee found – ID: ${oEmp.EmployeeID}, Name: ${oEmp.EmployeeName}`
@@ -292,6 +295,9 @@ export default class CreateRequest extends Controller {
         const oFormModel = this._getFormModel();
         try {
             const aTypes = await oService.readLeaveTypes();
+            if (aTypes.length === 0) {
+                MessageBox.warning("No leave types found on backend.");
+            }
             oFormModel.setProperty("/leaveTypes", aTypes);
         } catch (sErr) {
             MessageBox.error(
@@ -311,12 +317,47 @@ export default class CreateRequest extends Controller {
         const oFormModel = this._getFormModel();
         try {
             const aManagers = await oService.readManagers();
+            if (aManagers.length === 0) {
+                MessageBox.warning("No managers found on backend.");
+            }
             oFormModel.setProperty("/managers", aManagers);
             this._updateSummaryApprover();
             this._updateEmployeeManagerName();
         } catch (sErr) {
             console.error("Failed to load managers:", sErr);
+            MessageBox.error("Failed to load managers from backend.");
         }
+    }
+
+    private _loadEmployeeQuotas(sEmployeeId: string): Promise<void> {
+        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+        const oFormModel = this._getFormModel();
+        if (!oModel) {
+            return Promise.resolve();
+        }
+
+        return new Promise<void>((resolve) => {
+            oModel.read("/LeaveQuota", {
+                filters: [
+                    new Filter("EmployeeId", FilterOperator.EQ, sEmployeeId)
+                ],
+                success: (oData: any): void => {
+                    const aQuotas = oData.results || [];
+                    if (aQuotas.length === 0) {
+                        MessageBox.warning("No leave balance data available for this employee.");
+                    }
+                    oFormModel.setProperty("/quotas", aQuotas);
+                    // Trigger balance update in case dates/leave type were already selected
+                    this.onDatesChange();
+                    resolve();
+                },
+                error: (oErr: any): void => {
+                    console.error("[CreateRequest] Failed to load leave quotas:", oErr);
+                    MessageBox.error("Failed to load leave quota from backend.");
+                    resolve();
+                }
+            });
+        });
     }
 
     private _updateSummaryApprover(): void {
@@ -431,11 +472,19 @@ export default class CreateRequest extends Controller {
         oFormModel.setProperty("/summary/Duration", nDays + " Day" + (nDays !== 1 ? "s" : ""));
 
         const sLeaveType = oFormModel.getProperty("/leaveRequest/LeaveType") as string;
-        let nRemaining = 15;
-        if (sLeaveType === "AL" || sLeaveType === "Annual") {
-            nRemaining = Math.max(0, 15 - nDays);
+        let sBalanceText = "";
+        if (sLeaveType) {
+            const aQuotas = oFormModel.getProperty("/quotas") as any[] || [];
+            const oQuota = aQuotas.find(q => q.LeaveTypeId === sLeaveType);
+            if (oQuota) {
+                const nRemaining = Number(oQuota.RemainingDays ?? 0);
+                const nFinal = Math.max(0, nRemaining - nDays);
+                sBalanceText = nFinal + " Day" + (nFinal !== 1 ? "s" : "");
+            } else {
+                sBalanceText = "N/A";
+            }
         }
-        oFormModel.setProperty("/summary/RemainingBalance", nRemaining + " Days");
+        oFormModel.setProperty("/summary/RemainingBalance", sBalanceText);
     }
 
     // -----------------------------------------------------------------------
@@ -674,13 +723,13 @@ export default class CreateRequest extends Controller {
             HalfDay: false,
             Reason: "",
             ApproverId: oFormModel.getProperty("/employee/ManagerID") || "",
-            StartSession: "Full",
-            EndSession: "Full"
+            StartSession: "",
+            EndSession: ""
         });
         oFormModel.setProperty("/summary", {
             LeaveType: "-",
-            Duration: "0 Days",
-            RemainingBalance: "12 Days",
+            Duration: "",
+            RemainingBalance: "",
             Approver: oFormModel.getProperty("/employee/ManagerID") || "",
             Status: ""
         });
@@ -692,6 +741,7 @@ export default class CreateRequest extends Controller {
             ManagerID: "",
             ManagerName: ""
         });
+        oFormModel.setProperty("/quotas", []);
         this._updateSummaryApprover();
         this._updateEmployeeManagerName();
     }

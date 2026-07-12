@@ -47,7 +47,6 @@ export default class Dashboard extends Controller {
         // Load data immediately in case route was already matched
         // before this controller initialised (first page load).
         this.loadLeaveQuota();
-        this._loadDashboardData();
         // NOTE: _loadCurrentUser is called in _onPatternMatched only,
         // to avoid redirecting to admin before the view is stable.
     }
@@ -69,16 +68,18 @@ export default class Dashboard extends Controller {
         oModel.read("/LeaveQuota", {
             success: (oData: LeaveQuotaResult): void => {
                 this.getView().setBusy(false);
-                if (oData && oData.results) {
+                if (oData && oData.results && oData.results.length > 0) {
                     oQuotaModel?.setData(oData);
                 } else {
                     oQuotaModel?.setData({ results: [] });
+                    MessageBox.warning("No leave balance data available on the backend.");
                 }
             },
             error: (oErr: unknown): void => {
                 this.getView().setBusy(false);
                 console.error("[Dashboard] Failed to load leave quota:", oErr);
                 oQuotaModel?.setData({ results: [] });
+                MessageBox.error("Failed to load leave quota from backend.");
             }
         });
     }
@@ -88,95 +89,8 @@ export default class Dashboard extends Controller {
         if (oUiModel) {
             oUiModel.setProperty("/selectedSection", "dashboard");
         }
-        this._loadDashboardData();
         void this._loadCurrentUser();
         this.loadLeaveQuota();
-    }
-
-    private _loadDashboardData(): void {
-        const oModel = (this as any).getOwnerComponent().getModel();
-        // Retrieve "ui" model from the Component (set by App.controller.ts).
-        // This is reliable even before the Dashboard view is inserted into
-        // the App NavContainer (i.e. during onInit on first page load).
-        const oUiModel = (this as any).getOwnerComponent().getModel("ui") as any;
-
-        if (!oModel || !oUiModel) {
-            return;
-        }
-
-        this.getView().setBusy(true);
-
-        oModel.read("/LeaveRequest", {
-            success: (oData: any): void => {
-                this.getView().setBusy(false);
-                const aResults: LeaveRequest[] = oData.results ?? [];
-
-                // 1. Calculate stats
-                const oStats = aResults.reduce<DashboardStats>(
-                    (acc, item) => {
-                        const sStatus = String(item.Status ?? "").toLowerCase();
-                        acc.totalRequests += 1;
-                        acc.totalDays += Number(item.TotalDays ?? 0);
-
-                        if (sStatus === "approved") {
-                            acc.approvedRequests += 1;
-                        } else if (sStatus === "rejected") {
-                            acc.rejectedRequests += 1;
-                        } else if (sStatus === "pending") {
-                            acc.pendingRequests += 1;
-                        }
-                        return acc;
-                    },
-                    {
-                        totalRequests: 0,
-                        pendingRequests: 0,
-                        approvedRequests: 0,
-                        rejectedRequests: 0,
-                        totalDays: 0
-                    }
-                );
-                oUiModel.setProperty("/stats", oStats);
-
-                // 2. Calculate balances
-                let nAnnualUsed = 0;
-                let nSickUsed = 0;
-                let nUnpaidUsed = 0;
-
-                aResults.forEach((oReq) => {
-                    if (oReq.Status === "Approved") {
-                        const nDays = Number(oReq.TotalDays ?? 0);
-                        const sType = String(oReq.LeaveType).toLowerCase();
-                        if (sType.includes("annual")) {
-                            nAnnualUsed += nDays;
-                        } else if (sType.includes("sick")) {
-                            nSickUsed += nDays;
-                        } else if (sType.includes("unpaid")) {
-                            nUnpaidUsed += nDays;
-                        }
-                    }
-                });
-
-                const nAnnualRemaining = Math.max(0, 12 - nAnnualUsed);
-                const nSickRemaining = Math.max(0, 8 - nSickUsed);
-
-                oUiModel.setProperty("/dashboard", {
-                    annualLeaveRemaining: nAnnualRemaining,
-                    sickLeaveRemaining: nSickRemaining,
-                    unpaidLeaveUsed: nUnpaidUsed,
-                    myRequests: aResults.slice(0, 6), // Show top 6 recent requests
-                    upcomingLeaves: aResults.filter(r => r.Status === "Approved").slice(0, 4), // Top 4 approved
-                    notifications: [
-                        { icon: "sap-icon://accept", state: "Success", message: "Annual Leave request R0001 approved", time: "2 hours ago" },
-                        { icon: "sap-icon://decline", state: "Error", message: "Sick Leave request R0002 rejected", time: "5 hours ago" },
-                        { icon: "sap-icon://sys-enter-2", state: "Information", message: "System leave balance initialized", time: "Yesterday" }
-                    ]
-                });
-            },
-            error: (): void => {
-                this.getView().setBusy(false);
-                MessageToast.show("Failed to load dashboard data");
-            }
-        });
     }
 
     public onNavToCreate(): void {
@@ -254,7 +168,7 @@ export default class Dashboard extends Controller {
             success: (): void => {
                 this.getView().setBusy(false);
                 MessageToast.show(`Request ${oRequest.RequestId} cancelled successfully`);
-                this._loadDashboardData();
+                this.loadLeaveQuota();
             },
             error: (): void => {
                 this.getView().setBusy(false);
@@ -303,7 +217,7 @@ export default class Dashboard extends Controller {
             success: (): void => {
                 this.getView().setBusy(false);
                 MessageToast.show(`Request ${oRequest.RequestId} deleted successfully`);
-                this._loadDashboardData();
+                this.loadLeaveQuota();
             },
             error: (): void => {
                 this.getView().setBusy(false);

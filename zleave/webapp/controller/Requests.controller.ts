@@ -107,14 +107,18 @@ export default class Requests extends Controller {
         oModel.read("/Employee", {
             success: (oData: any): void => {
                 const aEmployees = oData.results || [];
+                if (aEmployees.length === 0) {
+                    MessageBox.warning("No employee data found on backend.");
+                }
                 const oMap: Record<string, string> = {};
                 aEmployees.forEach((emp: any) => {
                     oMap[emp.EmployeeId] = emp.FullName || emp.SapUserName;
                 });
                 oUiModel.setProperty("/employeesMap", oMap);
             },
-            error: (): void => {
-                // Ignore or log
+            error: (oErr: any): void => {
+                console.error("[Requests] Failed to load employees:", oErr);
+                MessageBox.error("Failed to load employee data from backend.");
             }
         });
     }
