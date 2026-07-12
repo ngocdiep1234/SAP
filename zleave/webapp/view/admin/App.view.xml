@@ -38,8 +38,7 @@
                     <tnt:NavigationListItem
                         text="{nav>text}"
                         icon="{nav>icon}"
-                        key="{nav>id}"
-                        visible="{= ${nav>id} !== 'audit' || ${ui>/currentUser/is_hr} !== 'X' }"/>
+                        key="{nav>id}"/>
                 </tnt:NavigationList>
             </tnt:SideNavigation>
         </tnt:sideContent>

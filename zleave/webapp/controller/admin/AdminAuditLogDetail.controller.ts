@@ -34,7 +34,8 @@ export default class AdminAuditLogDetail extends Controller {
             // Role verification
             const oCurrentUser = await this._getCurrentUser();
             const bIsAdmin = oCurrentUser && (oCurrentUser.is_admin === "X" || oCurrentUser.is_admin === "true" || oCurrentUser.is_admin === "1");
-            if (!bIsAdmin) {
+            const bIsHr = oCurrentUser && (oCurrentUser.is_hr === "X" || oCurrentUser.is_hr === "true" || oCurrentUser.is_hr === "1");
+            if (!bIsAdmin && !bIsHr) {
                 const oRouter = (this as any).getOwnerComponent().getRouter();
                 oRouter.navTo("Unauthorized");
                 return;

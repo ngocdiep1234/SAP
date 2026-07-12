@@ -70,13 +70,15 @@ export default class AdminLeaveRequests extends Controller {
         const oUiModel = this.getView().getModel("ui") as any;
         const oCurrentUser = oUiModel?.getProperty("/currentUser");
         const bIsAdmin = oCurrentUser && (oCurrentUser.is_admin === "X" || oCurrentUser.is_admin === "true" || oCurrentUser.is_admin === "1");
+        const bIsHr = oCurrentUser && (oCurrentUser.is_hr === "X" || oCurrentUser.is_hr === "true" || oCurrentUser.is_hr === "1");
+        const bIsAdminOrHr = bIsAdmin || bIsHr;
 
         const sExpectedStatus = this._sPendingStatusFilter.toUpperCase();
         const bEnabled = aSelectedItems.length > 0 && aSelectedItems.some((oItem: InstanceType<typeof ListItemBase>) => {
             const oContext = oItem.getBindingContext();
             if (!oContext) { return false; }
             const sStatus = String(oContext.getProperty("Status") || "").toUpperCase();
-            if (bIsAdmin) {
+            if (bIsAdminOrHr) {
                 return sStatus === "SUBMITTED" || sStatus === "MGR_APPROVED";
             }
             return sStatus === sExpectedStatus;
@@ -278,8 +280,10 @@ export default class AdminLeaveRequests extends Controller {
         if (sSelectedKey === "pending") {
             const vIsAdmin = oCurrentUser.is_admin;
             const bIsAdmin = vIsAdmin === "X" || vIsAdmin === "true" || vIsAdmin === "1";
+            const vIsHr = oCurrentUser.is_hr;
+            const bIsHr = vIsHr === "X" || vIsHr === "true" || vIsHr === "1";
 
-            if (bIsAdmin) {
+            if (bIsAdmin || bIsHr) {
                 aFilters.push(new Filter({
                     filters: [
                         new Filter("Status", FilterOperator.EQ, "SUBMITTED"),
@@ -288,8 +292,6 @@ export default class AdminLeaveRequests extends Controller {
                     and: false
                 }));
             } else {
-                const vIsHr = oCurrentUser.is_hr;
-                const bIsHr = vIsHr === "X" || vIsHr === "true" || vIsHr === "1";
                 const sPendingStatus = bIsHr ? "MGR_APPROVED" : "SUBMITTED";
                 this._sPendingStatusFilter = sPendingStatus;
                 console.log("[DEBUG][Pending] Full currentUser:", JSON.stringify(oCurrentUser));

@@ -209,9 +209,9 @@ export default class App extends Controller {
 
         const oMockUser = {
             registered: true,
-            employeeId: "1001",
-            employeeName: "Nguyen Van A",
-            role: "Employee",
+            employeeId: "Loading...",
+            employeeName: "Loading...",
+            role: "Loading...",
             is_manager: "",
             is_hr: "",
             is_admin: ""

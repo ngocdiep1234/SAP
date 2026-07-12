@@ -8,6 +8,10 @@ import ODataModel from "sap/ui/model/odata/v2/ODataModel";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import Event from "sap/ui/base/Event";
+import Dialog from "sap/m/Dialog";
+import Button from "sap/m/Button";
+import TextArea from "sap/m/TextArea";
+import Label from "sap/m/Label";
 
 interface LeaveTypeEntry {
     LeaveType: string;
@@ -29,7 +33,9 @@ export default class RequestDetail extends Controller {
             uploadProgress: 0,
             uploading: false,
             uploadStatusText: "",
-            uploadButtonEnabled: false
+            uploadButtonEnabled: false,
+            canApprove: false,
+            canReject: false
         });
         this.getView().setModel(oUiModel, "detailUi");
 
@@ -48,11 +54,13 @@ export default class RequestDetail extends Controller {
         oUiModel.setProperty("/uploading", false);
         oUiModel.setProperty("/uploadStatusText", "");
         oUiModel.setProperty("/uploadButtonEnabled", false);
+        oUiModel.setProperty("/canApprove", false);
+        oUiModel.setProperty("/canReject", false);
         // NOTE: Do NOT set busy=true here. Let dataRequested/dataReceived control it.
 
         try {
             const oCurrentUser = await this._getCurrentUser();
-            const bIsHrAdmin = oCurrentUser.is_admin === "X";
+            const bIsHrAdmin = oCurrentUser.is_admin === "X" || oCurrentUser.is_hr === "X";
             oUiModel.setProperty("/isHrAdmin", bIsHrAdmin);
 
             const sEntitySet = bIsHrAdmin ? "/LeaveRequestAdmin" : "/LeaveRequest";
@@ -66,6 +74,10 @@ export default class RequestDetail extends Controller {
                     },
                     dataReceived: (): void => {
                         oUiModel.setProperty("/busy", false);
+                        void this._updateApproveRejectVisibility();
+                    },
+                    change: (): void => {
+                        void this._updateApproveRejectVisibility();
                     }
                 }
             });
@@ -396,6 +408,263 @@ export default class RequestDetail extends Controller {
                 MessageBox.error(sMsg);
             }
         });
+    }
+
+    public onApprove(): void {
+        void this._showCommentDialog("approve");
+    }
+
+    public onReject(): void {
+        void this._showCommentDialog("reject");
+    }
+
+    private async _showCommentDialog(sActionType: "approve" | "reject"): Promise<void> {
+        const oContext = this.getView().getBindingContext();
+        if (!oContext) {
+            return;
+        }
+
+        const oResourceBundle = (this.getOwnerComponent().getModel("i18n") as any).getResourceBundle();
+        const oCurrentUser = await this._getCurrentUser();
+        const vIsHr = oCurrentUser.is_hr;
+        const bIsHr = vIsHr === "X" || vIsHr === "true" || vIsHr === "1";
+
+        const sCommentLabel = bIsHr 
+            ? "Enter HR comment (optional):"
+            : "Enter Manager comment (optional):";
+
+        const sTitle = sActionType === "approve"
+            ? (oResourceBundle.getText("confirmApproveTitle") || "Confirm Approve")
+            : (oResourceBundle.getText("confirmRejectTitle") || "Confirm Reject");
+
+        const oTextArea = new TextArea({
+            width: "100%",
+            rows: 3,
+            placeholder: "Type your comment here...",
+            growing: true
+        });
+
+        const oDlg = new Dialog({
+            title: sTitle,
+            type: "Message",
+            content: [
+                new Label({ text: sCommentLabel, labelFor: oTextArea }),
+                oTextArea
+            ],
+            beginButton: new Button({
+                text: oResourceBundle.getText("yes") || "Yes",
+                press: () => {
+                    const sComment = oTextArea.getValue().trim();
+                    oDlg.close();
+                    void this._executeAction(sActionType, sComment);
+                }
+            }),
+            endButton: new Button({
+                text: oResourceBundle.getText("no") || "No",
+                press: () => {
+                    oDlg.close();
+                }
+            }),
+            afterClose: () => {
+                oDlg.destroy();
+            }
+        });
+
+        oDlg.open();
+    }
+
+    private async _executeAction(sActionType: "approve" | "reject", sComment: string): Promise<void> {
+        const oContext = this.getView().getBindingContext();
+        if (!oContext) {
+            return;
+        }
+
+        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+        if (!oModel) {
+            return;
+        }
+        const oUiModel = this._getUiModel();
+        oUiModel.setProperty("/busy", true);
+
+        const oCurrentUser = await this._getCurrentUser();
+        const vIsHr = oCurrentUser.is_hr;
+        const bIsHr = vIsHr === "X" || vIsHr === "true" || vIsHr === "1";
+
+        const sActionName = this._getActionName(sActionType, bIsHr);
+        const sUuid = oContext.getProperty("UUID") as string;
+        const sLeaveRequestPath = `/LeaveRequest(guid'${sUuid}')`;
+
+        try {
+            // Save comment to the backend first
+            const oPayload: Record<string, string> = {};
+            if (bIsHr) {
+                oPayload.HrComment = sComment;
+            } else {
+                oPayload.ApprovalComment = sComment;
+            }
+
+            await new Promise<void>((resolve, reject) => {
+                oModel.update(sLeaveRequestPath, oPayload, {
+                    success: () => resolve(),
+                    error: (oErr: any) => reject(oErr)
+                });
+            });
+
+            // Call function import to finalize status change
+            await this._callAction(sActionName, sUuid);
+            oUiModel.setProperty("/busy", false);
+            const oResourceBundle = (this.getOwnerComponent().getModel("i18n") as any).getResourceBundle();
+            const sSuccessMsg = sActionType === "approve"
+                ? oResourceBundle.getText("successApproveSingle") || "Request approved successfully"
+                : oResourceBundle.getText("successRejectSingle") || "Request rejected successfully";
+            MessageToast.show(sSuccessMsg);
+            oModel.refresh(true);
+        } catch (oErr: any) {
+            oUiModel.setProperty("/busy", false);
+            let sMsg = sActionType === "approve" ? "Approval failed." : "Rejection failed.";
+            try {
+                const oErrorData = oErr.error || oErr;
+                if (oErrorData && oErrorData.responseText) {
+                    const oParsed = JSON.parse(oErrorData.responseText);
+                    sMsg = oParsed.error?.message?.value || sMsg;
+                } else if (oErrorData && oErrorData.message) {
+                    sMsg = oErrorData.message;
+                }
+            } catch {
+                // ignore
+            }
+            MessageBox.error(sMsg);
+        }
+    }
+
+    private _getActionName(sActionType: "approve" | "reject", bIsHr: boolean): string {
+        const oModel: any = this.getView().getModel();
+        if (oModel && typeof oModel.getServiceMetadata === "function") {
+            const oMetadata = oModel.getServiceMetadata();
+            if (oMetadata && oMetadata.dataServices && oMetadata.dataServices.schema) {
+                const aSchemas = oMetadata.dataServices.schema;
+                for (const oSchema of aSchemas) {
+                    if (oSchema.entityContainer) {
+                        const aContainers = Array.isArray(oSchema.entityContainer) ? oSchema.entityContainer : [oSchema.entityContainer];
+                        for (const oContainer of aContainers) {
+                            if (oContainer.functionImport) {
+                                const aFuncs = Array.isArray(oContainer.functionImport) ? oContainer.functionImport : [oContainer.functionImport];
+                                const sTargetName = bIsHr
+                                    ? (sActionType === "approve" ? "hrApproveResult" : "hrRejectResult")
+                                    : (sActionType === "approve" ? "approveResult" : "rejectResult");
+                                const sAltName = bIsHr
+                                    ? (sActionType === "approve" ? "hrApproveLeave" : "hrRejectLeave")
+                                    : (sActionType === "approve" ? "approveLeave" : "rejectLeave");
+                                if (aFuncs.some((f: any) => f.name === sTargetName)) {
+                                    return sTargetName;
+                                }
+                                if (aFuncs.some((f: any) => f.name === sAltName)) {
+                                    return sAltName;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return bIsHr
+            ? (sActionType === "approve" ? "hrApproveResult" : "hrRejectResult")
+            : (sActionType === "approve" ? "approveLeave" : "rejectLeave");
+    }
+
+    private _callAction(sActionName: string, sUuid: string): Promise<{ success: boolean; uuid: string; error?: string }> {
+        const oModel: any = this.getView().getModel();
+        return new Promise((resolve, reject) => {
+            if (!oModel) {
+                reject(new Error("OData Model is not available"));
+                return;
+            }
+            oModel.callFunction("/" + sActionName, {
+                method: "POST",
+                urlParameters: {
+                    UUID: sUuid
+                },
+                success: () => {
+                    resolve({ success: true, uuid: sUuid });
+                },
+                error: (oError: any) => {
+                    let sMsg = "Unknown error";
+                    try {
+                        if (oError && oError.responseText) {
+                            const oParsed = JSON.parse(oError.responseText);
+                            sMsg = (oParsed.error && oParsed.error.message && oParsed.error.message.value) || sMsg;
+                        } else if (oError && oError.message) {
+                            sMsg = oError.message;
+                        }
+                    } catch {
+                        sMsg = (oError && oError.message) || sMsg;
+                    }
+                    const oErr = new Error(sMsg);
+                    if (oError && oError.responseText) {
+                        (oErr as any).responseText = oError.responseText;
+                    }
+                    reject(oErr);
+                }
+            });
+        });
+    }
+
+    private async _updateApproveRejectVisibility(): Promise<void> {
+        const oContext = this.getView().getBindingContext();
+        const oUiModel = this._getUiModel();
+        if (!oContext) {
+            oUiModel.setProperty("/canApprove", false);
+            oUiModel.setProperty("/canReject", false);
+            return;
+        }
+
+        try {
+            const oCurrentUser = await this._getCurrentUser();
+            const sCurrentEmployeeId = String(parseInt(oCurrentUser.employeeId, 10));
+            const sReqEmployeeId = String(parseInt(oContext.getProperty("EmployeeId") as string || "", 10));
+
+            // User cannot approve/reject their own request
+            if (sCurrentEmployeeId === sReqEmployeeId) {
+                oUiModel.setProperty("/canApprove", false);
+                oUiModel.setProperty("/canReject", false);
+                return;
+            }
+
+            const vIsHr = oCurrentUser.is_hr;
+            const bIsHr = vIsHr === "X" || vIsHr === "true" || vIsHr === "1";
+            const vIsManager = oCurrentUser.is_manager;
+            const bIsManager = vIsManager === "X" || vIsManager === "true" || vIsManager === "1";
+
+            if (!bIsHr && !bIsManager) {
+                oUiModel.setProperty("/canApprove", false);
+                oUiModel.setProperty("/canReject", false);
+                return;
+            }
+
+            const bApproveAc = bIsHr
+                ? (oContext.getProperty("hrApproveResult_ac") ?? oContext.getProperty("hrApproveLeave_ac"))
+                : (oContext.getProperty("approveLeave_ac") ?? oContext.getProperty("approveResult_ac"));
+            const bRejectAc = bIsHr
+                ? (oContext.getProperty("hrRejectResult_ac") ?? oContext.getProperty("hrRejectLeave_ac"))
+                : (oContext.getProperty("rejectLeave_ac") ?? oContext.getProperty("rejectResult_ac"));
+
+            const sStatus = String(oContext.getProperty("Status") || "").toUpperCase();
+            const sPendingStatus = bIsHr ? "MGR_APPROVED" : "SUBMITTED";
+            const bStatusEligible = sStatus === sPendingStatus
+                || sStatus === "SUBMITTED"
+                || sStatus === "PENDING"
+                || sStatus === "MGR_APPROVED";
+
+            const bCanApprove = bApproveAc !== undefined ? bApproveAc === true : bStatusEligible;
+            const bCanReject = bRejectAc !== undefined ? bRejectAc === true : bStatusEligible;
+
+            oUiModel.setProperty("/canApprove", bCanApprove);
+            oUiModel.setProperty("/canReject", bCanReject);
+        } catch {
+            // Failed to update visibility
+            oUiModel.setProperty("/canApprove", false);
+            oUiModel.setProperty("/canReject", false);
+        }
     }
 
     public onNavBack(): void {

@@ -191,11 +191,11 @@ export default class CreateRequest extends Controller {
                     // --------------------------------------------------------
                     const oODataEmp = oResult.results[0];
                     const oEmp: Employee = {
-                        EmployeeID:   String(oODataEmp["EmployeeId"]   ?? ""),
-                        EmployeeName: String(oODataEmp["FullName"]      ?? ""),
-                        DepartmentID: String(oODataEmp["Department"]    ?? ""),
-                        ManagerID:    String(oODataEmp["ManagerSapUser"] ?? ""),
-                        ManagerName:  ""
+                        EmployeeID: String(oODataEmp["EmployeeId"] ?? ""),
+                        EmployeeName: String(oODataEmp["FullName"] ?? ""),
+                        DepartmentID: String(oODataEmp["Department"] ?? ""),
+                        ManagerID: String(oODataEmp["ManagerSapUser"] ?? ""),
+                        ManagerName: ""
                     };
 
                     oFormModel.setProperty("/employee", oEmp);
@@ -459,9 +459,9 @@ export default class CreateRequest extends Controller {
         oFormModel.setProperty("/summary/Duration", nDays + " Day" + (nDays !== 1 ? "s" : ""));
 
         const sLeaveType = oFormModel.getProperty("/leaveRequest/LeaveType") as string;
-        let nRemaining = 12;
+        let nRemaining = 15;
         if (sLeaveType === "AL" || sLeaveType === "Annual") {
-            nRemaining = Math.max(0, 12 - nDays);
+            nRemaining = Math.max(0, 15 - nDays);
         }
         oFormModel.setProperty("/summary/RemainingBalance", nRemaining + " Days");
     }
@@ -554,13 +554,13 @@ export default class CreateRequest extends Controller {
         };
 
         const oPayload: LeaveRequestPayload = {
-            LeaveType:    oRequest.LeaveType,
-            StartDate:    new Date(oRequest.StartDate!),
-            EndDate:      new Date(oRequest.EndDate!),
-            Reason:       oRequest.Reason,
-            ApproverId:   oRequest.ApproverId || (oFormModel.getProperty("/employee/ManagerID") as string) || "",
+            LeaveType: oRequest.LeaveType,
+            StartDate: new Date(oRequest.StartDate!),
+            EndDate: new Date(oRequest.EndDate!),
+            Reason: oRequest.Reason,
+            ApproverId: oRequest.ApproverId || (oFormModel.getProperty("/employee/ManagerID") as string) || "",
             StartSession: mapSession(oRequest.StartSession),
-            EndSession:   mapSession(oRequest.EndSession)
+            EndSession: mapSession(oRequest.EndSession)
         };
 
         // Resolve file once before going async so we capture the latest state

@@ -884,10 +884,10 @@ export default class Requests extends Controller {
             .then((oCurrentUser) => {
                 console.log("[DEBUG] [AdminViewCheck] Current user:", oCurrentUser);
 
-                // Dùng LeaveRequestAdmin nếu is_admin = 'X' (abap_true), ngược lại dùng LeaveRequest
-                const bIsAdmin = oCurrentUser.is_admin === "X";
-                const sPath = bIsAdmin ? "/LeaveRequestAdmin" : "/LeaveRequest";
-                console.log("[DEBUG] [AdminViewCheck] is_admin:", oCurrentUser.is_admin, "-> Binding table to:", sPath);
+                // Dùng LeaveRequestAdmin nếu là Admin hoặc HR, ngược lại dùng LeaveRequest
+                const bIsAdminOrHr = oCurrentUser.is_admin === "X" || oCurrentUser.is_hr === "X";
+                const sPath = bIsAdminOrHr ? "/LeaveRequestAdmin" : "/LeaveRequest";
+                console.log("[DEBUG] [AdminViewCheck] is_admin:", oCurrentUser.is_admin, "| is_hr:", oCurrentUser.is_hr, "-> Binding table to:", sPath);
 
                 const oBindingInfo = oTable.getBindingInfo("items") as any;
                 if (oBindingInfo && oBindingInfo.path !== sPath) {

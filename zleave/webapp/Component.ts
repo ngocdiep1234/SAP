@@ -226,15 +226,21 @@ export default class Component extends BaseComponent {
             return;
         }
 
-        // Determine user role (defaults to Employee if not specified)
-        let sUserRole = "Employee";
+        // Determine user roles
+        const aUserRoles = ["Employee"];
         if (oCurrentUser) {
             if (oCurrentUser.is_admin === "X" || oCurrentUser.is_admin === "true" || oCurrentUser.is_admin === "1" || oCurrentUser.role === "Admin") {
-                sUserRole = "Admin";
+                aUserRoles.push("Admin");
+            }
+            if (oCurrentUser.is_hr === "X" || oCurrentUser.is_hr === "true" || oCurrentUser.is_hr === "1" || oCurrentUser.role === "HR") {
+                aUserRoles.push("HR");
+            }
+            if (oCurrentUser.is_manager === "X" || oCurrentUser.is_manager === "true" || oCurrentUser.is_manager === "1" || oCurrentUser.role === "Manager") {
+                aUserRoles.push("Manager");
             }
         }
 
-        const bHasAccess = aAllowedRoles.includes(sUserRole);
+        const bHasAccess = aAllowedRoles.some((sRole) => aUserRoles.includes(sRole));
 
         if (!bHasAccess) {
             const oRouter = this.getRouter();
@@ -348,24 +354,24 @@ export default class Component extends BaseComponent {
 // -----------------------------------------------------------------------------
 const ROUTE_PERMISSIONS: Record<string, string[]> = {
     // Exact keys from the prompt
-    "Dashboard": ["Employee", "Admin"],
-    "Requests": ["Employee", "Admin"],
-    "CreateRequest": ["Employee", "Admin"],
-    "AdminDashboard": ["Admin"],
-    "AdminEmployees": ["Admin"],
-    "QuotaManagement": ["Admin"],
-    "LeaveTypeManagement": ["Admin"],
-    "HolidayManagement": ["Admin"],
+    "Dashboard": ["Employee", "Admin", "HR"],
+    "Requests": ["Employee", "Admin", "HR"],
+    "CreateRequest": ["Employee", "Admin", "HR"],
+    "AdminDashboard": ["Admin", "HR"],
+    "AdminEmployees": ["Admin", "HR"],
+    "QuotaManagement": ["Admin", "HR"],
+    "LeaveTypeManagement": ["Admin", "HR"],
+    "HolidayManagement": ["Admin", "HR"],
 
     // Case-matched routes from manifest.json
-    "dashboard": ["Employee", "Admin"],
-    "requests": ["Employee", "Admin"],
-    "requestDetail": ["Employee", "Admin"],
-    "createRequest": ["Employee", "Admin"],
-    "AdminShell": ["Admin"],
-    "AdminLeaveRequests": ["Admin"],
-    "AdminLeaveTypes": ["Admin"],
-    "AdminAuditLog": ["Admin"],
-    "AdminAuditLogDetail": ["Admin"],
-    "Unauthorized": ["Employee", "Admin"]
+    "dashboard": ["Employee", "Admin", "HR"],
+    "requests": ["Employee", "Admin", "HR"],
+    "requestDetail": ["Employee", "Admin", "HR"],
+    "createRequest": ["Employee", "Admin", "HR"],
+    "AdminShell": ["Admin", "HR"],
+    "AdminLeaveRequests": ["Admin", "HR"],
+    "AdminLeaveTypes": ["Admin", "HR"],
+    "AdminAuditLog": ["Admin", "HR"],
+    "AdminAuditLogDetail": ["Admin", "HR"],
+    "Unauthorized": ["Employee", "Admin", "HR"]
 };
