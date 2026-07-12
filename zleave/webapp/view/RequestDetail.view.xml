@@ -17,8 +17,6 @@
                         visible="{detailUi>/editMode}" />
                     <Button id="btnCancelEdit" text="Cancel Edit" type="Transparent" press=".onCancelEdit" 
                         visible="{detailUi>/editMode}" />
-                    <Button id="btnCancelRequest" text="Cancel Request" type="Reject" press=".onCancelRequest" 
-                        visible="{= ${Status} === 'SUBMITTED' &amp;&amp; !${detailUi>/editMode} }" />
                     <Button id="btnBack" text="Back" type="Default" press=".onNavBack" />
                 </uxap:actions>
             </uxap:ObjectPageHeader>
