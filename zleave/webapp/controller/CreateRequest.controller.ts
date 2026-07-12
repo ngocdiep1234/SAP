@@ -86,8 +86,8 @@ export default class CreateRequest extends Controller {
                 HalfDay: false,
                 Reason: "",
                 ApproverId: "",
-                StartSession: "Full",
-                EndSession: "Full"
+                StartSession: "",
+                EndSession: ""
             },
             employee: {
                 EmployeeID: "",
@@ -98,10 +98,10 @@ export default class CreateRequest extends Controller {
             },
             summary: {
                 LeaveType: "-",
-                Duration: "0 Days",
-                RemainingBalance: "12 Days",
+                Duration: "",
+                RemainingBalance: "",
                 Approver: "",
-                Status: "Pending"
+                Status: ""
             },
             busy: false,
             leaveTypes: [],
@@ -278,37 +278,9 @@ export default class CreateRequest extends Controller {
     // -----------------------------------------------------------------------
 
     private async _getCurrentUserId(): Promise<string> {
-        const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
-        const sStoredId = oUiModel?.getProperty("/currentUser/id") as string | undefined;
-        if (sStoredId) {
-            return sStoredId;
-        }
-
-        try {
-            const oResponse = await fetch("/sap/bc/ui2/start_up", {
-                credentials: "same-origin"
-            });
-            if (oResponse.ok) {
-                const oData = await oResponse.json() as Record<string, unknown>;
-                const sId = (oData["id"] as string) ??
-                    (oData["userId"] as string) ??
-                    (oData["name"] as string) ??
-                    "";
-                if (oUiModel && sId) {
-                    const sFullName = (oData["fullName"] as string) ??
-                        (oData["displayName"] as string) ??
-                        sId;
-                    oUiModel.setProperty("/currentUser", {
-                        id: sId,
-                        displayName: sFullName
-                    });
-                }
-                return sId;
-            }
-        } catch (oErr) {
-            console.error("[CreateRequest] fetch /sap/bc/ui2/start_up failed:", oErr);
-        }
-        return "";
+        const oComponent = (this as any).getOwnerComponent() as any;
+        const oUser = await oComponent.getCurrentUser();
+        return oUser ? oUser.id : "";
     }
 
     private async _loadLeaveTypes(): Promise<void> {
@@ -710,7 +682,7 @@ export default class CreateRequest extends Controller {
             Duration: "0 Days",
             RemainingBalance: "12 Days",
             Approver: oFormModel.getProperty("/employee/ManagerID") || "",
-            Status: "Pending"
+            Status: ""
         });
         // Also clear employee data to avoid stale display before check completes
         oFormModel.setProperty("/employee", {

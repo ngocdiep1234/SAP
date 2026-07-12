@@ -155,74 +155,7 @@ export default class AdminAuditLog extends Controller {
     }
 
     private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string }> {
-        const oUiModel = (this as any).getOwnerComponent().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
-        if (!oUiModel) {
-            return { registered: true, employeeId: "1001", employeeName: "Nguyen Van A", role: "Employee", is_manager: "", is_hr: "", is_admin: "" };
-        }
-
-        const oCachedUser = oUiModel.getProperty("/currentUser") as any;
-        if (oCachedUser && oCachedUser.employeeId && oCachedUser.role) {
-            return oCachedUser;
-        }
-
-        let sSapUser = oCachedUser?.id as string | undefined;
-        if (!sSapUser) {
-            try {
-                const oResponse = await fetch("/sap/bc/ui2/start_up", {
-                    credentials: "same-origin"
-                });
-                if (oResponse.ok) {
-                    const oData = await oResponse.json() as Record<string, unknown>;
-                    sSapUser = (oData["id"] as string) ?? (oData["userId"] as string) ?? (oData["name"] as string) ?? "";
-                }
-            } catch (oErr) {
-                console.error("[AuditLog] start_up check failed:", oErr);
-            }
-        }
-
-        if (sSapUser) {
-            const oModel = (this as any).getOwnerComponent().getModel() as InstanceType<typeof ODataModel> | undefined;
-            if (oModel) {
-                try {
-                    const oResult = await new Promise<any>((resolve, reject) => {
-                        oModel.read("/Employee", {
-                            filters: [new Filter("SapUserName", FilterOperator.EQ, sSapUser)],
-                            success: (oDataSuccess: any) => resolve(oDataSuccess),
-                            error: (oError: any) => reject(oError)
-                        });
-                    });
-                    if (oResult && oResult.results && oResult.results.length > 0) {
-                        const oEmp = oResult.results[0];
-                        const oUserObj = {
-                            registered: true,
-                            employeeId: String(oEmp["EmployeeId"] ?? ""),
-                            employeeName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
-                            id: sSapUser,
-                            displayName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
-                            role: String(oEmp["PositionTitle"] ?? "Employee"),
-                            is_manager: String(oEmp["IsManager"] ?? ""),
-                            is_hr: String(oEmp["IsHR"] ?? ""),
-                            is_admin: String(oEmp["IsAdmin"] ?? "")
-                        };
-                        oUiModel.setProperty("/currentUser", oUserObj);
-                        return oUserObj;
-                    }
-                } catch (oErr) {
-                    console.error("[AuditLog] Employee query failed:", oErr);
-                }
-            }
-        }
-
-        const oMockUser = {
-            registered: true,
-            employeeId: "1001",
-            employeeName: "Nguyen Van A",
-            role: "Employee",
-            is_manager: "",
-            is_hr: "",
-            is_admin: ""
-        };
-        oUiModel.setProperty("/currentUser", oMockUser);
-        return oMockUser;
+        const oComponent = (this as any).getOwnerComponent() as any;
+        return oComponent.getCurrentUser();
     }
 }

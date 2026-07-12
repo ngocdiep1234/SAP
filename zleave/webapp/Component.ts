@@ -195,7 +195,7 @@ export default class Component extends BaseComponent {
                     oRootControl.setBusy(true);
                 }
 
-                this._getCurrentUser().then((oUser: any) => {
+                this.getCurrentUser().then((oUser: any) => {
                     if (oRootControl && typeof oRootControl.setBusy === "function") {
                         oRootControl.setBusy(false);
                     }
@@ -240,28 +240,32 @@ export default class Component extends BaseComponent {
             }
         }
 
-        const bHasAccess = aAllowedRoles.some((sRole) => aUserRoles.includes(sRole));
-
-        if (!bHasAccess) {
-            const oRouter = this.getRouter();
-            // Redirect immediately to prevent rendering Admin screens
-            oRouter.navTo("dashboard", {}, true /* replace history */);
-
-            // Show Access Denied message box
-            MessageBox.error("You do not have permission to access this page.", {
-                title: "Access Denied"
-            });
+        // Check if user has at least one role allowed for the route
+        const bAuthorized = aAllowedRoles.some((sRole) => aUserRoles.includes(sRole));
+        if (bAuthorized) {
+            return;
         }
+
+        // Unauthorized: Display message and redirect to default allowed route (Dashboard)
+        MessageBox.error("You are not authorized to view this page.", {
+            actions: [MessageBox.Action.CLOSE],
+            onClose: (): void => {
+                const oRouter = this.getRouter();
+                if (oRouter) {
+                    oRouter.navTo("Dashboard", {}, true /* replace history */);
+                }
+            }
+        });
     }
 
     /**
-     * Helper to load the current user from the backend startup service and/or the Employee OData entity.
-     * Caches the loaded user object under "/currentUser" in the "ui" JSON model.
+     * Retrieves the current user details from OData service (/Employee) based on SAP Username.
+     * Caches the result on the UI model so it's only fetched once per session.
      */
-    private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string; accessRolesText?: string }> {
+    public async getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string; accessRolesText?: string; email?: string; department?: string }> {
         const oUiModel = this.getModel("ui") as InstanceType<typeof JSONModel> | undefined;
         if (!oUiModel) {
-            return { registered: true, employeeId: "1001", employeeName: "Nguyen Van A", role: "Employee", is_manager: "", is_hr: "", is_admin: "" };
+            return { registered: false, employeeId: "", employeeName: "", role: "Employee", is_manager: "", is_hr: "", is_admin: "", accessRolesText: "Employee", email: "", department: "" };
         }
 
         const oCachedUser = oUiModel.getProperty("/currentUser") as any;
@@ -293,59 +297,78 @@ export default class Component extends BaseComponent {
             }
         }
 
-        if (sSapUser) {
-            const oModel = this.getModel() as InstanceType<typeof ODataModel> | undefined;
-            if (oModel) {
-                try {
-                    const oResult = await new Promise<any>((resolve, reject) => {
+        const oModel = this.getModel() as InstanceType<typeof ODataModel> | undefined;
+        if (oModel) {
+            try {
+                const oResult = await new Promise<any>((resolve, reject) => {
+                    const mParameters: any = {
+                        success: (oDataSuccess: any) => resolve(oDataSuccess),
+                        error: (oError: any) => reject(oError)
+                    };
+                    if (sSapUser) {
+                        mParameters.filters = [new Filter("SapUserName", FilterOperator.EQ, sSapUser)];
+                    }
+                    oModel.read("/Employee", mParameters);
+                });
+
+                let oEmp = oResult && oResult.results && oResult.results.length > 0 ? oResult.results[0] : null;
+
+                if (!oEmp) {
+                    // Fallback to fetch first available employee
+                    const oAllResults = await new Promise<any>((resolve, reject) => {
                         oModel.read("/Employee", {
-                            filters: [
-                                new Filter("SapUserName", FilterOperator.EQ, sSapUser)
-                            ],
                             success: (oDataSuccess: any) => resolve(oDataSuccess),
                             error: (oError: any) => reject(oError)
                         });
                     });
-                    if (oResult && oResult.results && oResult.results.length > 0) {
-                        const oEmp = oResult.results[0];
-                        const sAccessRolesText = [
-                            (oEmp["IsAdmin"] === "X" || oEmp["IsAdmin"] === "true" || oEmp["IsAdmin"] === "1") ? "Admin" : "",
-                            (oEmp["IsHR"] === "X" || oEmp["IsHR"] === "true" || oEmp["IsHR"] === "1") ? "HR" : "",
-                            (oEmp["IsManager"] === "X" || oEmp["IsManager"] === "true" || oEmp["IsManager"] === "1") ? "Manager" : ""
-                        ].filter(Boolean).join(", ") || "Employee";
-                        const oUserObj = {
-                            registered: true,
-                            employeeId: String(oEmp["EmployeeId"] ?? ""),
-                            employeeName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
-                            id: sSapUser,
-                            displayName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
-                            role: String(oEmp["PositionTitle"] ?? "Employee"),
-                            is_manager: String(oEmp["IsManager"] ?? ""),
-                            is_hr: String(oEmp["IsHR"] ?? ""),
-                            is_admin: String(oEmp["IsAdmin"] ?? ""),
-                            accessRolesText: sAccessRolesText
-                        };
-                        oUiModel.setProperty("/currentUser", oUserObj);
-                        return oUserObj;
+                    if (oAllResults && oAllResults.results && oAllResults.results.length > 0) {
+                        oEmp = oAllResults.results[0];
                     }
-                } catch (oErr) {
-                    console.error("[Component] Querying Employee failed:", oErr);
                 }
+
+                if (oEmp) {
+                    const sAccessRolesText = [
+                        (oEmp["IsAdmin"] === "X" || oEmp["IsAdmin"] === "true" || oEmp["IsAdmin"] === "1") ? "Admin" : "",
+                        (oEmp["IsHR"] === "X" || oEmp["IsHR"] === "true" || oEmp["IsHR"] === "1") ? "HR" : "",
+                        (oEmp["IsManager"] === "X" || oEmp["IsManager"] === "true" || oEmp["IsManager"] === "1") ? "Manager" : ""
+                    ].filter(Boolean).join(", ") || "Employee";
+
+                    const oUserObj = {
+                        registered: true,
+                        employeeId: String(oEmp["EmployeeId"] ?? ""),
+                        employeeName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
+                        id: sSapUser || String(oEmp["SapUserName"] ?? ""),
+                        displayName: String(oEmp["FullName"] ?? oEmp["SapUserName"] ?? ""),
+                        role: String(oEmp["PositionTitle"] ?? "Employee"),
+                        is_manager: String(oEmp["IsManager"] ?? ""),
+                        is_hr: String(oEmp["IsHR"] ?? ""),
+                        is_admin: String(oEmp["IsAdmin"] ?? ""),
+                        accessRolesText: sAccessRolesText,
+                        email: String(oEmp["Email"] ?? ""),
+                        department: String(oEmp["Department"] ?? "")
+                    };
+                    oUiModel.setProperty("/currentUser", oUserObj);
+                    return oUserObj;
+                }
+            } catch (oErr) {
+                console.error("[Component] Querying Employee failed:", oErr);
             }
         }
 
-        const oMockUser = {
-            registered: true,
-            employeeId: "1001",
-            employeeName: "Nguyen Van A",
+        const oEmptyUser = {
+            registered: false,
+            employeeId: "",
+            employeeName: "",
             role: "Employee",
             is_manager: "",
             is_hr: "",
             is_admin: "",
-            accessRolesText: "Employee"
+            accessRolesText: "Employee",
+            email: "",
+            department: ""
         };
-        oUiModel.setProperty("/currentUser", oMockUser);
-        return oMockUser;
+        oUiModel.setProperty("/currentUser", oEmptyUser);
+        return oEmptyUser;
     }
 }
 
