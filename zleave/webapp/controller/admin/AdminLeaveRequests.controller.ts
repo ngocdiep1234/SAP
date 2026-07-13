@@ -133,7 +133,7 @@ export default class AdminLeaveRequests extends Controller {
 
         const sUuid = String(oContext.getProperty("UUID") || "");
         const oRouter = (this.getOwnerComponent() as any).getRouter();
-        oRouter.navTo("requestDetail", {
+        oRouter.navTo("AdminLeaveRequestDetail", {
             uuid: sUuid
         });
     }

@@ -389,7 +389,8 @@ const ROUTE_PERMISSIONS: Record<string, string[]> = {
     // Case-matched routes from manifest.json
     "dashboard": ["Employee", "Admin", "HR"],
     "requests": ["Employee", "Admin", "HR"],
-    "requestDetail": ["Employee", "Admin", "HR"],
+    "EmployeeLeaveRequestDetail": ["Employee", "Admin", "HR"],
+    "AdminLeaveRequestDetail": ["Admin", "HR"],
     "createRequest": ["Employee", "Admin", "HR"],
     "AdminShell": ["Admin", "HR"],
     "AdminLeaveRequests": ["Admin", "HR"],

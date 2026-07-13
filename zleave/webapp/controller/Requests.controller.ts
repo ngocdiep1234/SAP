@@ -146,7 +146,7 @@ export default class Requests extends Controller {
 
         const sUuid = String(oContext.getProperty("UUID") || "");
         const oRouter = (this.getOwnerComponent() as any).getRouter();
-        oRouter.navTo("requestDetail", {
+        oRouter.navTo("EmployeeLeaveRequestDetail", {
             uuid: sUuid
         });
     }

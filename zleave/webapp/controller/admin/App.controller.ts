@@ -1,11 +1,6 @@
 import Controller from "sap/ui/core/mvc/Controller";
-import Event from "sap/ui/base/Event";
-import JSONModel from "sap/ui/model/json/JSONModel";
-import MessageToast from "sap/m/MessageToast";
 import MessageBox from "sap/m/MessageBox";
-import Filter from "sap/ui/model/Filter";
-import FilterOperator from "sap/ui/model/FilterOperator";
-import ODataModel from "sap/ui/model/odata/v2/ODataModel";
+import JSONModel from "sap/ui/model/json/JSONModel";
 import { createNavModel } from "../../model/nav.model";
 
 /**

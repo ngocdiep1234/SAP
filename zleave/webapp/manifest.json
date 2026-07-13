@@ -140,9 +140,17 @@
           "target": "requests"
         },
         {
-          "name": "requestDetail",
+          "name": "EmployeeLeaveRequestDetail",
           "pattern": "requests/detail/{uuid}",
-          "target": "requestDetail"
+          "target": "EmployeeLeaveRequestDetail"
+        },
+        {
+          "name": "AdminLeaveRequestDetail",
+          "pattern": "admin/requests/detail/{uuid}",
+          "target": [
+            "adminShell",
+            "AdminLeaveRequestDetail"
+          ]
         },
         {
           "name": "createRequest",
@@ -232,11 +240,20 @@
           "viewType": "XML",
           "transition": "slide"
         },
-        "requestDetail": {
+        "EmployeeLeaveRequestDetail": {
           "viewName": "RequestDetail",
-          "viewId": "RequestDetail",
+          "viewId": "EmployeeLeaveRequestDetail",
           "viewType": "XML",
           "transition": "slide"
+        },
+        "AdminLeaveRequestDetail": {
+          "viewName": "RequestDetail",
+          "viewId": "AdminLeaveRequestDetail",
+          "viewType": "XML",
+          "transition": "slide",
+          "parent": "adminShell",
+          "controlId": "adminNavContainer",
+          "controlAggregation": "pages"
         },
         "createRequest": {
           "viewName": "CreateRequest",

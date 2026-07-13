@@ -1,10 +1,6 @@
 import Controller from "sap/ui/core/mvc/Controller";
 import MessageBox from "sap/m/MessageBox";
 import MessageToast from "sap/m/MessageToast";
-import Filter from "sap/ui/model/Filter";
-import FilterOperator from "sap/ui/model/FilterOperator";
-import ODataModel from "sap/ui/model/odata/v2/ODataModel";
-import JSONModel from "sap/ui/model/json/JSONModel";
 
 /**
  * @namespace zleave.zleave.controller

@@ -23,6 +23,7 @@ interface LeaveTypeEntry {
 export default class RequestDetail extends Controller {
 
     private _sUuid: string = "";
+    private _bIsAdminMode: boolean = false;
 
     public onInit(): void {
         const oUiModel = new JSONModel({
@@ -40,10 +41,14 @@ export default class RequestDetail extends Controller {
         this.getView().setModel(oUiModel, "detailUi");
 
         const oRouter = (this.getOwnerComponent() as { getRouter(): InstanceType<typeof Router> }).getRouter();
-        oRouter.getRoute("requestDetail").attachPatternMatched(this._onPatternMatched, this);
+        oRouter.getRoute("EmployeeLeaveRequestDetail").attachPatternMatched(this._onPatternMatched, this);
+        oRouter.getRoute("AdminLeaveRequestDetail").attachPatternMatched(this._onPatternMatched, this);
     }
 
     private async _onPatternMatched(oEvent: any): Promise<void> {
+        const sRouteName = oEvent.getParameter("name") as string;
+        this._bIsAdminMode = sRouteName === "AdminLeaveRequestDetail";
+
         const oArgs = oEvent.getParameter("arguments") as { uuid: string };
         const sUuid = oArgs.uuid;
         this._sUuid = sUuid;
@@ -79,7 +84,8 @@ export default class RequestDetail extends Controller {
                             MessageBox.error("Request details not found or could not be loaded.", {
                                 onClose: () => {
                                     const oRouter = (this.getOwnerComponent() as any).getRouter();
-                                    oRouter.navTo("requests", {}, true);
+                                    const sBackRoute = this._bIsAdminMode ? "AdminLeaveRequests" : "requests";
+                                    oRouter.navTo(sBackRoute, {}, true);
                                 }
                             });
                         }
@@ -91,7 +97,8 @@ export default class RequestDetail extends Controller {
                             MessageBox.error("Request details not found.", {
                                 onClose: () => {
                                     const oRouter = (this.getOwnerComponent() as any).getRouter();
-                                    oRouter.navTo("requests", {}, true);
+                                    const sBackRoute = this._bIsAdminMode ? "AdminLeaveRequests" : "requests";
+                                    oRouter.navTo(sBackRoute, {}, true);
                                 }
                             });
                         }
@@ -623,7 +630,8 @@ export default class RequestDetail extends Controller {
             window.history.go(-1);
         } else {
             const oRouter = (this.getOwnerComponent() as { getRouter(): InstanceType<typeof Router> }).getRouter();
-            oRouter.navTo("requests", {}, true);
+            const sBackRoute = this._bIsAdminMode ? "AdminLeaveRequests" : "requests";
+            oRouter.navTo(sBackRoute, {}, true);
         }
     }
 
