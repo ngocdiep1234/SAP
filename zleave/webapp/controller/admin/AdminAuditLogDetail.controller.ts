@@ -5,11 +5,26 @@ import JSONModel from "sap/ui/model/json/JSONModel";
 import ODataModel from "sap/ui/model/odata/v2/ODataModel";
 import Sorter from "sap/ui/model/Sorter";
 import MessageBox from "sap/m/MessageBox";
+import AdminService from "../../service/AdminService";
 
 /**
  * @namespace zleave.zleave.controller.admin
  */
 export default class AdminAuditLogDetail extends Controller {
+    private _oAdminService: AdminService;
+
+    private _getAdminService(): AdminService | null {
+        if (!this._oAdminService) {
+            const oRawModel = (this as any).getOwnerComponent().getModel();
+            if (!oRawModel) {
+                return null;
+            }
+            this._oAdminService = new AdminService(
+                oRawModel as InstanceType<typeof ODataModel>
+            );
+        }
+        return this._oAdminService;
+    }
 
     public onInit(): void {
         const oTimelineModel = new JSONModel({ results: [] });
@@ -85,30 +100,26 @@ export default class AdminAuditLogDetail extends Controller {
     }
 
     private _loadTimelineData(sRequestId: string): void {
-        const oModel = (this as any).getOwnerComponent().getModel() as InstanceType<typeof ODataModel> | undefined;
+        const oAdminService = this._getAdminService();
         const oTimelineModel = this.getView().getModel("timeline") as InstanceType<typeof JSONModel> | undefined;
-        if (!oModel || !oTimelineModel) {
+        if (!oAdminService || !oTimelineModel) {
             return;
         }
 
-        oModel.read("/AuditLog", {
+        oAdminService.readAuditLogs({
             filters: [
                 new Filter("RequestId", FilterOperator.EQ, sRequestId)
             ],
             sorters: [
                 new Sorter("ActionAt", true) // Descending (latest action first)
-            ],
-            success: (oData: any) => {
-                if (oData && oData.results) {
-                    oTimelineModel.setData(oData);
-                } else {
-                    oTimelineModel.setData({ results: [] });
-                }
-            },
-            error: (oErr: any) => {
-                console.error("[AdminAuditLogDetail] Failed to load timeline data:", oErr);
-                oTimelineModel.setData({ results: [] });
-            }
+            ]
+        })
+        .then((aResults): void => {
+            oTimelineModel.setData({ results: aResults });
+        })
+        .catch((oErr): void => {
+            console.error("[AdminAuditLogDetail] Failed to load timeline data:", oErr);
+            oTimelineModel.setData({ results: [] });
         });
     }
 

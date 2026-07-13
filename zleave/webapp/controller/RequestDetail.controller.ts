@@ -12,6 +12,7 @@ import Dialog from "sap/m/Dialog";
 import Button from "sap/m/Button";
 import TextArea from "sap/m/TextArea";
 import Label from "sap/m/Label";
+import LeaveRequestService from "../service/LeaveRequestService";
 
 interface LeaveTypeEntry {
     LeaveType: string;
@@ -24,6 +25,20 @@ export default class RequestDetail extends Controller {
 
     private _sUuid: string = "";
     private _bIsAdminMode: boolean = false;
+    private _oLeaveRequestService: LeaveRequestService;
+
+    private _getLeaveRequestService(): LeaveRequestService | null {
+        if (!this._oLeaveRequestService) {
+            const oRawModel = this.getView().getModel();
+            if (!oRawModel) {
+                return null;
+            }
+            this._oLeaveRequestService = new LeaveRequestService(
+                oRawModel as InstanceType<typeof ODataModel>
+            );
+        }
+        return this._oLeaveRequestService;
+    }
 
     public onInit(): void {
         const oUiModel = new JSONModel({
@@ -121,27 +136,21 @@ export default class RequestDetail extends Controller {
     }
 
     private _loadLeaveTypes(): Promise<void> {
-        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
-        if (!oModel) {
+        const oLeaveRequestService = this._getLeaveRequestService();
+        if (!oLeaveRequestService) {
             return Promise.resolve();
         }
-        return new Promise<void>((resolve) => {
-            oModel.read("/LeaveType", {
-                success: (oData: any): void => {
-                    const aTypes = (oData.results || []) as LeaveTypeEntry[];
-                    if (aTypes.length === 0) {
-                        MessageBox.warning("No leave types found on backend.");
-                    }
-                    this._getUiModel().setProperty("/leaveTypes", aTypes);
-                    resolve();
-                },
-                error: (oErr: any): void => {
-                    console.error("[RequestDetail] Failed to load leave types:", oErr);
-                    MessageBox.error("Failed to load leave types from backend.");
-                    resolve();
+        return oLeaveRequestService.readLeaveTypes()
+            .then((aTypes: LeaveTypeEntry[]): void => {
+                if (aTypes.length === 0) {
+                    MessageBox.warning("No leave types found on backend.");
                 }
+                this._getUiModel().setProperty("/leaveTypes", aTypes);
+            })
+            .catch((oErr: any): void => {
+                console.error("[RequestDetail] Failed to load leave types:", oErr);
+                MessageBox.error("Failed to load leave types from backend.");
             });
-        });
     }
 
     private async _getCurrentUser(): Promise<{ registered: boolean; employeeId: string; employeeName: string; role: string; is_manager: string; is_hr: string; is_admin: string }> {
@@ -173,13 +182,16 @@ export default class RequestDetail extends Controller {
             return;
         }
 
-        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
+        const oLeaveRequestService = this._getLeaveRequestService();
         const oUiModel = this._getUiModel();
+        if (!oLeaveRequestService) {
+            return;
+        }
         oUiModel.setProperty("/busy", true);
 
         const sPath = oContext.getPath();
-        oModel.read(sPath, {
-            success: (oData: any): void => {
+        oLeaveRequestService.readLeaveRequest(sPath)
+            .then((oData: any): void => {
                 oUiModel.setProperty("/busy", false);
                 const sStatus = oData?.Status;
                 if (sStatus === "SUBMITTED") {
@@ -191,21 +203,11 @@ export default class RequestDetail extends Controller {
                         }
                     });
                 }
-            },
-            error: (oErr: any): void => {
+            })
+            .catch((oErr: any): void => {
                 oUiModel.setProperty("/busy", false);
-                let sMsg = "Failed to load the latest request details from backend.";
-                try {
-                    if (oErr && oErr.responseText) {
-                        const oParsed = JSON.parse(oErr.responseText);
-                        sMsg = oParsed.error?.message?.value || sMsg;
-                    }
-                } catch (e) {
-                    // ignore
-                }
-                MessageBox.error(sMsg);
-            }
-        });
+                MessageBox.error(typeof oErr === "string" ? oErr : "Failed to load the latest request details from backend.");
+            });
     }
 
     public onCancelEdit(): void {
@@ -215,20 +217,20 @@ export default class RequestDetail extends Controller {
         oUiModel.setProperty("/uploadButtonEnabled", false);
 
         const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
-        if (oModel) {
+        const oLeaveRequestService = this._getLeaveRequestService();
+        if (oModel && oLeaveRequestService) {
             oModel.resetChanges();
             // Re-bind element to reload fresh data from backend
             const oContext = this.getView().getBindingContext();
             if (oContext) {
                 const sPath = oContext.getPath();
-                oModel.read(sPath, {
-                    success: (): void => {
+                oLeaveRequestService.readLeaveRequest(sPath)
+                    .then((): void => {
                         void this._updateApproveRejectVisibility();
-                    },
-                    error: (oErr: any): void => {
+                    })
+                    .catch((oErr: any): void => {
                         console.error("[RequestDetail] Failed to refresh after cancel:", oErr);
-                    }
-                });
+                    });
             }
         }
     }
@@ -353,6 +355,10 @@ export default class RequestDetail extends Controller {
             return;
         }
 
+        const oLeaveRequestService = this._getLeaveRequestService();
+        if (!oLeaveRequestService) {
+            return;
+        }
         oUiModel.setProperty("/busy", true);
 
         const sPath = oContext.getPath();
@@ -367,13 +373,15 @@ export default class RequestDetail extends Controller {
             ApprovalComment: oContext.getProperty("ApprovalComment") || ""
         };
 
-        oModel.update(sPath, oPayload, {
-            success: (): void => {
+        oLeaveRequestService.updateLeaveRequest(sPath, oPayload)
+            .then((): void => {
                 oUiModel.setProperty("/editMode", false);
                 MessageToast.show("Request updated successfully");
 
                 // Clear any pending model changes to avoid stale state
-                oModel.resetChanges();
+                if (oModel) {
+                    oModel.resetChanges();
+                }
 
                 // Use getElementBinding().refresh(true) — the correct SAPUI5 way to
                 // force the view's binding context to re-fetch from backend and re-render
@@ -384,22 +392,11 @@ export default class RequestDetail extends Controller {
 
                 oUiModel.setProperty("/busy", false);
                 void this._updateApproveRejectVisibility();
-            },
-
-            error: (oErr: any): void => {
+            })
+            .catch((oErr: any): void => {
                 oUiModel.setProperty("/busy", false);
-                let sMsg = "Update failed.";
-                try {
-                    if (oErr && oErr.responseText) {
-                        const oParsed = JSON.parse(oErr.responseText);
-                        sMsg = oParsed.error?.message?.value || sMsg;
-                    }
-                } catch (e) {
-                    // ignore
-                }
-                MessageBox.error(sMsg);
-            }
-        });
+                MessageBox.error(typeof oErr === "string" ? oErr : "Update failed.");
+            });
     }
 
     public onCancelRequest(): void {
@@ -424,41 +421,36 @@ export default class RequestDetail extends Controller {
             return;
         }
 
-        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
+        const oLeaveRequestService = this._getLeaveRequestService();
         const oUiModel = this._getUiModel();
+        if (!oLeaveRequestService) {
+            return;
+        }
         oUiModel.setProperty("/busy", true);
 
         const sPath = oContext.getPath();
-        oModel.update(sPath, { Status: "Cancelled" }, {
-            success: (): void => {
+        oLeaveRequestService.updateLeaveRequest(sPath, { Status: "Cancelled" })
+            .then((): void => {
                 MessageToast.show("Request cancelled successfully");
-                oModel.refresh(true);
+                const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+                if (oModel) {
+                    oModel.refresh(true);
+                }
 
-                oModel.read(sPath, {
-                    success: (): void => {
+                oLeaveRequestService.readLeaveRequest(sPath)
+                    .then((): void => {
                         oUiModel.setProperty("/busy", false);
                         void this._updateApproveRejectVisibility();
-                    },
-                    error: (oErr: any): void => {
+                    })
+                    .catch((oErr: any): void => {
                         oUiModel.setProperty("/busy", false);
                         console.error("Failed to refresh request details:", oErr);
-                    }
-                });
-            },
-            error: (oErr: any): void => {
+                    });
+            })
+            .catch((oErr: any): void => {
                 oUiModel.setProperty("/busy", false);
-                let sMsg = "Cancellation failed.";
-                try {
-                    if (oErr && oErr.responseText) {
-                        const oParsed = JSON.parse(oErr.responseText);
-                        sMsg = oParsed.error?.message?.value || sMsg;
-                    }
-                } catch (e) {
-                    // ignore
-                }
-                MessageBox.error(sMsg);
-            }
-        });
+                MessageBox.error(typeof oErr === "string" ? oErr : "Cancellation failed.");
+            });
     }
 
     public onApprove(): void {
@@ -530,8 +522,8 @@ export default class RequestDetail extends Controller {
             return;
         }
 
-        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
-        if (!oModel) {
+        const oLeaveRequestService = this._getLeaveRequestService();
+        if (!oLeaveRequestService) {
             return;
         }
         const oUiModel = this._getUiModel();
@@ -554,50 +546,46 @@ export default class RequestDetail extends Controller {
                 oPayload.ApprovalComment = sComment;
             }
 
-            await new Promise<void>((resolve, reject) => {
-                oModel.update(sLeaveRequestPath, oPayload, {
-                    success: () => resolve(),
-                    error: (oErr: any) => reject(oErr)
-                });
-            });
+            await oLeaveRequestService.updateLeaveRequest(sLeaveRequestPath, oPayload);
 
             // Call function import to finalize status change
-            await this._callAction(sActionName, sUuid);
+            const oRes = await oLeaveRequestService.callAction(sActionName, sUuid);
+            if (!oRes.success) {
+                throw new Error(oRes.error || "Action failed.");
+            }
+
             oUiModel.setProperty("/busy", true); // Ensure busy indicator is active during load
             const oResourceBundle = (this.getOwnerComponent().getModel("i18n") as any).getResourceBundle();
             const sSuccessMsg = sActionType === "approve"
                 ? oResourceBundle.getText("successApproveSingle") || "Request approved successfully"
                 : oResourceBundle.getText("successRejectSingle") || "Request rejected successfully";
             MessageToast.show(sSuccessMsg);
-            oModel.refresh(true);
+
+            const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+            if (oModel) {
+                oModel.refresh(true);
+            }
 
             const sPath = bIsHr
                 ? `/LeaveRequestAdmin(guid'${sUuid}')`
                 : `/LeaveRequest(guid'${sUuid}')`;
 
-            oModel.read(sPath, {
-                success: (): void => {
+            oLeaveRequestService.readLeaveRequest(sPath)
+                .then((): void => {
                     oUiModel.setProperty("/busy", false);
                     void this._updateApproveRejectVisibility();
-                },
-                error: (oErr: any): void => {
+                })
+                .catch((oErr: any): void => {
                     oUiModel.setProperty("/busy", false);
                     console.error("Failed to refresh request details:", oErr);
-                }
-            });
+                });
         } catch (oErr: any) {
             oUiModel.setProperty("/busy", false);
             let sMsg = sActionType === "approve" ? "Approval failed." : "Rejection failed.";
-            try {
-                const oErrorData = oErr.error || oErr;
-                if (oErrorData && oErrorData.responseText) {
-                    const oParsed = JSON.parse(oErrorData.responseText);
-                    sMsg = oParsed.error?.message?.value || sMsg;
-                } else if (oErrorData && oErrorData.message) {
-                    sMsg = oErrorData.message;
-                }
-            } catch {
-                // ignore
+            if (typeof oErr === "string") {
+                sMsg = oErr;
+            } else if (oErr && oErr.message) {
+                sMsg = oErr.message;
             }
             MessageBox.error(sMsg);
         }
@@ -636,43 +624,6 @@ export default class RequestDetail extends Controller {
         return bIsHr
             ? (sActionType === "approve" ? "hrApproveResult" : "hrRejectResult")
             : (sActionType === "approve" ? "approveLeave" : "rejectLeave");
-    }
-
-    private _callAction(sActionName: string, sUuid: string): Promise<{ success: boolean; uuid: string; error?: string }> {
-        const oModel: any = this.getView().getModel();
-        return new Promise((resolve, reject) => {
-            if (!oModel) {
-                reject(new Error("OData Model is not available"));
-                return;
-            }
-            oModel.callFunction("/" + sActionName, {
-                method: "POST",
-                urlParameters: {
-                    UUID: sUuid
-                },
-                success: () => {
-                    resolve({ success: true, uuid: sUuid });
-                },
-                error: (oError: any) => {
-                    let sMsg = "Unknown error";
-                    try {
-                        if (oError && oError.responseText) {
-                            const oParsed = JSON.parse(oError.responseText);
-                            sMsg = (oParsed.error && oParsed.error.message && oParsed.error.message.value) || sMsg;
-                        } else if (oError && oError.message) {
-                            sMsg = oError.message;
-                        }
-                    } catch {
-                        sMsg = (oError && oError.message) || sMsg;
-                    }
-                    const oErr = new Error(sMsg);
-                    if (oError && oError.responseText) {
-                        (oErr as any).responseText = oError.responseText;
-                    }
-                    reject(oErr);
-                }
-            });
-        });
     }
 
     private async _updateApproveRejectVisibility(): Promise<void> {
@@ -804,70 +755,39 @@ export default class RequestDetail extends Controller {
             return;
         }
 
-        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
-        const oUiModel = this._getUiModel();
+        const oLeaveRequestService = this._getLeaveRequestService();
+        if (!oLeaveRequestService) {
+            return;
+        }
 
+        const oUiModel = this._getUiModel();
         oUiModel.setProperty("/uploading", true);
         oUiModel.setProperty("/uploadProgress", 50);
         oUiModel.setProperty("/uploadStatusText", "Uploading...");
 
         const sUuid = oContext.getProperty("UUID") as string;
-        let sServiceUrl = oModel.sServiceUrl;
-        if (sServiceUrl.endsWith("/")) {
-            sServiceUrl = sServiceUrl.slice(0, -1);
-        }
-        const sUrl = `${sServiceUrl}/LeaveRequest(guid'${sUuid}')/$value`;
-        const sToken = oModel.getSecurityToken() || "";
+        oLeaveRequestService.uploadAttachment(sUuid, oFile)
+            .then((): Promise<any> => {
+                oUiModel.setProperty("/uploadProgress", 100);
+                oUiModel.setProperty("/uploadStatusText", "File uploaded successfully.");
+                MessageToast.show("File uploaded successfully");
+                
+                const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+                if (oModel) {
+                    oModel.refresh(true);
+                }
 
-        const xhr = new XMLHttpRequest();
-        xhr.open("PUT", sUrl, true);
-        xhr.setRequestHeader("x-csrf-token", sToken);
-        xhr.setRequestHeader("Slug", oFile.name);
-        if (oFile.type) {
-            xhr.setRequestHeader("Content-Type", oFile.type);
-        }
-
-        xhr.onload = (): void => {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                oModel.setProperty(oContext.getPath() + "/FileName", oFile.name);
-                oModel.setProperty(oContext.getPath() + "/MimeType", oFile.type);
-
-                oModel.submitChanges({
-                    success: (): void => {
-                        oUiModel.setProperty("/uploadProgress", 100);
-                        oUiModel.setProperty("/uploadStatusText", "File uploaded successfully.");
-                        MessageToast.show("File uploaded successfully");
-                        oModel.refresh(true);
-
-                        oModel.read(oContext.getPath(), {
-                            success: (): void => {
-                                oUiModel.setProperty("/uploading", false);
-                                oUiModel.setProperty("/uploadButtonEnabled", false);
-                                void this._updateApproveRejectVisibility();
-                            },
-                            error: (oErr: any): void => {
-                                oUiModel.setProperty("/uploading", false);
-                                console.error("Failed to refresh request details:", oErr);
-                            }
-                        });
-                    },
-                    error: (oErr: any): void => {
-                        oUiModel.setProperty("/uploading", false);
-                        MessageBox.error("Upload succeeded but failed to save metadata.");
-                    }
-                });
-            } else {
+                return oLeaveRequestService.readLeaveRequest(oContext.getPath());
+            })
+            .then((): void => {
                 oUiModel.setProperty("/uploading", false);
-                MessageBox.error(`Upload failed with status: ${xhr.status} ${xhr.statusText}`);
-            }
-        };
-
-        xhr.onerror = (): void => {
-            oUiModel.setProperty("/uploading", false);
-            MessageBox.error("Upload failed due to a network error.");
-        };
-
-        xhr.send(oFile);
+                oUiModel.setProperty("/uploadButtonEnabled", false);
+                void this._updateApproveRejectVisibility();
+            })
+            .catch((oErr: any): void => {
+                oUiModel.setProperty("/uploading", false);
+                MessageBox.error(typeof oErr === "string" ? oErr : "Upload failed.");
+            });
     }
 
     public onDownloadAttachment(): void {

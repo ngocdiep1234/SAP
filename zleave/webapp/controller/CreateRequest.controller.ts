@@ -7,6 +7,8 @@ import ODataModel from "sap/ui/model/odata/v2/ODataModel";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import LeaveRequestService, { LeaveRequestPayload, LeaveTypeEntry, ManagerEntry } from "../service/LeaveRequestService";
+import EmployeeService from "../service/EmployeeService";
+import MasterDataService from "../service/MasterDataService";
 
 // ---------------------------------------------------------------------------
 // Local model shape interfaces
@@ -71,6 +73,8 @@ interface CreateFormModel {
 export default class CreateRequest extends Controller {
 
     private _oService: LeaveRequestService;
+    private _oEmployeeService: EmployeeService;
+    private _oMasterDataService: MasterDataService;
     private _selectedFile: File | null = null;
 
     // -----------------------------------------------------------------------
@@ -149,11 +153,11 @@ export default class CreateRequest extends Controller {
      *                                      Submit & SaveDraft buttons remain disabled.
      */
     private async _checkAndLoadEmployee(): Promise<void> {
-        const oModel = this.getView().getModel();
+        const oEmployeeService = this._getEmployeeService();
         const oFormModel = this._getFormModel();
 
-        if (!oModel) {
-            console.error("[CreateRequest] OData model is not available.");
+        if (!oEmployeeService) {
+            console.error("[CreateRequest] EmployeeService is not available.");
             MessageBox.error(
                 "Could not connect to the system. Please reload the page.",
                 { title: "Connection Error" }
@@ -180,66 +184,59 @@ export default class CreateRequest extends Controller {
         console.info(`[CreateRequest] Checking employee registration for user: ${sUserId}`);
 
         // Step 2: query Employee entity by SapUserName
-        (oModel as InstanceType<typeof ODataModel>).read("/Employee", {
-            filters: [
-                new Filter("SapUserName", FilterOperator.EQ, sUserId)
-            ],
-            success: (oData: unknown): void => {
-                const oResult = oData as { results?: Record<string, unknown>[] };
+        try {
+            const oODataEmp = await oEmployeeService.getEmployeeBySapUser(sUserId);
 
-                if (oResult?.results && oResult.results.length > 0) {
-                    // --------------------------------------------------------
-                    // User IS registered → populate form & unlock buttons
-                    // --------------------------------------------------------
-                    const oODataEmp = oResult.results[0];
-                    const oEmp: Employee = {
-                        EmployeeID: String(oODataEmp["EmployeeId"] ?? ""),
-                        EmployeeName: String(oODataEmp["FullName"] ?? ""),
-                        DepartmentID: String(oODataEmp["Department"] ?? ""),
-                        ManagerID: String(oODataEmp["ManagerSapUser"] ?? ""),
-                        ManagerName: ""
-                    };
-
-                    oFormModel.setProperty("/employee", oEmp);
-                    oFormModel.setProperty("/leaveRequest/ApproverId", oEmp.ManagerID);
-                    this._updateSummaryApprover();
-                    this._updateEmployeeManagerName();
-                    oFormModel.setProperty("/employeeRegistered", true);
-                    void this._loadEmployeeQuotas(oEmp.EmployeeID);
-
-                    console.info(
-                        `[CreateRequest] Employee found – ID: ${oEmp.EmployeeID}, Name: ${oEmp.EmployeeName}`
-                    );
-                } else {
-                    // --------------------------------------------------------
-                    // User NOT registered → block and show error
-                    // --------------------------------------------------------
-                    console.warn(
-                        `[CreateRequest] No Employee record found for SapUserName="${sUserId}".`
-                    );
-                    this._blockWithError(
-                        "You are not registered in the system. " +
-                        "Please contact the administrator."
-                    );
-                }
-            },
-            error: (oError: unknown): void => {
+            if (oODataEmp) {
                 // --------------------------------------------------------
-                // OData error → block and show error
+                // User IS registered → populate form & unlock buttons
                 // --------------------------------------------------------
-                const sDetail = this._extractODataErrorMessage(oError);
-                console.error(
-                    `[CreateRequest] OData error when reading /Employee (user="${sUserId}"):`,
-                    sDetail,
-                    oError
+                const oEmp: Employee = {
+                    EmployeeID: String(oODataEmp["EmployeeId"] ?? ""),
+                    EmployeeName: String(oODataEmp["FullName"] ?? ""),
+                    DepartmentID: String(oODataEmp["Department"] ?? ""),
+                    ManagerID: String(oODataEmp["ManagerSapUser"] ?? ""),
+                    ManagerName: ""
+                };
+
+                oFormModel.setProperty("/employee", oEmp);
+                oFormModel.setProperty("/leaveRequest/ApproverId", oEmp.ManagerID);
+                this._updateSummaryApprover();
+                this._updateEmployeeManagerName();
+                oFormModel.setProperty("/employeeRegistered", true);
+                void this._loadEmployeeQuotas(oEmp.EmployeeID);
+
+                console.info(
+                    `[CreateRequest] Employee found – ID: ${oEmp.EmployeeID}, Name: ${oEmp.EmployeeName}`
+                );
+            } else {
+                // --------------------------------------------------------
+                // User NOT registered → block and show error
+                // --------------------------------------------------------
+                console.warn(
+                    `[CreateRequest] No Employee record found for SapUserName="${sUserId}".`
                 );
                 this._blockWithError(
-                    "An error occurred while checking employee information. " +
-                    "Please try again or contact the administrator.\n\n" +
-                    `Details: ${sDetail}`
+                    "You are not registered in the system. " +
+                    "Please contact the administrator."
                 );
             }
-        });
+        } catch (oErr: any) {
+            // --------------------------------------------------------
+            // OData error → block and show error
+            // --------------------------------------------------------
+            const sDetail = typeof oErr === "string" ? oErr : this._extractODataErrorMessage(oErr);
+            console.error(
+                `[CreateRequest] OData error when reading /Employee (user="${sUserId}"):`,
+                sDetail,
+                oErr
+            );
+            this._blockWithError(
+                "An error occurred while checking employee information. " +
+                "Please try again or contact the administrator.\n\n" +
+                `Details: ${sDetail}`
+            );
+        }
     }
 
     /**
@@ -329,35 +326,26 @@ export default class CreateRequest extends Controller {
         }
     }
 
-    private _loadEmployeeQuotas(sEmployeeId: string): Promise<void> {
-        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+    private async _loadEmployeeQuotas(sEmployeeId: string): Promise<void> {
+        const oMasterDataService = this._getMasterDataService();
         const oFormModel = this._getFormModel();
-        if (!oModel) {
-            return Promise.resolve();
+        if (!oMasterDataService) {
+            return;
         }
 
-        return new Promise<void>((resolve) => {
-            oModel.read("/LeaveQuota", {
-                filters: [
-                    new Filter("EmployeeId", FilterOperator.EQ, sEmployeeId)
-                ],
-                success: (oData: any): void => {
-                    const aQuotas = oData.results || [];
-                    if (aQuotas.length === 0) {
-                        MessageBox.warning("No leave balance data available for this employee.");
-                    }
-                    oFormModel.setProperty("/quotas", aQuotas);
-                    // Trigger balance update in case dates/leave type were already selected
-                    this.onDatesChange();
-                    resolve();
-                },
-                error: (oErr: any): void => {
-                    console.error("[CreateRequest] Failed to load leave quotas:", oErr);
-                    MessageBox.error("Failed to load leave quota from backend.");
-                    resolve();
-                }
-            });
-        });
+        try {
+            const aQuotas = await oMasterDataService.readLeaveQuota(sEmployeeId);
+            if (aQuotas.length === 0) {
+                MessageBox.warning("No leave balance data available for this employee.");
+            }
+            oFormModel.setProperty("/quotas", aQuotas);
+            // Trigger balance update in case dates/leave type were already selected
+            this.onDatesChange();
+        } catch (oErr: any) {
+            const sDetail = typeof oErr === "string" ? oErr : this._extractODataErrorMessage(oErr);
+            console.error("[CreateRequest] Failed to load leave quotas:", sDetail);
+            MessageBox.error("Failed to load leave quota from backend.");
+        }
     }
 
     private _updateSummaryApprover(): void {
@@ -702,6 +690,32 @@ export default class CreateRequest extends Controller {
             );
         }
         return this._oService;
+    }
+
+    private _getEmployeeService(): EmployeeService | null {
+        if (!this._oEmployeeService) {
+            const oRawModel = this.getView().getModel();
+            if (!oRawModel) {
+                return null;
+            }
+            this._oEmployeeService = new EmployeeService(
+                oRawModel as InstanceType<typeof ODataModel>
+            );
+        }
+        return this._oEmployeeService;
+    }
+
+    private _getMasterDataService(): MasterDataService | null {
+        if (!this._oMasterDataService) {
+            const oRawModel = this.getView().getModel();
+            if (!oRawModel) {
+                return null;
+            }
+            this._oMasterDataService = new MasterDataService(
+                oRawModel as InstanceType<typeof ODataModel>
+            );
+        }
+        return this._oMasterDataService;
     }
 
     private _getFormModel(): InstanceType<typeof JSONModel> {

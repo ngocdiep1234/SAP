@@ -234,5 +234,88 @@ export default class LeaveRequestService {
         });
     }
 
+    /**
+     * Reads a single leave request entry from the backend.
+     *
+     * @param sPath - The OData path to read (e.g., "/LeaveRequest(guid'...')").
+     * @returns A Promise that resolves with the leave request data.
+     */
+    public readLeaveRequest(sPath: string): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            this._oModel.read(sPath, {
+                success: (oData: any): void => {
+                    resolve(oData);
+                },
+                error: (oErr: { responseText?: string; message?: string }): void => {
+                    reject(parseODataError(oErr));
+                }
+            });
+        });
+    }
 
+    /**
+     * Updates an existing leave request entry.
+     *
+     * @param sPath - The OData path of the entity to update.
+     * @param oPayload - The data payload containing properties to update.
+     * @returns A Promise that resolves on success or rejects with an error message.
+     */
+    public updateLeaveRequest(sPath: string, oPayload: any): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this._oModel.update(sPath, oPayload, {
+                success: (): void => {
+                    resolve();
+                },
+                error: (oErr: { responseText?: string; message?: string }): void => {
+                    reject(parseODataError(oErr));
+                }
+            });
+        });
+    }
+
+    /**
+     * Deletes a leave request by its UUID.
+     *
+     * @param sUuid - The UUID of the request to delete.
+     * @param bIsAdmin - Whether to delete from /LeaveRequestAdmin or /LeaveRequest.
+     * @returns A Promise that resolves on success or rejects with an error message.
+     */
+    public deleteLeaveRequest(sUuid: string, bIsAdmin: boolean = false): Promise<{ success: boolean; uuid: string; error?: string }> {
+        const sPath = bIsAdmin ? `/LeaveRequestAdmin(guid'${sUuid}')` : `/LeaveRequest(guid'${sUuid}')`;
+        return new Promise((resolve) => {
+            this._oModel.remove(sPath, {
+                success: (): void => {
+                    resolve({ success: true, uuid: sUuid });
+                },
+                error: (oErr: { responseText?: string; message?: string }): void => {
+                    resolve({ success: false, uuid: sUuid, error: parseODataError(oErr) });
+                }
+            });
+        });
+    }
+
+    /**
+     * Invokes an OData function import action (e.g. approveResult, rejectResult).
+     *
+     * @param sActionName - The name of the function import.
+     * @param sUuid - The UUID parameter.
+     * @returns A Promise that resolves with the operation result or rejects with an error message.
+     */
+    public callAction(sActionName: string, sUuid: string): Promise<{ success: boolean; uuid: string; error?: string }> {
+        return new Promise((resolve) => {
+            this._oModel.callFunction("/" + sActionName, {
+                method: "POST",
+                urlParameters: {
+                    UUID: sUuid
+                },
+                success: (): void => {
+                    resolve({ success: true, uuid: sUuid });
+                },
+                error: (oErr: { responseText?: string; message?: string }): void => {
+                    resolve({ success: false, uuid: sUuid, error: parseODataError(oErr) });
+                }
+            });
+        });
+    }
 }
+

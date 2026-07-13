@@ -19,8 +19,39 @@ import ODataModel from "sap/ui/model/odata/v2/ODataModel";
 import Event from "sap/ui/base/Event";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import Sorter from "sap/ui/model/Sorter";
+import LeaveRequestService from "../service/LeaveRequestService";
+import EmployeeService from "../service/EmployeeService";
 
 export default class Requests extends Controller {
+
+    private _oLeaveRequestService: LeaveRequestService;
+    private _oEmployeeService: EmployeeService;
+
+    private _getLeaveRequestService(): LeaveRequestService | null {
+        if (!this._oLeaveRequestService) {
+            const oRawModel = this.getView().getModel();
+            if (!oRawModel) {
+                return null;
+            }
+            this._oLeaveRequestService = new LeaveRequestService(
+                oRawModel as InstanceType<typeof ODataModel>
+            );
+        }
+        return this._oLeaveRequestService;
+    }
+
+    private _getEmployeeService(): EmployeeService | null {
+        if (!this._oEmployeeService) {
+            const oRawModel = this.getView().getModel();
+            if (!oRawModel) {
+                return null;
+            }
+            this._oEmployeeService = new EmployeeService(
+                oRawModel as InstanceType<typeof ODataModel>
+            );
+        }
+        return this._oEmployeeService;
+    }
 
     // Tracks which status the "pending" tab is filtering (SUBMITTED for Manager, MGR_APPROVED for HR)
     private _sPendingStatusFilter: string = "SUBMITTED";
@@ -98,15 +129,14 @@ export default class Requests extends Controller {
     }
 
     private _loadEmployees(): void {
-        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+        const oEmployeeService = this._getEmployeeService();
         const oUiModel = this.getView().getModel("ui") as InstanceType<typeof JSONModel> | undefined;
-        if (!oModel || !oUiModel) {
+        if (!oEmployeeService || !oUiModel) {
             return;
         }
 
-        oModel.read("/Employee", {
-            success: (oData: any): void => {
-                const aEmployees = oData.results || [];
+        oEmployeeService.readEmployees()
+            .then((aEmployees): void => {
                 if (aEmployees.length === 0) {
                     MessageBox.warning("No employee data found on backend.");
                 }
@@ -115,12 +145,11 @@ export default class Requests extends Controller {
                     oMap[emp.EmployeeId] = emp.FullName || emp.SapUserName;
                 });
                 oUiModel.setProperty("/employeesMap", oMap);
-            },
-            error: (oErr: any): void => {
+            })
+            .catch((oErr): void => {
                 console.error("[Requests] Failed to load employees:", oErr);
                 MessageBox.error("Failed to load employee data from backend.");
-            }
-        });
+            });
     }
 
     public formatEmployeeName(
@@ -425,38 +454,11 @@ export default class Requests extends Controller {
     }
 
     private _deleteRequest(sUuid: string): Promise<{ success: boolean; uuid: string; error?: string }> {
-        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
-        return new Promise((resolve) => {
-            if (!oModel) {
-                resolve({ success: false, uuid: sUuid, error: "OData Model is not available" });
-                return;
-            }
-            oModel.remove(`/LeaveRequest(guid'${sUuid}')`, {
-                success: () => {
-                    resolve({ success: true, uuid: sUuid });
-                },
-                error: (oError: { responseText?: string; message?: string }) => {
-                    let sMsg = "Unknown error";
-                    try {
-                        if (oError && oError.responseText) {
-                            const oParsed = JSON.parse(oError.responseText) as {
-                                error?: {
-                                    message?: {
-                                        value?: string;
-                                    };
-                                };
-                            };
-                            sMsg = (oParsed.error && oParsed.error.message && oParsed.error.message.value) || sMsg;
-                        } else if (oError && oError.message) {
-                            sMsg = oError.message;
-                        }
-                    } catch (e) {
-                        sMsg = (oError && oError.message) || sMsg;
-                    }
-                    resolve({ success: false, uuid: sUuid, error: sMsg });
-                }
-            });
-        });
+        const oLeaveRequestService = this._getLeaveRequestService();
+        if (!oLeaveRequestService) {
+            return Promise.resolve({ success: false, uuid: sUuid, error: "Service is not available" });
+        }
+        return oLeaveRequestService.deleteLeaveRequest(sUuid);
     }
 
     private _getActionName(sActionType: "approve" | "reject", bIsHr: boolean): string {
@@ -464,32 +466,11 @@ export default class Requests extends Controller {
     }
 
     private _callAction(sActionName: string, sUuid: string): Promise<{ success: boolean; uuid: string; error?: string }> {
-        const oModel = (this as any).getView().getModel() as any;
-        return new Promise((resolve) => {
-            oModel.callFunction("/" + sActionName, {
-                method: "POST",
-                urlParameters: {
-                    UUID: sUuid
-                },
-                success: () => {
-                    resolve({ success: true, uuid: sUuid });
-                },
-                error: (oError: any) => {
-                    let sMsg = "Unknown error";
-                    try {
-                        if (oError && oError.responseText) {
-                            const oParsed = JSON.parse(oError.responseText);
-                            sMsg = (oParsed.error && oParsed.error.message && oParsed.error.message.value) || sMsg;
-                        } else if (oError && oError.message) {
-                            sMsg = oError.message;
-                        }
-                    } catch (e) {
-                        sMsg = (oError && oError.message) || sMsg;
-                    }
-                    resolve({ success: false, uuid: sUuid, error: sMsg });
-                }
-            });
-        });
+        const oLeaveRequestService = this._getLeaveRequestService();
+        if (!oLeaveRequestService) {
+            return Promise.resolve({ success: false, uuid: sUuid, error: "Service is not available" });
+        }
+        return oLeaveRequestService.callAction(sActionName, sUuid);
     }
 
     public onApproveSelected(): void {
@@ -646,16 +627,25 @@ export default class Requests extends Controller {
     }
 
     private _updateStatus(sPath: string, sStatus: string): void {
-        const oModel = (this as any).getView().getModel();
+        const oLeaveRequestService = this._getLeaveRequestService();
+        if (!oLeaveRequestService) {
+            return;
+        }
         const oPayload = { Status: sStatus } as any;
-        oModel.update(sPath, oPayload, {
-            success: () => {
+        oLeaveRequestService.updateLeaveRequest(sPath, oPayload)
+            .then((): void => {
                 MessageToast.show((this as any).getView().getModel("i18n").getProperty("updateSuccess"));
                 // refresh app-level stats
-                try { (this as any).getView().getModel().refresh(true); } catch { }
-            },
-            error: () => { MessageToast.show((this as any).getView().getModel("i18n").getProperty("updateError")); }
-        });
+                try {
+                    const oModel = (this as any).getView().getModel();
+                    if (oModel) {
+                        oModel.refresh(true);
+                    }
+                } catch { }
+            })
+            .catch((): void => {
+                MessageToast.show((this as any).getView().getModel("i18n").getProperty("updateError"));
+            });
     }
 
     public onApprove(oEvent: any): void {
@@ -750,14 +740,22 @@ export default class Requests extends Controller {
                         Reason: oReason.getValue(),
                         Status: "Pending"
                     };
-                    const oModel = (this as any).getView().getModel();
-                    oModel.create("/LeaveRequest", oEntry, {
-                        success: () => {
-                            MessageToast.show((this as any).getView().getModel("i18n").getProperty("createSuccess"));
-                            try { (this as any).getView().getModel().refresh(true); } catch { }
-                        },
-                        error: () => { MessageToast.show((this as any).getView().getModel("i18n").getProperty("createError")); }
-                    });
+                    const oLeaveRequestService = this._getLeaveRequestService();
+                    if (oLeaveRequestService) {
+                        oLeaveRequestService.createLeaveRequest(oEntry)
+                            .then((): void => {
+                                MessageToast.show((this as any).getView().getModel("i18n").getProperty("createSuccess"));
+                                try {
+                                    const oModel = (this as any).getView().getModel();
+                                    if (oModel) {
+                                        oModel.refresh(true);
+                                    }
+                                } catch { }
+                            })
+                            .catch((): void => {
+                                MessageToast.show((this as any).getView().getModel("i18n").getProperty("createError"));
+                            });
+                    }
                     oDialog.close();
                     oDialog.destroy();
                 }

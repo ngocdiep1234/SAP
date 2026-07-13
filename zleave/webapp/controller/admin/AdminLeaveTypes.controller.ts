@@ -6,12 +6,27 @@ import Fragment from "sap/ui/core/Fragment";
 import MessageToast from "sap/m/MessageToast";
 import MessageBox from "sap/m/MessageBox";
 import ODataModel from "sap/ui/model/odata/v2/ODataModel";
+import AdminService from "../../service/AdminService";
 
 /**
  * @namespace zleave.zleave.controller.admin
  */
 export default class AdminLeaveTypes extends Controller {
     private _oDialog: any = null;
+    private _oAdminService: AdminService;
+
+    private _getAdminService(): AdminService | null {
+        if (!this._oAdminService) {
+            const oRawModel = (this as any).getOwnerComponent().getModel();
+            if (!oRawModel) {
+                return null;
+            }
+            this._oAdminService = new AdminService(
+                oRawModel as InstanceType<typeof ODataModel>
+            );
+        }
+        return this._oAdminService;
+    }
 
     public onInit(): void {
         const oDialogModel = new JSONModel({
@@ -97,19 +112,25 @@ export default class AdminLeaveTypes extends Controller {
                 emphasizedAction: MessageBox.Action.YES,
                 onClose: (sAction: string) => {
                     if (sAction === MessageBox.Action.YES) {
-                        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
+                        const oAdminService = this._getAdminService();
+                        if (!oAdminService) {
+                            return;
+                        }
                         this.getView().setBusy(true);
 
-                        oModel.remove(`/LeaveTypeAdmin(LeaveTypeId='${sLeaveTypeId}')`, {
-                            success: () => {
+                        oAdminService.deleteLeaveType(sLeaveTypeId)
+                            .then((): void => {
                                 this.getView().setBusy(false);
                                 MessageToast.show("Leave Type deleted successfully.");
-                            },
-                            error: (oErr: any) => {
+                                const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+                                if (oModel) {
+                                    oModel.refresh(true);
+                                }
+                            })
+                            .catch((): void => {
                                 this.getView().setBusy(false);
                                 MessageBox.error("Failed to delete Leave Type. Please try again.");
-                            }
-                        });
+                            });
                     }
                 }
             }
@@ -156,53 +177,42 @@ export default class AdminLeaveTypes extends Controller {
             IsActive: bIsActive
         };
 
-        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
+        const oAdminService = this._getAdminService();
+        if (!oAdminService) {
+            return;
+        }
         this.getView().setBusy(true);
 
+        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+
         if (oData.isCreate) {
-            oModel.create("/LeaveTypeAdmin", oPayload, {
-                success: () => {
+            oAdminService.createLeaveType(oPayload)
+                .then((): void => {
                     this.getView().setBusy(false);
                     MessageToast.show("Leave Type created successfully.");
-                    oModel.refresh(true);
-                    this.onCloseDialog();
-                },
-                error: (oErr: any) => {
-                    this.getView().setBusy(false);
-                    let sMsg = "Failed to create Leave Type.";
-                    try {
-                        const oResponse = JSON.parse(oErr.responseText);
-                        if (oResponse?.error?.message?.value) {
-                            sMsg = oResponse.error.message.value;
-                        }
-                    } catch (e) {
-                        // ignore
+                    if (oModel) {
+                        oModel.refresh(true);
                     }
-                    MessageBox.error(sMsg);
-                }
-            });
+                    this.onCloseDialog();
+                })
+                .catch((sMsg: string): void => {
+                    this.getView().setBusy(false);
+                    MessageBox.error(sMsg || "Failed to create Leave Type.");
+                });
         } else {
-            oModel.update(`/LeaveTypeAdmin(LeaveTypeId='${oData.LeaveTypeId}')`, oPayload, {
-                success: () => {
+            oAdminService.updateLeaveType(oData.LeaveTypeId, oPayload)
+                .then((): void => {
                     this.getView().setBusy(false);
                     MessageToast.show("Leave Type updated successfully.");
-                    oModel.refresh(true);
-                    this.onCloseDialog();
-                },
-                error: (oErr: any) => {
-                    this.getView().setBusy(false);
-                    let sMsg = "Failed to update Leave Type.";
-                    try {
-                        const oResponse = JSON.parse(oErr.responseText);
-                        if (oResponse?.error?.message?.value) {
-                            sMsg = oResponse.error.message.value;
-                        }
-                    } catch (e) {
-                        // ignore
+                    if (oModel) {
+                        oModel.refresh(true);
                     }
-                    MessageBox.error(sMsg);
-                }
-            });
+                    this.onCloseDialog();
+                })
+                .catch((sMsg: string): void => {
+                    this.getView().setBusy(false);
+                    MessageBox.error(sMsg || "Failed to update Leave Type.");
+                });
         }
     }
 

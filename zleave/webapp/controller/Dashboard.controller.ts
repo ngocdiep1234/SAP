@@ -7,6 +7,8 @@ import ODataModel from "sap/ui/model/odata/v2/ODataModel";
 import ManagedObject from "sap/ui/base/ManagedObject";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
+import LeaveRequestService from "../service/LeaveRequestService";
+import MasterDataService from "../service/MasterDataService";
 
 interface LeaveRequest {
     UUID: string;
@@ -41,6 +43,35 @@ interface LeaveQuotaResult {
 
 export default class Dashboard extends Controller {
 
+    private _oLeaveRequestService: LeaveRequestService;
+    private _oMasterDataService: MasterDataService;
+
+    private _getLeaveRequestService(): LeaveRequestService | null {
+        if (!this._oLeaveRequestService) {
+            const oRawModel = (this as any).getOwnerComponent().getModel();
+            if (!oRawModel) {
+                return null;
+            }
+            this._oLeaveRequestService = new LeaveRequestService(
+                oRawModel as InstanceType<typeof ODataModel>
+            );
+        }
+        return this._oLeaveRequestService;
+    }
+
+    private _getMasterDataService(): MasterDataService | null {
+        if (!this._oMasterDataService) {
+            const oRawModel = (this as any).getOwnerComponent().getModel();
+            if (!oRawModel) {
+                return null;
+            }
+            this._oMasterDataService = new MasterDataService(
+                oRawModel as InstanceType<typeof ODataModel>
+            );
+        }
+        return this._oMasterDataService;
+    }
+
     public onInit(): void {
         const oRouter = (this as any).getOwnerComponent().getRouter();
         oRouter.getRoute("dashboard").attachPatternMatched(this._onPatternMatched, this);
@@ -52,36 +83,35 @@ export default class Dashboard extends Controller {
     }
 
     public loadLeaveQuota(): void {
-        const oModel = (this as any).getOwnerComponent().getModel() as InstanceType<typeof ODataModel> | undefined;
+        const oMasterDataService = this._getMasterDataService();
         let oQuotaModel = this.getView().getModel("quota") as InstanceType<typeof JSONModel> | undefined;
         if (!oQuotaModel) {
             oQuotaModel = new JSONModel({ results: [] });
             this.getView().setModel(oQuotaModel, "quota");
         }
 
-        if (!oModel) {
+        if (!oMasterDataService) {
             return;
         }
 
         this.getView().setBusy(true);
 
-        oModel.read("/LeaveQuota", {
-            success: (oData: LeaveQuotaResult): void => {
+        oMasterDataService.readLeaveQuota()
+            .then((aQuotas) => {
                 this.getView().setBusy(false);
-                if (oData && oData.results && oData.results.length > 0) {
-                    oQuotaModel?.setData(oData);
+                if (aQuotas && aQuotas.length > 0) {
+                    oQuotaModel?.setData({ results: aQuotas });
                 } else {
                     oQuotaModel?.setData({ results: [] });
                     MessageBox.warning("No leave balance data available on the backend.");
                 }
-            },
-            error: (oErr: unknown): void => {
+            })
+            .catch((oErr) => {
                 this.getView().setBusy(false);
                 console.error("[Dashboard] Failed to load leave quota:", oErr);
                 oQuotaModel?.setData({ results: [] });
                 MessageBox.error("Failed to load leave quota from backend.");
-            }
-        });
+            });
     }
 
     private _onPatternMatched(): void {
@@ -152,29 +182,26 @@ export default class Dashboard extends Controller {
     }
 
     private _cancelODataRequest(oRequest: LeaveRequest): void {
-        const oModel = (this as any).getOwnerComponent().getModel();
-        if (!oModel) {
+        const oLeaveRequestService = this._getLeaveRequestService();
+        if (!oLeaveRequestService) {
             return;
         }
 
         this.getView().setBusy(true);
 
-        // Find the OData path. Because we bound from the ui model copy, we locate by UUID.
-        // OData path is usually "/LeaveRequest(guid'<UUID>')" or "/LeaveRequest(UUID=guid'<UUID>')"
         const sPath = `/LeaveRequest(guid'${oRequest.UUID}')`;
         const oPayload = { Status: "Cancelled" };
 
-        oModel.update(sPath, oPayload, {
-            success: (): void => {
+        oLeaveRequestService.updateLeaveRequest(sPath, oPayload)
+            .then((): void => {
                 this.getView().setBusy(false);
                 MessageToast.show(`Request ${oRequest.RequestId} cancelled successfully`);
                 this.loadLeaveQuota();
-            },
-            error: (): void => {
+            })
+            .catch((): void => {
                 this.getView().setBusy(false);
                 MessageBox.error("Failed to cancel the request");
-            }
-        });
+            });
     }
 
     public onDeleteRequest(oEvent: InstanceType<typeof Event>): void {
@@ -204,26 +231,27 @@ export default class Dashboard extends Controller {
     }
 
     private _deleteODataRequest(oRequest: LeaveRequest): void {
-        const oModel = (this as any).getOwnerComponent().getModel() as InstanceType<typeof ODataModel> | undefined;
-        if (!oModel) {
+        const oLeaveRequestService = this._getLeaveRequestService();
+        if (!oLeaveRequestService) {
             return;
         }
 
         this.getView().setBusy(true);
 
-        const sPath = `/LeaveRequest(guid'${oRequest.UUID}')`;
-
-        oModel.remove(sPath, {
-            success: (): void => {
+        oLeaveRequestService.deleteLeaveRequest(oRequest.UUID)
+            .then((oRes): void => {
                 this.getView().setBusy(false);
-                MessageToast.show(`Request ${oRequest.RequestId} deleted successfully`);
-                this.loadLeaveQuota();
-            },
-            error: (): void => {
+                if (oRes.success) {
+                    MessageToast.show(`Request ${oRequest.RequestId} deleted successfully`);
+                    this.loadLeaveQuota();
+                } else {
+                    MessageBox.error(oRes.error || "Failed to delete the request");
+                }
+            })
+            .catch((): void => {
                 this.getView().setBusy(false);
                 MessageBox.error("Failed to delete the request");
-            }
-        });
+            });
     }
 
     public onTilePress(): void {
