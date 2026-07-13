@@ -1,6 +1,5 @@
 import Controller from "sap/ui/core/mvc/Controller";
 import MessageBox from "sap/m/MessageBox";
-import MessageToast from "sap/m/MessageToast";
 
 /**
  * @namespace zleave.zleave.controller
