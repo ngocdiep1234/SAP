@@ -460,38 +460,7 @@ export default class Requests extends Controller {
     }
 
     private _getActionName(sActionType: "approve" | "reject", bIsHr: boolean): string {
-        const oModel = (this as any).getView().getModel() as any;
-        if (oModel && typeof oModel.getServiceMetadata === "function") {
-            const oMetadata = oModel.getServiceMetadata();
-            if (oMetadata && oMetadata.dataServices && oMetadata.dataServices.schema) {
-                const aSchemas = oMetadata.dataServices.schema;
-                for (const oSchema of aSchemas) {
-                    if (oSchema.entityContainer) {
-                        const aContainers = Array.isArray(oSchema.entityContainer) ? oSchema.entityContainer : [oSchema.entityContainer];
-                        for (const oContainer of aContainers) {
-                            if (oContainer.functionImport) {
-                                const aFuncs = Array.isArray(oContainer.functionImport) ? oContainer.functionImport : [oContainer.functionImport];
-                                const sTargetName = bIsHr
-                                    ? (sActionType === "approve" ? "hrApproveResult" : "hrRejectResult")
-                                    : (sActionType === "approve" ? "approveResult" : "rejectResult");
-                                const sAltName = bIsHr
-                                    ? (sActionType === "approve" ? "hrApproveLeave" : "hrRejectLeave")
-                                    : (sActionType === "approve" ? "approveLeave" : "rejectLeave");
-                                if (aFuncs.some((f: any) => f.name === sTargetName)) {
-                                    return sTargetName;
-                                }
-                                if (aFuncs.some((f: any) => f.name === sAltName)) {
-                                    return sAltName;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return bIsHr
-            ? (sActionType === "approve" ? "hrApproveResult" : "hrRejectResult")
-            : (sActionType === "approve" ? "approveLeave" : "rejectLeave");
+        return sActionType === "approve" ? "approveResult" : "rejectResult";
     }
 
     private _callAction(sActionName: string, sUuid: string): Promise<{ success: boolean; uuid: string; error?: string }> {
@@ -551,12 +520,8 @@ export default class Requests extends Controller {
 
             // Check dynamic action controls first (backend-driven _ac flags)
             // Fallback: match current pending status filter (SUBMITTED for MGR, MGR_APPROVED for HR)
-            const bApproveAc = bIsHr
-                ? (oContext.getProperty("hrApproveResult_ac") ?? oContext.getProperty("hrApproveLeave_ac"))
-                : (oContext.getProperty("approveLeave_ac") ?? oContext.getProperty("approveResult_ac"));
-            const bRejectAc = bIsHr
-                ? (oContext.getProperty("hrRejectResult_ac") ?? oContext.getProperty("hrRejectLeave_ac"))
-                : (oContext.getProperty("rejectLeave_ac") ?? oContext.getProperty("rejectResult_ac"));
+            const bApproveAc = oContext.getProperty("approveLeave_ac") ?? oContext.getProperty("approveResult_ac");
+            const bRejectAc = oContext.getProperty("rejectLeave_ac") ?? oContext.getProperty("rejectResult_ac");
             const sStatus = String(oContext.getProperty("Status") || "").toUpperCase();
             // Use _sPendingStatusFilter: "SUBMITTED" for Manager, "MGR_APPROVED" for HR
             const bStatusEligible = sStatus === this._sPendingStatusFilter.toUpperCase()

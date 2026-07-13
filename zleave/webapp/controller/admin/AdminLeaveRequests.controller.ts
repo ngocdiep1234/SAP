@@ -71,17 +71,17 @@ export default class AdminLeaveRequests extends Controller {
         const oCurrentUser = oUiModel?.getProperty("/currentUser");
         const bIsAdmin = oCurrentUser && (oCurrentUser.is_admin === "X" || oCurrentUser.is_admin === "true" || oCurrentUser.is_admin === "1");
         const bIsHr = oCurrentUser && (oCurrentUser.is_hr === "X" || oCurrentUser.is_hr === "true" || oCurrentUser.is_hr === "1");
-        const bIsAdminOrHr = bIsAdmin || bIsHr;
-
-        const sExpectedStatus = this._sPendingStatusFilter.toUpperCase();
         const bEnabled = aSelectedItems.length > 0 && aSelectedItems.some((oItem: InstanceType<typeof ListItemBase>) => {
             const oContext = oItem.getBindingContext();
             if (!oContext) { return false; }
             const sStatus = String(oContext.getProperty("Status") || "").toUpperCase();
-            if (bIsAdminOrHr) {
+            if (bIsAdmin) {
                 return sStatus === "SUBMITTED" || sStatus === "MGR_APPROVED";
             }
-            return sStatus === sExpectedStatus;
+            if (bIsHr) {
+                return sStatus === "MGR_APPROVED";
+            }
+            return false;
         });
 
         if (oBtnApprove) { oBtnApprove.setEnabled(bEnabled); }
@@ -206,7 +206,7 @@ export default class AdminLeaveRequests extends Controller {
             const vIsHr = oCurrentUser.is_hr;
             const bIsHr = vIsHr === "X" || vIsHr === "true" || vIsHr === "1";
 
-            if (bIsAdmin || bIsHr) {
+            if (bIsAdmin) {
                 aFilters.push(new Filter({
                     filters: [
                         new Filter("Status", FilterOperator.EQ, "SUBMITTED"),
@@ -214,12 +214,13 @@ export default class AdminLeaveRequests extends Controller {
                     ],
                     and: false
                 }));
+                this._sPendingStatusFilter = "SUBMITTED";
+            } else if (bIsHr) {
+                aFilters.push(new Filter("Status", FilterOperator.EQ, "MGR_APPROVED"));
+                this._sPendingStatusFilter = "MGR_APPROVED";
             } else {
-                const sPendingStatus = bIsHr ? "MGR_APPROVED" : "SUBMITTED";
-                this._sPendingStatusFilter = sPendingStatus;
-                console.log("[DEBUG][Pending] Full currentUser:", JSON.stringify(oCurrentUser));
-                console.log("[DEBUG][Pending] is_hr raw:", JSON.stringify(vIsHr), "| bIsHr:", bIsHr, "| Status filter:", sPendingStatus);
-                aFilters.push(new Filter("Status", FilterOperator.EQ, sPendingStatus));
+                aFilters.push(new Filter("Status", FilterOperator.EQ, ""));
+                this._sPendingStatusFilter = "";
             }
 
             if (sCurrentEmployeeId) {
@@ -383,38 +384,7 @@ export default class AdminLeaveRequests extends Controller {
     }
 
     private _getActionName(sActionType: "approve" | "reject", bIsHr: boolean): string {
-        const oModel = (this as any).getView().getModel() as any;
-        if (oModel && typeof oModel.getServiceMetadata === "function") {
-            const oMetadata = oModel.getServiceMetadata();
-            if (oMetadata && oMetadata.dataServices && oMetadata.dataServices.schema) {
-                const aSchemas = oMetadata.dataServices.schema;
-                for (const oSchema of aSchemas) {
-                    if (oSchema.entityContainer) {
-                        const aContainers = Array.isArray(oSchema.entityContainer) ? oSchema.entityContainer : [oSchema.entityContainer];
-                        for (const oContainer of aContainers) {
-                            if (oContainer.functionImport) {
-                                const aFuncs = Array.isArray(oContainer.functionImport) ? oContainer.functionImport : [oContainer.functionImport];
-                                const sTargetName = bIsHr
-                                    ? (sActionType === "approve" ? "hrApproveResult" : "hrRejectResult")
-                                    : (sActionType === "approve" ? "approveResult" : "rejectResult");
-                                const sAltName = bIsHr
-                                    ? (sActionType === "approve" ? "hrApproveLeave" : "hrRejectLeave")
-                                    : (sActionType === "approve" ? "approveLeave" : "rejectLeave");
-                                if (aFuncs.some((f: any) => f.name === sTargetName)) {
-                                    return sTargetName;
-                                }
-                                if (aFuncs.some((f: any) => f.name === sAltName)) {
-                                    return sAltName;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return bIsHr
-            ? (sActionType === "approve" ? "hrApproveResult" : "hrRejectResult")
-            : (sActionType === "approve" ? "approveLeave" : "rejectLeave");
+        return sActionType === "approve" ? "hrApproveResult" : "hrRejectResult";
     }
 
     private _callAction(sActionName: string, sUuid: string): Promise<{ success: boolean; uuid: string; error?: string }> {
@@ -472,12 +442,8 @@ export default class AdminLeaveRequests extends Controller {
             const oContext = oItem.getBindingContext();
             if (!oContext) { return false; }
 
-            const bApproveAc = bIsHr
-                ? (oContext.getProperty("hrApproveResult_ac") ?? oContext.getProperty("hrApproveLeave_ac"))
-                : (oContext.getProperty("approveLeave_ac") ?? oContext.getProperty("approveResult_ac"));
-            const bRejectAc = bIsHr
-                ? (oContext.getProperty("hrRejectResult_ac") ?? oContext.getProperty("hrRejectLeave_ac"))
-                : (oContext.getProperty("rejectLeave_ac") ?? oContext.getProperty("rejectResult_ac"));
+            const bApproveAc = oContext.getProperty("hrApproveResult_ac") ?? oContext.getProperty("hrApproveLeave_ac");
+            const bRejectAc = oContext.getProperty("hrRejectResult_ac") ?? oContext.getProperty("hrRejectLeave_ac");
             const sStatus = String(oContext.getProperty("Status") || "").toUpperCase();
             const bStatusEligible = sStatus === this._sPendingStatusFilter.toUpperCase()
                 || sStatus === "SUBMITTED"
