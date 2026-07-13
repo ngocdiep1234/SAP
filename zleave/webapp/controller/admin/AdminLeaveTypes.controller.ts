@@ -94,7 +94,7 @@ export default class AdminLeaveTypes extends Controller {
         this._openDialog();
     }
 
-    public onDeleteLeaveType(oEvent: any): void {
+    public onActivateLeaveType(oEvent: any): void {
         const oButton = oEvent.getSource();
         const oBindingContext = oButton.getBindingContext();
         if (!oBindingContext) {
@@ -106,7 +106,7 @@ export default class AdminLeaveTypes extends Controller {
         const sLeaveTypeName = oData.LeaveTypeName;
 
         MessageBox.confirm(
-            `Are you sure you want to delete leave type "${sLeaveTypeName}" (${sLeaveTypeId})?`,
+            `Are you sure you want to activate leave type "${sLeaveTypeName}" (${sLeaveTypeId})?`,
             {
                 actions: [MessageBox.Action.YES, MessageBox.Action.NO],
                 emphasizedAction: MessageBox.Action.YES,
@@ -118,10 +118,10 @@ export default class AdminLeaveTypes extends Controller {
                         }
                         this.getView().setBusy(true);
 
-                        oAdminService.deleteLeaveType(sLeaveTypeId)
+                        oAdminService.activateLeaveType(sLeaveTypeId)
                             .then((): void => {
                                 this.getView().setBusy(false);
-                                MessageToast.show("Leave Type deleted successfully.");
+                                MessageToast.show("Leave Type activated successfully.");
                                 const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
                                 if (oModel) {
                                     oModel.refresh(true);
@@ -129,7 +129,50 @@ export default class AdminLeaveTypes extends Controller {
                             })
                             .catch((): void => {
                                 this.getView().setBusy(false);
-                                MessageBox.error("Failed to delete Leave Type. Please try again.");
+                                MessageBox.error("Failed to activate Leave Type. Please try again.");
+                            });
+                    }
+                }
+            }
+        );
+    }
+
+    public onDeactivateLeaveType(oEvent: any): void {
+        const oButton = oEvent.getSource();
+        const oBindingContext = oButton.getBindingContext();
+        if (!oBindingContext) {
+            return;
+        }
+
+        const oData = oBindingContext.getObject();
+        const sLeaveTypeId = oData.LeaveTypeId;
+        const sLeaveTypeName = oData.LeaveTypeName;
+
+        MessageBox.confirm(
+            `Are you sure you want to deactivate leave type "${sLeaveTypeName}" (${sLeaveTypeId})?`,
+            {
+                actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+                emphasizedAction: MessageBox.Action.YES,
+                onClose: (sAction: string) => {
+                    if (sAction === MessageBox.Action.YES) {
+                        const oAdminService = this._getAdminService();
+                        if (!oAdminService) {
+                            return;
+                        }
+                        this.getView().setBusy(true);
+
+                        oAdminService.deactivateLeaveType(sLeaveTypeId)
+                            .then((): void => {
+                                this.getView().setBusy(false);
+                                MessageToast.show("Leave Type deactivated successfully.");
+                                const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
+                                if (oModel) {
+                                    oModel.refresh(true);
+                                }
+                            })
+                            .catch((): void => {
+                                this.getView().setBusy(false);
+                                MessageBox.error("Failed to deactivate Leave Type. Please try again.");
                             });
                     }
                 }

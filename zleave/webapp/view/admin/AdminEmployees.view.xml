@@ -5,17 +5,28 @@
     xmlns:core="sap.ui.core"
     height="100%">
     <Page title="Employees Management" showHeader="true">
-        <headerContent>
-            <SearchField
-                id="searchField"
-                width="300px"
-                placeholder="Search by name, user, department..."
-                search=".onSearch"/>
-        </headerContent>
         <content>
-            <Table
-                id="tableEmployees"
-                width="auto"
+            <VBox class="sapUiResponsiveMargin">
+                <SearchField
+                    id="searchField"
+                    width="18rem"
+                    placeholder="Search by name, user, department..."
+                    search=".onSearch"
+                    class="tableFilter"/>
+                <SegmentedButton
+                    id="statusFilterButton"
+                    select=".onStatusFilterChange"
+                    selectedKey="all"
+                    class="sapUiSmallMarginBottom">
+                    <items>
+                        <SegmentedButtonItem key="all" text="All Employees" />
+                        <SegmentedButtonItem key="active" text="Active" />
+                        <SegmentedButtonItem key="inactive" text="Inactive" />
+                    </items>
+                </SegmentedButton>
+                <Table
+                    id="tableEmployees"
+                    width="auto"
                 items="{
                     path: '/EmployeeAdmin',
                     sorter: { path: 'FullName' }
@@ -23,7 +34,7 @@
                 growing="true"
                 growingThreshold="20"
                 mode="None"
-                class="sapUiResponsiveMargin employeeTable">
+                class="employeeTable">
                 <headerToolbar>
                     <OverflowToolbar>
                         <Title text="Employee List" level="H2"/>
@@ -108,6 +119,7 @@
                     </ColumnListItem>
                 </items>
             </Table>
+            </VBox>
         </content>
     </Page>
 </mvc:View>

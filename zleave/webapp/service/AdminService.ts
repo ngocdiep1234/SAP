@@ -19,7 +19,7 @@ export default class AdminService {
      */
     public activateEmployee(sEmployeeId: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            this._oModel.callFunction("/activate", {
+            this._oModel.callFunction("/activateEmployee", {
                 method: "POST",
                 urlParameters: {
                     EmployeeId: sEmployeeId
@@ -42,7 +42,7 @@ export default class AdminService {
      */
     public deactivateEmployee(sEmployeeId: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            this._oModel.callFunction("/deactivate", {
+            this._oModel.callFunction("/deactivateEmployee", {
                 method: "POST",
                 urlParameters: {
                     EmployeeId: sEmployeeId
@@ -167,6 +167,52 @@ export default class AdminService {
         return new Promise<void>((resolve, reject) => {
             const sPath = `/LeaveTypeAdmin(LeaveTypeId='${sLeaveTypeId}')`;
             this._oModel.remove(sPath, {
+                success: (): void => {
+                    resolve();
+                },
+                error: (oErr: { responseText?: string; message?: string }): void => {
+                    reject(parseODataError(oErr));
+                }
+            });
+        });
+    }
+
+    /**
+     * Activates a leave type by LeaveTypeId.
+     * 
+     * @param sLeaveTypeId - Leave Type ID to activate
+     * @returns Promise resolving on success
+     */
+    public activateLeaveType(sLeaveTypeId: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this._oModel.callFunction("/activateLeaveType", {
+                method: "POST",
+                urlParameters: {
+                    LeaveTypeId: sLeaveTypeId
+                },
+                success: (): void => {
+                    resolve();
+                },
+                error: (oErr: { responseText?: string; message?: string }): void => {
+                    reject(parseODataError(oErr));
+                }
+            });
+        });
+    }
+
+    /**
+     * Deactivates a leave type by LeaveTypeId.
+     * 
+     * @param sLeaveTypeId - Leave Type ID to deactivate
+     * @returns Promise resolving on success
+     */
+    public deactivateLeaveType(sLeaveTypeId: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            this._oModel.callFunction("/deactivateLeaveType", {
+                method: "POST",
+                urlParameters: {
+                    LeaveTypeId: sLeaveTypeId
+                },
                 success: (): void => {
                     resolve();
                 },

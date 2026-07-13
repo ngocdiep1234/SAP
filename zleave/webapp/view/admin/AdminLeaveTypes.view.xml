@@ -76,10 +76,17 @@
                                     press=".onEditLeaveType"
                                     tooltip="Edit Leave Type"/>
                                 <Button
-                                    icon="sap-icon://delete"
+                                    icon="sap-icon://accept"
                                     type="Transparent"
-                                    press=".onDeleteLeaveType"
-                                    tooltip="Delete Leave Type"/>
+                                    press=".onActivateLeaveType"
+                                    visible="{= !${IsActive} }"
+                                    tooltip="Activate Leave Type"/>
+                                <Button
+                                    icon="sap-icon://decline"
+                                    type="Transparent"
+                                    press=".onDeactivateLeaveType"
+                                    visible="{= ${IsActive} === true || ${IsActive} === 'true' || ${IsActive} === 'X' }"
+                                    tooltip="Deactivate Leave Type"/>
                             </HBox>
                         </cells>
                     </ColumnListItem>

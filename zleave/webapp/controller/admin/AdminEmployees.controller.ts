@@ -47,9 +47,26 @@ export default class AdminEmployees extends Controller {
     }
 
     public onSearch(oEvent: any): void {
-        const sQuery = oEvent.getParameter("query");
+        this._applyFilters();
+    }
+
+    public onStatusFilterChange(oEvent: any): void {
+        this._applyFilters();
+    }
+
+    private _applyFilters(): void {
+        const oSearchField = this.getView().byId("searchField") as any;
+        const sQuery = oSearchField ? oSearchField.getValue() : "";
+
+        const oStatusFilter = this.getView().byId("statusFilterButton") as any;
+        const sStatus = oStatusFilter ? oStatusFilter.getSelectedKey() : "all";
+
         const oTable = this.getView().byId("tableEmployees") as any;
-        const oBinding = oTable.getBinding("items");
+        const oBinding = oTable ? oTable.getBinding("items") : null;
+
+        if (!oBinding) {
+            return;
+        }
 
         const aFilters = [];
         if (sQuery && sQuery.trim().length > 0) {
@@ -63,6 +80,13 @@ export default class AdminEmployees extends Controller {
                 and: false
             }));
         }
+
+        if (sStatus === "active") {
+            aFilters.push(new Filter("IsActive", FilterOperator.EQ, true));
+        } else if (sStatus === "inactive") {
+            aFilters.push(new Filter("IsActive", FilterOperator.EQ, false));
+        }
+
         oBinding.filter(aFilters);
     }
 
