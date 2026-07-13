@@ -127,8 +127,8 @@
 <Property Name="MimeType" Type="Edm.String" MaxLength="128"/>
 <Property Name="FileName" Type="Edm.String" MaxLength="128"/>
 <Property Name="CreatedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:creatable="false" sap:updatable="false"/>
-<Property Name="ApprovalComment" Type="Edm.String" MaxLength="255"/>
-<Property Name="HrComment" Type="Edm.String" MaxLength="255"/>
+<Property Name="ApprovalComment" Type="Edm.String" MaxLength="255" sap:updatable="false"/>
+<Property Name="HrComment" Type="Edm.String" MaxLength="255" sap:updatable="false"/>
 <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
 <Property Name="LastChangedBy" Type="Edm.String" MaxLength="12" sap:display-format="UpperCase" sap:label="Benutzername" sap:creatable="false" sap:updatable="false"/>
 <Property Name="LastChangedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)" sap:creatable="false" sap:updatable="false"/>
@@ -142,6 +142,7 @@
 <Property Name="LeaveTypeId" Type="Edm.String" Nullable="false" MaxLength="5" sap:updatable="false"/>
 <Property Name="LeaveTypeName" Type="Edm.String" Nullable="false" MaxLength="50"/>
 <Property Name="MaxDaysPerYear" Type="Edm.Decimal" Precision="5" Scale="2"/>
+<Property Name="IsPaid" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
 <Property Name="RequiresApproval" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
 <Property Name="IsActive" Type="Edm.Boolean" sap:display-format="UpperCase" sap:label="Wahrheitswert" sap:quickinfo="Wahrheitswert: wahr/falsch"/>
 </EntityType>
@@ -197,6 +198,7 @@
 <Property Name="Status" Type="Edm.String" MaxLength="15"/>
 <Property Name="StatusCriticality" Type="Edm.Byte"/>
 <Property Name="ApprovalComment" Type="Edm.String" MaxLength="255"/>
+<Property Name="HrApprovalComment" Type="Edm.String" MaxLength="255"/>
 <Property Name="MimeType" Type="Edm.String" MaxLength="128"/>
 <Property Name="FileName" Type="Edm.String" MaxLength="128"/>
 <Property Name="CreatedAt" Type="Edm.DateTimeOffset" Precision="7" sap:label="Zeitstempel" sap:quickinfo="UTC-Zeitstempel in Langform (JJJJMMTThhmmssmmmuuun)"/>
@@ -694,6 +696,12 @@
 </Annotation>
 </Annotations>
 <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.EmployeeAdminType/IsActive">
+<Annotation Term="SAP__core.Immutable"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.LeaveRequestType/ApprovalComment">
+<Annotation Term="SAP__core.Immutable"/>
+</Annotations>
+<Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.LeaveRequestType/HrComment">
 <Annotation Term="SAP__core.Immutable"/>
 </Annotations>
 <Annotations xmlns="http://docs.oasis-open.org/odata/ns/edm" Target="cds_zui_leave_mgmt.LeaveTypeAdminType/LeaveTypeId">

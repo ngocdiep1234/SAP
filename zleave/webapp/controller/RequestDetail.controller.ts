@@ -167,14 +167,69 @@ export default class RequestDetail extends Controller {
     }
 
     public onEdit(): void {
-        this._getUiModel().setProperty("/editMode", true);
+        const oContext = this.getView().getBindingContext();
+        if (!oContext) {
+            this._getUiModel().setProperty("/editMode", true);
+            return;
+        }
+
+        const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
+        const oUiModel = this._getUiModel();
+        oUiModel.setProperty("/busy", true);
+
+        const sPath = oContext.getPath();
+        oModel.read(sPath, {
+            success: (oData: any): void => {
+                oUiModel.setProperty("/busy", false);
+                const sStatus = oData?.Status;
+                if (sStatus === "SUBMITTED") {
+                    oUiModel.setProperty("/editMode", true);
+                } else {
+                    MessageBox.error(`This request is now in "${sStatus}" status and can no longer be edited.`, {
+                        onClose: () => {
+                            void this._updateApproveRejectVisibility();
+                        }
+                    });
+                }
+            },
+            error: (oErr: any): void => {
+                oUiModel.setProperty("/busy", false);
+                let sMsg = "Failed to load the latest request details from backend.";
+                try {
+                    if (oErr && oErr.responseText) {
+                        const oParsed = JSON.parse(oErr.responseText);
+                        sMsg = oParsed.error?.message?.value || sMsg;
+                    }
+                } catch (e) {
+                    // ignore
+                }
+                MessageBox.error(sMsg);
+            }
+        });
     }
 
     public onCancelEdit(): void {
-        this._getUiModel().setProperty("/editMode", false);
+        const oUiModel = this._getUiModel();
+        oUiModel.setProperty("/editMode", false);
+        oUiModel.setProperty("/uploadStatusText", "");
+        oUiModel.setProperty("/uploadButtonEnabled", false);
+
         const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
         if (oModel) {
             oModel.resetChanges();
+            // Re-bind element to reload fresh data from backend
+            const oContext = this.getView().getBindingContext();
+            if (oContext) {
+                const sPath = oContext.getPath();
+                oModel.read(sPath, {
+                    success: (): void => {
+                        void this._updateApproveRejectVisibility();
+                    },
+                    error: (oErr: any): void => {
+                        console.error("[RequestDetail] Failed to refresh after cancel:", oErr);
+                    }
+                });
+            }
         }
     }
 
@@ -232,6 +287,16 @@ export default class RequestDetail extends Controller {
         oModel.setProperty(oContext.getPath() + "/TotalDays", nDays);
     }
 
+    /**
+     * Normalize a local Date to midnight UTC so the correct calendar date
+     * is sent to the backend regardless of the client's timezone offset.
+     * Example: user picks 2026-07-17 in UTC+7 → local Date is 2026-07-17T00:00+07:00
+     *          → serialized as 2026-07-16T17:00Z (wrong!) without this fix.
+     */
+    private _toUTCDate(d: Date): Date {
+        return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    }
+
     public onUpdate(): void {
         const oContext = this.getView().getBindingContext();
         if (!oContext) {
@@ -241,11 +306,20 @@ export default class RequestDetail extends Controller {
         const oModel = this.getView().getModel() as InstanceType<typeof ODataModel>;
         const oUiModel = this._getUiModel();
 
-        const sLeaveType = oContext.getProperty("LeaveType") as string;
-        const oStartDate = oContext.getProperty("StartDate") as Date | null;
-        const oEndDate = oContext.getProperty("EndDate") as Date | null;
-        // Read Reason directly from the TextArea control to avoid OData two-way binding flush issue
+        // Read ALL editable field values directly from UI controls
+        // to avoid OData two-way binding flush issues (same pattern as Reason/TextArea)
+        const oCmbLeaveType = this.byId("cmbLeaveType") as any;
+        const oDpStart = this.byId("dpStartDate") as any;
+        const oDpEnd = this.byId("dpEndDate") as any;
+        const oSelStart = this.byId("selStartSession") as any;
+        const oSelEnd = this.byId("selEndSession") as any;
         const oTaReason = this.byId("taReason") as any;
+
+        const sLeaveType = oCmbLeaveType ? (oCmbLeaveType.getSelectedKey() as string) : (oContext.getProperty("LeaveType") as string);
+        const oStartDate = oDpStart ? (oDpStart.getDateValue() as Date | null) : (oContext.getProperty("StartDate") as Date | null);
+        const oEndDate = oDpEnd ? (oDpEnd.getDateValue() as Date | null) : (oContext.getProperty("EndDate") as Date | null);
+        const sStartSession = oSelStart ? (oSelStart.getSelectedKey() as string) : (oContext.getProperty("StartSession") as string || "");
+        const sEndSession = oSelEnd ? (oSelEnd.getSelectedKey() as string) : (oContext.getProperty("EndSession") as string || "");
         const sReason = (oTaReason ? oTaReason.getValue() as string : (oContext.getProperty("Reason") as string || "")).trim();
         const nTotalDays = Number(oContext.getProperty("TotalDays") ?? 0);
 
@@ -284,10 +358,10 @@ export default class RequestDetail extends Controller {
         const sPath = oContext.getPath();
         const oPayload = {
             LeaveType: sLeaveType,
-            StartDate: oStartDate,
-            EndDate: oEndDate,
-            StartSession: oContext.getProperty("StartSession") || "",
-            EndSession: oContext.getProperty("EndSession") || "",
+            StartDate: this._toUTCDate(oStartDate),
+            EndDate: this._toUTCDate(oEndDate),
+            StartSession: sStartSession,
+            EndSession: sEndSession,
             TotalDays: String(nTotalDays),
             Reason: sReason,
             ApprovalComment: oContext.getProperty("ApprovalComment") || ""
@@ -295,11 +369,23 @@ export default class RequestDetail extends Controller {
 
         oModel.update(sPath, oPayload, {
             success: (): void => {
-                oUiModel.setProperty("/busy", false);
                 oUiModel.setProperty("/editMode", false);
                 MessageToast.show("Request updated successfully");
-                oModel.refresh(true);
+
+                // Clear any pending model changes to avoid stale state
+                oModel.resetChanges();
+
+                // Use getElementBinding().refresh(true) — the correct SAPUI5 way to
+                // force the view's binding context to re-fetch from backend and re-render
+                const oElementBinding = this.getView().getElementBinding();
+                if (oElementBinding) {
+                    oElementBinding.refresh(true);
+                }
+
+                oUiModel.setProperty("/busy", false);
+                void this._updateApproveRejectVisibility();
             },
+
             error: (oErr: any): void => {
                 oUiModel.setProperty("/busy", false);
                 let sMsg = "Update failed.";
@@ -345,9 +431,19 @@ export default class RequestDetail extends Controller {
         const sPath = oContext.getPath();
         oModel.update(sPath, { Status: "Cancelled" }, {
             success: (): void => {
-                oUiModel.setProperty("/busy", false);
                 MessageToast.show("Request cancelled successfully");
                 oModel.refresh(true);
+
+                oModel.read(sPath, {
+                    success: (): void => {
+                        oUiModel.setProperty("/busy", false);
+                        void this._updateApproveRejectVisibility();
+                    },
+                    error: (oErr: any): void => {
+                        oUiModel.setProperty("/busy", false);
+                        console.error("Failed to refresh request details:", oErr);
+                    }
+                });
             },
             error: (oErr: any): void => {
                 oUiModel.setProperty("/busy", false);
@@ -384,7 +480,7 @@ export default class RequestDetail extends Controller {
         const vIsHr = oCurrentUser.is_hr;
         const bIsHr = vIsHr === "X" || vIsHr === "true" || vIsHr === "1";
 
-        const sCommentLabel = bIsHr 
+        const sCommentLabel = bIsHr
             ? "Enter HR comment (optional):"
             : "Enter Manager comment (optional):";
 
@@ -467,13 +563,28 @@ export default class RequestDetail extends Controller {
 
             // Call function import to finalize status change
             await this._callAction(sActionName, sUuid);
-            oUiModel.setProperty("/busy", false);
+            oUiModel.setProperty("/busy", true); // Ensure busy indicator is active during load
             const oResourceBundle = (this.getOwnerComponent().getModel("i18n") as any).getResourceBundle();
             const sSuccessMsg = sActionType === "approve"
                 ? oResourceBundle.getText("successApproveSingle") || "Request approved successfully"
                 : oResourceBundle.getText("successRejectSingle") || "Request rejected successfully";
             MessageToast.show(sSuccessMsg);
             oModel.refresh(true);
+
+            const sPath = bIsHr
+                ? `/LeaveRequestAdmin(guid'${sUuid}')`
+                : `/LeaveRequest(guid'${sUuid}')`;
+
+            oModel.read(sPath, {
+                success: (): void => {
+                    oUiModel.setProperty("/busy", false);
+                    void this._updateApproveRejectVisibility();
+                },
+                error: (oErr: any): void => {
+                    oUiModel.setProperty("/busy", false);
+                    console.error("Failed to refresh request details:", oErr);
+                }
+            });
         } catch (oErr: any) {
             oUiModel.setProperty("/busy", false);
             let sMsg = sActionType === "approve" ? "Approval failed." : "Rejection failed.";
@@ -720,15 +831,25 @@ export default class RequestDetail extends Controller {
             if (xhr.status >= 200 && xhr.status < 300) {
                 oModel.setProperty(oContext.getPath() + "/FileName", oFile.name);
                 oModel.setProperty(oContext.getPath() + "/MimeType", oFile.type);
-                
+
                 oModel.submitChanges({
                     success: (): void => {
                         oUiModel.setProperty("/uploadProgress", 100);
-                        oUiModel.setProperty("/uploading", false);
-                        oUiModel.setProperty("/uploadButtonEnabled", false);
                         oUiModel.setProperty("/uploadStatusText", "File uploaded successfully.");
                         MessageToast.show("File uploaded successfully");
                         oModel.refresh(true);
+
+                        oModel.read(oContext.getPath(), {
+                            success: (): void => {
+                                oUiModel.setProperty("/uploading", false);
+                                oUiModel.setProperty("/uploadButtonEnabled", false);
+                                void this._updateApproveRejectVisibility();
+                            },
+                            error: (oErr: any): void => {
+                                oUiModel.setProperty("/uploading", false);
+                                console.error("Failed to refresh request details:", oErr);
+                            }
+                        });
                     },
                     error: (oErr: any): void => {
                         oUiModel.setProperty("/uploading", false);
