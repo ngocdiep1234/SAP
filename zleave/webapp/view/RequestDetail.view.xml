@@ -12,7 +12,7 @@
                 objectSubtitle="Employee: {EmployeeId} | Type: {LeaveType}">
                 <uxap:actions>
                     <Button id="btnEdit" text="Edit" type="Emphasized" press=".onEdit" 
-                        visible="{= ${Status} === 'SUBMITTED' &amp;&amp; !${detailUi>/editMode} }" />
+                        visible="{= ${detailUi>/canEdit} &amp;&amp; !${detailUi>/editMode} }" />
                     <Button id="btnApprove" text="{i18n>approve}" icon="sap-icon://accept" type="Accept" press=".onApprove" 
                         visible="{= ${detailUi>/canApprove} &amp;&amp; !${detailUi>/editMode} }" />
                     <Button id="btnReject" text="{i18n>reject}" icon="sap-icon://decline" type="Reject" press=".onReject" 
@@ -200,7 +200,7 @@
                                 <Text text="{ApprovalComment}" />
 
                                 <Label text="HR Comment" />
-                                <Text text="{HrComment}" />
+                                <Text text="{= ${HrComment} || ${HrApprovalComment} }" />
                             </f:content>
                         </f:SimpleForm>
                     </uxap:ObjectPageSubSection>

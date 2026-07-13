@@ -51,7 +51,8 @@ export default class RequestDetail extends Controller {
             uploadStatusText: "",
             uploadButtonEnabled: false,
             canApprove: false,
-            canReject: false
+            canReject: false,
+            canEdit: false
         });
         this.getView().setModel(oUiModel, "detailUi");
 
@@ -76,6 +77,7 @@ export default class RequestDetail extends Controller {
         oUiModel.setProperty("/uploadButtonEnabled", false);
         oUiModel.setProperty("/canApprove", false);
         oUiModel.setProperty("/canReject", false);
+        oUiModel.setProperty("/canEdit", false);
         // NOTE: Do NOT set busy=true here. Let dataRequested/dataReceived control it.
 
         try {
@@ -535,21 +537,11 @@ export default class RequestDetail extends Controller {
 
         const sActionName = this._getActionName(sActionType, bIsHr);
         const sUuid = oContext.getProperty("UUID") as string;
-        const sLeaveRequestPath = `/LeaveRequest(guid'${sUuid}')`;
 
         try {
-            // Save comment to the backend first
-            const oPayload: Record<string, string> = {};
-            if (bIsHr) {
-                oPayload.HrComment = sComment;
-            } else {
-                oPayload.ApprovalComment = sComment;
-            }
-
-            await oLeaveRequestService.updateLeaveRequest(sLeaveRequestPath, oPayload);
-
-            // Call function import to finalize status change
-            const oRes = await oLeaveRequestService.callAction(sActionName, sUuid);
+            // Call function import — comment is sent as ApprovalComment URL parameter.
+            // The backend maps it to HrComment (for HR users) or ApprovalComment (for managers).
+            const oRes = await oLeaveRequestService.callAction(sActionName, sUuid, sComment);
             if (!oRes.success) {
                 throw new Error(oRes.error || "Action failed.");
             }
@@ -632,6 +624,7 @@ export default class RequestDetail extends Controller {
         if (!oContext) {
             oUiModel.setProperty("/canApprove", false);
             oUiModel.setProperty("/canReject", false);
+            oUiModel.setProperty("/canEdit", false);
             return;
         }
 
@@ -639,6 +632,11 @@ export default class RequestDetail extends Controller {
             const oCurrentUser = await this._getCurrentUser();
             const sCurrentEmployeeId = String(parseInt(oCurrentUser.employeeId, 10));
             const sReqEmployeeId = String(parseInt(oContext.getProperty("EmployeeId") as string || "", 10));
+
+            // Edit button visibility: status = SUBMITTED, and currentuser ID = Employee ID of the request
+            const sStatus = String(oContext.getProperty("Status") || "").toUpperCase();
+            const bCanEdit = sStatus === "SUBMITTED" && sCurrentEmployeeId === sReqEmployeeId;
+            oUiModel.setProperty("/canEdit", bCanEdit);
 
             // User cannot approve/reject their own request
             if (sCurrentEmployeeId === sReqEmployeeId) {
@@ -665,7 +663,6 @@ export default class RequestDetail extends Controller {
                 ? (oContext.getProperty("hrRejectResult_ac") ?? oContext.getProperty("hrRejectLeave_ac"))
                 : (oContext.getProperty("rejectLeave_ac") ?? oContext.getProperty("rejectResult_ac"));
 
-            const sStatus = String(oContext.getProperty("Status") || "").toUpperCase();
             const sPendingStatus = bIsHr ? "MGR_APPROVED" : "SUBMITTED";
             const bStatusEligible = sStatus === sPendingStatus
                 || sStatus === "SUBMITTED"
@@ -681,6 +678,7 @@ export default class RequestDetail extends Controller {
             // Failed to update visibility
             oUiModel.setProperty("/canApprove", false);
             oUiModel.setProperty("/canReject", false);
+            oUiModel.setProperty("/canEdit", false);
         }
     }
 
@@ -771,7 +769,7 @@ export default class RequestDetail extends Controller {
                 oUiModel.setProperty("/uploadProgress", 100);
                 oUiModel.setProperty("/uploadStatusText", "File uploaded successfully.");
                 MessageToast.show("File uploaded successfully");
-                
+
                 const oModel = this.getView().getModel() as InstanceType<typeof ODataModel> | undefined;
                 if (oModel) {
                     oModel.refresh(true);

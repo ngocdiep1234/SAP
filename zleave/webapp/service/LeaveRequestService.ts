@@ -301,13 +301,17 @@ export default class LeaveRequestService {
      * @param sUuid - The UUID parameter.
      * @returns A Promise that resolves with the operation result or rejects with an error message.
      */
-    public callAction(sActionName: string, sUuid: string): Promise<{ success: boolean; uuid: string; error?: string }> {
+    public callAction(sActionName: string, sUuid: string, sComment?: string): Promise<{ success: boolean; uuid: string; error?: string }> {
+        const oUrlParameters: any = {
+            UUID: sUuid
+        };
+        if (sComment !== undefined && sComment !== null) {
+            oUrlParameters.ApprovalComment = sComment;
+        }
         return new Promise((resolve) => {
             this._oModel.callFunction("/" + sActionName, {
                 method: "POST",
-                urlParameters: {
-                    UUID: sUuid
-                },
+                urlParameters: oUrlParameters,
                 success: (): void => {
                     resolve({ success: true, uuid: sUuid });
                 },
