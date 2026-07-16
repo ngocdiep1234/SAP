@@ -565,7 +565,10 @@ export default class AdminLeaveRequests extends Controller {
 
         const nTotalDays = Number(vTotalDays || 0);
 
-
+        // Check if StartDate is before the submission date (CreatedAt)
+        if (dStartZero.getTime() < dCreatedZero.getTime()) {
+            aReasons.push("Ngày nghỉ trước ngày nộp đơn");
+        }
         if (nDiffDays < 3) {
             aReasons.push("Nộp < 3 ngày so với ngày nghỉ");
         }

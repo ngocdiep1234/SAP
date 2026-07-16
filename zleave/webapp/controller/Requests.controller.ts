@@ -818,7 +818,10 @@ export default class Requests extends Controller {
 
         const nTotalDays = Number(vTotalDays || 0);
 
-
+        // Check if StartDate is before the submission date (CreatedAt)
+        if (dStartZero.getTime() < dCreatedZero.getTime()) {
+            aReasons.push("Ngày nghỉ trước ngày nộp đơn");
+        }
         if (nTotalDays > 2) {
             aReasons.push("Nghỉ quá 2 ngày");
         }
