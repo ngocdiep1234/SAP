@@ -1,4 +1,6 @@
 import ODataModel from "sap/ui/model/odata/v2/ODataModel";
+import Filter from "sap/ui/model/Filter";
+import FilterOperator from "sap/ui/model/FilterOperator";
 
 // ---------------------------------------------------------------------------
 // Entity interfaces – mirrors the OData metadata
@@ -245,6 +247,40 @@ export default class LeaveRequestService {
             this._oModel.read(sPath, {
                 success: (oData: any): void => {
                     resolve(oData);
+                },
+                error: (oErr: { responseText?: string; message?: string }): void => {
+                    reject(parseODataError(oErr));
+                }
+            });
+        });
+    }
+
+    /**
+     * Reads all approved leave requests for a given employee ID from /LeaveRequest.
+     *
+     * @param sEmployeeId - The normalized employee ID string.
+     * @returns A Promise resolving to an array of approved leave request records.
+     */
+    public readApprovedLeaveRequests(sEmployeeId: string): Promise<any[]> {
+        return new Promise<any[]>((resolve, reject) => {
+            const aFilters: InstanceType<typeof Filter>[] = [
+                new Filter({
+                    filters: [
+                        new Filter("Status", FilterOperator.EQ, "APPROVED"),
+                        new Filter("Status", FilterOperator.EQ, "Approved")
+                    ],
+                    and: false
+                })
+            ];
+
+            if (sEmployeeId) {
+                aFilters.push(new Filter("EmployeeId", FilterOperator.EQ, sEmployeeId));
+            }
+
+            this._oModel.read("/LeaveRequest", {
+                filters: aFilters,
+                success: (oData: { results: any[] }): void => {
+                    resolve(oData.results ?? []);
                 },
                 error: (oErr: { responseText?: string; message?: string }): void => {
                     reject(parseODataError(oErr));

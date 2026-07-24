@@ -91,7 +91,8 @@
         "sap.tnt": {},
         "sap.uxap": {},
         "sap.ui.layout": {},
-        "sap.ui.core": {}
+        "sap.ui.core": {},
+        "sap.ui.unified": {}
       }
     },
     "contentDensities": {
@@ -156,6 +157,11 @@
           "name": "createRequest",
           "pattern": "requests/create",
           "target": "createRequest"
+        },
+        {
+          "name": "myLeaveCalendar",
+          "pattern": "calendar",
+          "target": "myLeaveCalendar"
         },
         {
           "name": "Unauthorized",
@@ -258,6 +264,12 @@
         "createRequest": {
           "viewName": "CreateRequest",
           "viewId": "CreateRequest",
+          "viewType": "XML",
+          "transition": "slide"
+        },
+        "myLeaveCalendar": {
+          "viewName": "MyLeaveCalendar",
+          "viewId": "MyLeaveCalendar",
           "viewType": "XML",
           "transition": "slide"
         },

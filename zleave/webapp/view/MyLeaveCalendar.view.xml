@@ -1,0 +1,40 @@
+<mvc:View
+    controllerName="zleave.zleave.controller.MyLeaveCalendar"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:unified="sap.ui.unified"
+    height="100%">
+    <Page title="{i18n>myLeaveCalendarTitle}" showHeader="true">
+        <headerContent>
+            <Button
+                icon="sap-icon://refresh"
+                tooltip="{i18n>refresh}"
+                press=".onRefresh" />
+        </headerContent>
+        <content>
+            <VBox class="sapUiResponsiveMargin">
+                <SinglePlanningCalendar
+                    id="leaveCalendar"
+                    startDate="{calendar>/startDate}"
+                    appointments="{calendar>/appointments}"
+                    appointmentSelect=".onAppointmentSelect"
+                    title="{calendar>/title}">
+                    <views>
+                        <SinglePlanningCalendarMonthView
+                            key="month"
+                            title="Month" />
+                    </views>
+                    <appointments>
+                        <unified:CalendarAppointment
+                            startDate="{calendar>startDate}"
+                            endDate="{calendar>endDate}"
+                            title="{calendar>title}"
+                            text="{calendar>text}"
+                            type="{calendar>type}"
+                            icon="{calendar>icon}" />
+                    </appointments>
+                </SinglePlanningCalendar>
+            </VBox>
+        </content>
+    </Page>
+</mvc:View>
