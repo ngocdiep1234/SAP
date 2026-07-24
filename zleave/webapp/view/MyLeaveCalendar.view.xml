@@ -22,7 +22,8 @@
                     <views>
                         <SinglePlanningCalendarMonthView
                             key="month"
-                            title="Month" />
+                            title="Month"
+                            showWeekNumbers="false" />
                     </views>
                     <appointments>
                         <unified:CalendarAppointment

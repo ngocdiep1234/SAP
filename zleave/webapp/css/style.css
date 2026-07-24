@@ -120,3 +120,30 @@ body {
 .employeeTable .sapMListTblHeaderCell {
 	padding-block: 0.4rem;
 }
+
+/* Hide week number column in SinglePlanningCalendarMonthView:
+   Collapse the grid track itself so header and body stay aligned */
+.sapMSinglePCGrid.sapMSPCMonthGrid {
+	--_sap_m_SinglePlanningCalendar_Grid_WeekNumbers_Width: 0px !important;
+	grid-template-columns: 0 repeat(7, 1fr) !important;
+}
+
+/* Force header row to span full grid and match the 7-column body layout */
+.sapMSinglePCGrid.sapMSPCMonthGrid .sapMSPCMonthDayNames {
+	grid-column: 1 / -1 !important;
+	display: grid !important;
+	grid-template-columns: repeat(7, 1fr) !important;
+	margin-left: 0 !important;
+	padding-left: 0 !important;
+}
+
+.sapMSPCMonthWeekNumber {
+	display: none !important;
+	width: 0 !important;
+	min-width: 0 !important;
+	max-width: 0 !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	overflow: hidden !important;
+	border: none !important;
+}
