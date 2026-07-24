@@ -164,6 +164,11 @@
           "target": "myLeaveCalendar"
         },
         {
+          "name": "teamCalendar",
+          "pattern": "team-calendar",
+          "target": "teamCalendar"
+        },
+        {
           "name": "Unauthorized",
           "pattern": "unauthorized",
           "target": "Unauthorized"
@@ -270,6 +275,12 @@
         "myLeaveCalendar": {
           "viewName": "MyLeaveCalendar",
           "viewId": "MyLeaveCalendar",
+          "viewType": "XML",
+          "transition": "slide"
+        },
+        "teamCalendar": {
+          "viewName": "TeamCalendar",
+          "viewId": "TeamCalendar",
           "viewType": "XML",
           "transition": "slide"
         },

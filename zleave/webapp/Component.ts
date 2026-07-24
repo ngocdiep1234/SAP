@@ -393,6 +393,7 @@ const ROUTE_PERMISSIONS: Record<string, string[]> = {
     "AdminLeaveRequestDetail": ["Admin", "HR"],
     "createRequest": ["Employee", "Admin", "HR"],
     "myLeaveCalendar": ["Employee", "Admin", "HR", "Manager"],
+    "teamCalendar": ["Manager", "Admin", "HR"],
     "AdminShell": ["Admin", "HR"],
     "AdminLeaveRequests": ["Admin", "HR"],
     "AdminLeaveTypes": ["Admin", "HR"],

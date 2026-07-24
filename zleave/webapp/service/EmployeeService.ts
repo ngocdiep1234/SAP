@@ -45,6 +45,28 @@ export default class EmployeeService {
     }
 
     /**
+     * Reads team employees for a given manager's SAP User Name from /Employee.
+     *
+     * @param sManagerSapUser - The manager's SAP User Name.
+     * @returns Promise resolving with an array of team EmployeeEntry items.
+     */
+    public readTeamEmployees(sManagerSapUser: string): Promise<EmployeeEntry[]> {
+        return new Promise<EmployeeEntry[]>((resolve, reject) => {
+            this._oModel.read("/Employee", {
+                filters: [
+                    new Filter("ManagerSapUser", FilterOperator.EQ, sManagerSapUser)
+                ],
+                success: (oData: { results: EmployeeEntry[] }): void => {
+                    resolve(oData.results ?? []);
+                },
+                error: (oErr: { responseText?: string; message?: string }): void => {
+                    reject(parseODataError(oErr));
+                }
+            });
+        });
+    }
+
+    /**
      * Queries /Employee by SapUserName.
      * 
      * @param sSapUser - The SAP User Name to search for

@@ -1,0 +1,47 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form">
+    <Dialog id="teamCalendarDetailsDialog" title="{i18n>teamCalendarDetailsTitle}" type="Message">
+        <content>
+            <f:SimpleForm
+                editable="false"
+                layout="ResponsiveGridLayout"
+                labelSpanXL="4"
+                labelSpanL="4"
+                labelSpanM="4"
+                labelSpanS="12"
+                emptySpanXL="0"
+                emptySpanL="0"
+                emptySpanM="0"
+                emptySpanS="0"
+                columnsXL="1"
+                columnsL="1"
+                columnsM="1"
+                singleContainerFullSize="false">
+                <f:content>
+                    <Label text="{i18n>employeeName}" />
+                    <Text text="{details>/EmployeeName}" />
+
+                    <Label text="{i18n>leaveType}" />
+                    <Text text="{details>/LeaveTypeDisplay}" />
+
+                    <Label text="{i18n>startDate}" />
+                    <Text text="{details>/StartDateFormatted}" />
+
+                    <Label text="{i18n>endDate}" />
+                    <Text text="{details>/EndDateFormatted}" />
+
+                    <Label text="{i18n>totalDays}" />
+                    <Text text="{details>/TotalDays}" />
+
+                    <Label text="{i18n>reason}" />
+                    <Text text="{details>/Reason}" />
+                </f:content>
+            </f:SimpleForm>
+        </content>
+        <endButton>
+            <Button text="{i18n>close}" press=".onCloseDetailsDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

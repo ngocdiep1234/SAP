@@ -34,6 +34,7 @@
                         <tnt:NavigationListItem text="{i18n>dashboard}" key="dashboard" icon="sap-icon://home"/>
                         <tnt:NavigationListItem text="{i18n>requests}" key="requests" icon="sap-icon://employee"/>
                         <tnt:NavigationListItem text="{i18n>myLeaveCalendarTitle}" key="myLeaveCalendar" icon="sap-icon://calendar"/>
+                        <tnt:NavigationListItem text="{i18n>teamCalendarTitle}" key="teamCalendar" icon="sap-icon://group" visible="{= ${ui>/currentUser/is_manager} === 'X' || ${ui>/currentUser/is_manager} === 'true' || ${ui>/currentUser/is_manager} === '1' || ${ui>/currentUser/is_admin} === 'X' || ${ui>/currentUser/is_hr} === 'X' }"/>
                         <tnt:NavigationListItem text="{i18n>createLeaveRequestTitle}" key="createRequest" icon="sap-icon://create"/>
                     </tnt:NavigationList>
                 </tnt:item>
