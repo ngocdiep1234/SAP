@@ -48,6 +48,11 @@
                         id="checkRequiresApproval"
                         selected="{dialog>/RequiresApproval}"/>
 
+                    <Label text="Is Paid" />
+                    <CheckBox
+                        id="checkIsPaid"
+                        selected="{dialog>/IsPaid}"/>
+
                     <Label text="Status/Active" />
                     <Switch
                         id="switchActive"

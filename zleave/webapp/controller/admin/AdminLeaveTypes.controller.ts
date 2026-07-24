@@ -35,6 +35,7 @@ export default class AdminLeaveTypes extends Controller {
             LeaveTypeId: "",
             LeaveTypeName: "",
             MaxDaysPerYear: 0,
+            IsPaid: false,
             RequiresApproval: true,
             IsActive: true
         });
@@ -67,6 +68,7 @@ export default class AdminLeaveTypes extends Controller {
             LeaveTypeId: "",
             LeaveTypeName: "",
             MaxDaysPerYear: 12,
+            IsPaid: false,
             RequiresApproval: true,
             IsActive: true
         });
@@ -88,6 +90,7 @@ export default class AdminLeaveTypes extends Controller {
             LeaveTypeId: oData.LeaveTypeId,
             LeaveTypeName: oData.LeaveTypeName,
             MaxDaysPerYear: oData.MaxDaysPerYear ? parseFloat(oData.MaxDaysPerYear) : 0,
+            IsPaid: !!oData.IsPaid,
             RequiresApproval: !!oData.RequiresApproval,
             IsActive: !!oData.IsActive
         });
@@ -198,8 +201,10 @@ export default class AdminLeaveTypes extends Controller {
         }
 
         const oCbRequiresApproval = this.getView().byId("checkRequiresApproval") as any;
+        const oCbIsPaid = this.getView().byId("checkIsPaid") as any;
         const oSwActive = this.getView().byId("switchActive") as any;
         const bRequiresApproval = oCbRequiresApproval ? oCbRequiresApproval.getSelected() : !!oData.RequiresApproval;
+        const bIsPaid = oCbIsPaid ? oCbIsPaid.getSelected() : !!oData.IsPaid;
         const bIsActive = oSwActive ? oSwActive.getState() : !!oData.IsActive;
 
         let sMaxDays = "0.00";
@@ -216,6 +221,7 @@ export default class AdminLeaveTypes extends Controller {
             LeaveTypeId: oData.LeaveTypeId.trim(),
             LeaveTypeName: oData.LeaveTypeName.trim(),
             MaxDaysPerYear: sMaxDays,
+            IsPaid: bIsPaid,
             RequiresApproval: bRequiresApproval,
             IsActive: bIsActive
         };

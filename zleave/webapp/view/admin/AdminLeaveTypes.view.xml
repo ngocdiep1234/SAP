@@ -48,6 +48,9 @@
                     <Column width="10rem" hAlign="Center">
                         <Text text="Requires Approval" />
                     </Column>
+                    <Column width="7rem" hAlign="Center">
+                        <Text text="Is Paid" />
+                    </Column>
                     <Column width="8rem" hAlign="Center">
                         <Text text="Active" />
                     </Column>
@@ -64,6 +67,10 @@
                             <core:Icon
                                 src="{= ${RequiresApproval} ? 'sap-icon://sys-enter-2' : 'sap-icon://sys-cancel-2' }"
                                 color="{= ${RequiresApproval} ? 'Positive' : 'Negative' }"
+                                size="1.25rem"/>
+                            <core:Icon
+                                src="{= ${IsPaid} ? 'sap-icon://sys-enter-2' : 'sap-icon://sys-cancel-2' }"
+                                color="{= ${IsPaid} ? 'Positive' : 'Negative' }"
                                 size="1.25rem"/>
                             <core:Icon
                                 src="{= ${IsActive} ? 'sap-icon://sys-enter-2' : 'sap-icon://sys-cancel-2' }"
